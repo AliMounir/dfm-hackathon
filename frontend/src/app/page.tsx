@@ -12,14 +12,12 @@ import {
   Bus,
   CheckCircle2,
   ChevronRight,
-  ClipboardCheck,
   ClipboardList,
   CloudRain,
   Database,
   FileText,
   FileSpreadsheet,
   FolderPlus,
-  Globe2,
   HandCoins,
   HeartPulse,
   Languages,
@@ -30,8 +28,6 @@ import {
   Megaphone,
   MessageSquareText,
   Microscope,
-  Plus,
-  Search,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -81,7 +77,6 @@ const copy = {
     appSubtitle: "Qualite, interpretation et rapports",
     overview: "Vue ensemble",
     allProjects: "Tous les projets",
-    projectSubsets: "Sous-pages projet",
     addProject: "Ajouter un projet",
     addProjectShort: "Ajouter",
     newProjectPlaceholder: "Nom du nouveau projet",
@@ -135,7 +130,6 @@ const copy = {
     appSubtitle: "Quality, interpretation, and reporting",
     overview: "Overview",
     allProjects: "All projects",
-    projectSubsets: "Project subpages",
     addProject: "Add project",
     addProjectShort: "Add",
     newProjectPlaceholder: "New project name",
@@ -217,8 +211,8 @@ const sectionIconMap: Record<
 export default function Home() {
   const [language, setLanguage] = useState<Language>("fr");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [customProjects, setCustomProjects] = useState<Project[]>([]);
@@ -228,10 +222,6 @@ export default function Home() {
   const projectList = useMemo(
     () => [...projects, ...customProjects],
     [customProjects],
-  );
-
-  const filteredProjects = projectList.filter((project) =>
-    project.name.toLowerCase().includes(query.toLowerCase()),
   );
 
   const selectedProject = projectList.find(
@@ -317,6 +307,7 @@ export default function Home() {
 
     setCustomProjects((current) => [...current, project]);
     setSelectedProjectId(project.id);
+    setExpandedProjectId(project.id);
     setSelectedSectionId(null);
     setNewProjectName("");
     setIsAdding(false);
@@ -325,106 +316,45 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-neutral-100 text-stone-950">
       <div className="flex min-h-screen flex-col lg:flex-row">
-        <aside className="flex w-full flex-col bg-[#153b36] text-white lg:fixed lg:inset-y-0 lg:w-[320px]">
-          <div className="border-b border-white/10 px-5 py-5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white text-[#153b36]">
-                  <HeartPulse className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-semibold tracking-normal">
-                    {t.appTitle}
-                  </h1>
-                  <p className="text-xs text-white/70">{t.appSubtitle}</p>
-                </div>
+        <aside className="flex w-full flex-col bg-[#153b36] text-white lg:fixed lg:inset-y-0 lg:h-screen lg:w-[320px]">
+          <div className="shrink-0 border-b border-white/10 px-5 py-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white text-[#153b36]">
+                <HeartPulse className="h-5 w-5" aria-hidden="true" />
               </div>
-              <Button
-                title="Language"
-                variant="ghost"
-                size="icon"
-                className="text-white hover:bg-white/10 hover:text-white"
-                onClick={() =>
-                  setLanguage((current) => (current === "fr" ? "en" : "fr"))
-                }
-              >
-                <Languages className="h-4 w-4" aria-hidden="true" />
-              </Button>
+              <div>
+                <h1 className="text-lg font-semibold tracking-normal">
+                  {t.appTitle}
+                </h1>
+                <p className="text-xs text-white/70">{t.appSubtitle}</p>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-4 px-4 py-4">
-            <button
-              className={cn(
-                "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold transition-colors",
-                selectedProjectId === null
-                  ? "bg-white text-[#153b36]"
-                  : "text-white/80 hover:bg-white/10 hover:text-white",
-              )}
-              onClick={() => {
-                setSelectedProjectId(null);
-                setSelectedSectionId(null);
-              }}
-            >
-              <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
-              {t.overview}
-            </button>
-
-            <div>
-              <div className="mb-2 flex items-center justify-between px-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-white/60">
-                  {t.allProjects}
-                </p>
-                <Button
-                  title={t.addProject}
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-white/80 hover:bg-white/10 hover:text-white"
-                  onClick={() => setIsAdding((current) => !current)}
-                >
-                  <Plus className="h-4 w-4" aria-hidden="true" />
-                </Button>
-              </div>
-
-              <div className="relative mb-3">
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45"
-                  aria-hidden="true"
-                />
-                <Input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder={t.searchPlaceholder}
-                  className="border-white/10 bg-white/10 pl-9 text-white placeholder:text-white/45 focus:border-white/40 focus:ring-white/10"
-                />
-              </div>
-
-              {isAdding && (
-                <div className="mb-3 flex gap-2">
-                  <Input
-                    value={newProjectName}
-                    onChange={(event) => setNewProjectName(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") addProject();
-                    }}
-                    placeholder={t.newProjectPlaceholder}
-                    className="border-white/10 bg-white text-stone-950"
-                  />
-                  <Button
-                    title={t.addProject}
-                    size="icon"
-                    className="shrink-0"
-                    onClick={addProject}
-                  >
-                    <FolderPlus className="h-4 w-4" aria-hidden="true" />
-                  </Button>
-                </div>
-              )}
-
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className="px-4 py-4">
               <div className="space-y-1">
-                {filteredProjects.map((project, index) => {
+                <button
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold transition-colors",
+                    selectedProjectId === null
+                      ? "bg-white text-[#153b36]"
+                      : "text-white/80 hover:bg-white/10 hover:text-white",
+                  )}
+                  onClick={() => {
+                    setSelectedProjectId(null);
+                    setExpandedProjectId(null);
+                    setSelectedSectionId(null);
+                  }}
+                >
+                  <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+                  <span className="min-w-0 flex-1 truncate">{t.overview}</span>
+                </button>
+
+                {projectList.map((project, index) => {
                   const Icon = projectIcons[index % projectIcons.length];
                   const active = selectedProjectId === project.id;
+                  const expanded = expandedProjectId === project.id;
 
                   return (
                     <div key={project.id}>
@@ -436,7 +366,14 @@ export default function Home() {
                             : "text-white/80 hover:bg-white/10 hover:text-white",
                         )}
                         onClick={() => {
-                          setSelectedProjectId(project.id);
+                          if (active) {
+                            setExpandedProjectId((current) =>
+                              current === project.id ? null : project.id,
+                            );
+                          } else {
+                            setSelectedProjectId(project.id);
+                            setExpandedProjectId(project.id);
+                          }
                           setSelectedSectionId(null);
                         }}
                       >
@@ -447,17 +384,14 @@ export default function Home() {
                         <ChevronRight
                           className={cn(
                             "h-4 w-4 shrink-0 transition-transform",
-                            active && "rotate-90",
+                            expanded && "rotate-90",
                           )}
                           aria-hidden="true"
                         />
                       </button>
 
-                      {active && project.sections.length > 0 && (
+                      {expanded && project.sections.length > 0 && (
                         <div className="mb-2 mt-1 border-l border-white/10 pl-3">
-                          <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-white/45">
-                            {t.projectSubsets}
-                          </p>
                           <div className="space-y-1">
                             {project.sections.map((section) => (
                               <ProjectSectionNav
@@ -467,6 +401,7 @@ export default function Home() {
                                 language={language}
                                 onSelect={(sectionId) => {
                                   setSelectedProjectId(project.id);
+                                  setExpandedProjectId(project.id);
                                   setSelectedSectionId(sectionId);
                                 }}
                               />
@@ -477,39 +412,60 @@ export default function Home() {
                     </div>
                   );
                 })}
+
+                <button
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                  onClick={() => setIsAdding((current) => !current)}
+                >
+                  <FolderPlus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="min-w-0 flex-1 truncate">{t.addProject}</span>
+                </button>
+
+                {isAdding && (
+                  <div className="flex gap-2 rounded-md bg-white/10 p-2">
+                    <Input
+                      value={newProjectName}
+                      onChange={(event) => setNewProjectName(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") addProject();
+                      }}
+                      placeholder={t.newProjectPlaceholder}
+                      className="border-white/10 bg-white text-stone-950"
+                    />
+                    <Button
+                      title={t.addProject}
+                      size="icon"
+                      className="shrink-0"
+                      onClick={addProject}
+                    >
+                      <FolderPlus className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
+
+            {selectedProject && (
+              <SidebarFilters
+                language={language}
+                selectedProjectId={selectedProject.id}
+                labels={t}
+              />
+            )}
           </div>
 
-          {selectedProject && (
-            <SidebarFilters
-              language={language}
-              selectedProjectId={selectedProject.id}
-              labels={t}
-            />
-          )}
-
-          <div className="mt-auto border-t border-white/10 p-4">
-            <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-white/60">
-              {t.options}
-            </p>
+          <div className="shrink-0 border-t border-white/10 p-4">
             <div className="grid grid-cols-3 gap-2">
-              <SidebarTool icon={ClipboardCheck} label={t.qualityMode} />
               <SidebarTool icon={FileText} label={t.reportMode} />
+              <SidebarTool
+                icon={Languages}
+                label={language === "fr" ? "English" : "Francais"}
+                onClick={() =>
+                  setLanguage((current) => (current === "fr" ? "en" : "fr"))
+                }
+              />
               <SidebarTool icon={Settings} label={t.settings} />
             </div>
-            <button
-              className="mt-3 flex w-full items-center justify-between rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/15"
-              onClick={() =>
-                setLanguage((current) => (current === "fr" ? "en" : "fr"))
-              }
-            >
-              <span className="flex items-center gap-2">
-                <Globe2 className="h-4 w-4" aria-hidden="true" />
-                {t.language}
-              </span>
-              <span>{language === "fr" ? "English" : "Francais"}</span>
-            </button>
           </div>
         </aside>
 
@@ -874,13 +830,18 @@ export default function Home() {
 function SidebarTool({
   icon: Icon,
   label,
+  onClick,
 }: {
   icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
   label: string;
+  onClick?: () => void;
 }) {
   return (
     <button
+      type="button"
       title={label}
+      aria-label={label}
+      onClick={onClick}
       className="flex h-10 items-center justify-center rounded-md bg-white/10 text-white/80 hover:bg-white/15 hover:text-white"
     >
       <Icon className="h-4 w-4" aria-hidden={true} />
