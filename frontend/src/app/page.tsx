@@ -28,8 +28,16 @@ import {
   Megaphone,
   MessageSquareText,
   Microscope,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  Paperclip,
+  RefreshCw,
+  Send,
   Settings,
   ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
   Stethoscope,
   TrendingDown,
@@ -213,6 +221,8 @@ export default function Home() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [customProjects, setCustomProjects] = useState<Project[]>([]);
@@ -316,27 +326,46 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-neutral-100 text-stone-950">
       <div className="flex min-h-screen flex-col lg:flex-row">
-        <aside className="flex w-full flex-col bg-[#153b36] text-white lg:fixed lg:inset-y-0 lg:h-screen lg:w-[320px]">
-          <div className="shrink-0 border-b border-white/10 px-5 py-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white text-[#153b36]">
+        <aside
+          className={cn(
+            "flex w-full flex-col bg-[#153b36] text-white transition-[width] duration-200 lg:fixed lg:inset-y-0 lg:h-screen",
+            isLeftSidebarOpen ? "lg:w-[320px]" : "lg:w-[72px]",
+          )}
+        >
+          <div className={cn("shrink-0 border-b border-white/10 py-5", isLeftSidebarOpen ? "px-5" : "px-2")}>
+            <div className={cn("flex items-center gap-3", !isLeftSidebarOpen && "justify-center")}>
+              <div className={cn("flex h-10 w-10 items-center justify-center rounded-md bg-white text-[#153b36]", !isLeftSidebarOpen && "hidden")}>
                 <HeartPulse className="h-5 w-5" aria-hidden="true" />
               </div>
-              <div>
+              <div className={cn("min-w-0 flex-1", !isLeftSidebarOpen && "hidden")}>
                 <h1 className="text-lg font-semibold tracking-normal">
                   {t.appTitle}
                 </h1>
                 <p className="text-xs text-white/70">{t.appSubtitle}</p>
               </div>
+              <Button
+                title={isLeftSidebarOpen ? "Collapse navigation" : "Open navigation"}
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0 text-white hover:bg-white/10 hover:text-white"
+                onClick={() => setIsLeftSidebarOpen((current) => !current)}
+              >
+                {isLeftSidebarOpen ? (
+                  <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
+                )}
+              </Button>
             </div>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="px-4 py-4">
+            <div className={cn("py-4", isLeftSidebarOpen ? "px-4" : "px-2")}>
               <div className="space-y-1">
                 <button
                   className={cn(
                     "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold transition-colors",
+                    !isLeftSidebarOpen && "justify-center px-0",
                     selectedProjectId === null
                       ? "bg-white text-[#153b36]"
                       : "text-white/80 hover:bg-white/10 hover:text-white",
@@ -348,7 +377,9 @@ export default function Home() {
                   }}
                 >
                   <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
-                  <span className="min-w-0 flex-1 truncate">{t.overview}</span>
+                  <span className={cn("min-w-0 flex-1 truncate", !isLeftSidebarOpen && "hidden")}>
+                    {t.overview}
+                  </span>
                 </button>
 
                 {projectList.map((project, index) => {
@@ -361,6 +392,7 @@ export default function Home() {
                       <button
                         className={cn(
                           "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left transition-colors",
+                          !isLeftSidebarOpen && "justify-center px-0",
                           active
                             ? "bg-white text-[#153b36]"
                             : "text-white/80 hover:bg-white/10 hover:text-white",
@@ -378,19 +410,20 @@ export default function Home() {
                         }}
                       >
                         <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                        <span className={cn("min-w-0 flex-1 truncate text-sm font-semibold", !isLeftSidebarOpen && "hidden")}>
                           {project.name}
                         </span>
                         <ChevronRight
                           className={cn(
                             "h-4 w-4 shrink-0 transition-transform",
                             expanded && "rotate-90",
+                            !isLeftSidebarOpen && "hidden",
                           )}
                           aria-hidden="true"
                         />
                       </button>
 
-                      {expanded && project.sections.length > 0 && (
+                      {isLeftSidebarOpen && expanded && project.sections.length > 0 && (
                         <div className="mb-2 mt-1 border-l border-white/10 pl-3">
                           <div className="space-y-1">
                             {project.sections.map((section) => (
@@ -414,14 +447,19 @@ export default function Home() {
                 })}
 
                 <button
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white",
+                    !isLeftSidebarOpen && "justify-center px-0",
+                  )}
                   onClick={() => setIsAdding((current) => !current)}
                 >
                   <FolderPlus className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="min-w-0 flex-1 truncate">{t.addProject}</span>
+                  <span className={cn("min-w-0 flex-1 truncate", !isLeftSidebarOpen && "hidden")}>
+                    {t.addProject}
+                  </span>
                 </button>
 
-                {isAdding && (
+                {isLeftSidebarOpen && isAdding && (
                   <div className="flex gap-2 rounded-md bg-white/10 p-2">
                     <Input
                       value={newProjectName}
@@ -445,7 +483,7 @@ export default function Home() {
               </div>
             </div>
 
-            {selectedProject && (
+            {isLeftSidebarOpen && selectedProject && (
               <SidebarFilters
                 language={language}
                 selectedProjectId={selectedProject.id}
@@ -454,8 +492,8 @@ export default function Home() {
             )}
           </div>
 
-          <div className="shrink-0 border-t border-white/10 p-4">
-            <div className="grid grid-cols-3 gap-2">
+          <div className={cn("shrink-0 border-t border-white/10 p-4", !isLeftSidebarOpen && "px-2")}>
+            <div className={cn("grid gap-2", isLeftSidebarOpen ? "grid-cols-3" : "grid-cols-1")}>
               <SidebarTool icon={FileText} label={t.reportMode} />
               <SidebarTool
                 icon={Languages}
@@ -469,7 +507,13 @@ export default function Home() {
           </div>
         </aside>
 
-        <section className="flex min-h-screen flex-1 flex-col lg:ml-[320px]">
+        <section
+          className={cn(
+            "flex min-h-screen flex-1 flex-col transition-[margin] duration-200",
+            isLeftSidebarOpen ? "lg:ml-[320px]" : "lg:ml-[72px]",
+            isAssistantOpen ? "lg:mr-[380px]" : "lg:mr-14",
+          )}
+        >
           <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/95 px-5 py-4 backdrop-blur lg:px-8">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div>
@@ -494,19 +538,6 @@ export default function Home() {
                       : selectedProject.focus[language]
                     : t.overviewLead}
                 </p>
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="relative min-w-0 sm:w-[360px]">
-                  <MessageSquareText
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
-                    aria-hidden="true"
-                  />
-                  <Input placeholder={t.askPlaceholder} className="pl-9" />
-                </div>
-                <Button>
-                  <Bot className="h-4 w-4" aria-hidden="true" />
-                  {t.ask}
-                </Button>
               </div>
             </div>
           </header>
@@ -822,6 +853,13 @@ export default function Home() {
             </div>
           </div>
         </section>
+        <AssistantPanel
+          isOpen={isAssistantOpen}
+          language={language}
+          selectedProject={selectedProject}
+          selectedSection={selectedSection}
+          onToggle={() => setIsAssistantOpen((current) => !current)}
+        />
       </div>
     </main>
   );
@@ -846,6 +884,221 @@ function SidebarTool({
     >
       <Icon className="h-4 w-4" aria-hidden={true} />
     </button>
+  );
+}
+
+function AssistantPanel({
+  isOpen,
+  language,
+  selectedProject,
+  selectedSection,
+  onToggle,
+}: {
+  isOpen: boolean;
+  language: Language;
+  selectedProject?: Project;
+  selectedSection?: ProjectSection;
+  onToggle: () => void;
+}) {
+  const [draft, setDraft] = useState("");
+  const isFrench = language === "fr";
+  const contextLabel = selectedProject
+    ? selectedSection
+      ? `${selectedProject.name} / ${selectedSection.label[language]}`
+      : selectedProject.name
+    : isFrench
+      ? "Tous les projets"
+      : "All projects";
+  const suggestions = isFrench
+    ? [
+        "Quels changements demandent une attention cette semaine ?",
+        "Quels controles qualite faut-il lancer en priorite ?",
+        "Prepare une synthese courte pour une reunion projet.",
+      ]
+    : [
+        "Which changes need attention this week?",
+        "Which quality checks should run first?",
+        "Prepare a short summary for a project meeting.",
+      ];
+
+  if (!isOpen) {
+    return (
+      <aside className="fixed inset-y-0 right-0 z-20 hidden w-14 flex-col border-l border-stone-200 bg-white shadow-sm lg:flex">
+        <button
+          type="button"
+          aria-label={isFrench ? "Ouvrir l'assistant" : "Open assistant"}
+          title={isFrench ? "Ouvrir l'assistant" : "Open assistant"}
+          className="flex h-14 items-center justify-center border-b border-stone-200 text-stone-600 hover:bg-stone-100 hover:text-stone-950"
+          onClick={onToggle}
+        >
+          <PanelRightOpen className="h-5 w-5" aria-hidden="true" />
+        </button>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="-rotate-90 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-stone-400">
+            {isFrench ? "Assistant" : "Assistant"}
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="fixed inset-y-0 right-0 z-20 hidden w-[380px] flex-col border-l border-stone-200 bg-white shadow-sm lg:flex">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-stone-200 px-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
+            <Bot className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-semibold text-stone-950">
+              {isFrench ? "Assistant M&E" : "M&E Assistant"}
+            </h2>
+            <p className="truncate text-xs text-stone-500">{contextLabel}</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          title={isFrench ? "Fermer l'assistant" : "Close assistant"}
+          onClick={onToggle}
+        >
+          <PanelRightClose className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </div>
+
+      <div className="shrink-0 border-b border-stone-100 p-4">
+        <div className="mb-3 flex flex-wrap gap-2">
+          <Badge variant="default">{isFrench ? "Francais" : "English"}</Badge>
+          <Badge variant="info">{isFrench ? "Contexte actif" : "Active context"}</Badge>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <AssistantAction
+            icon={MessageSquareText}
+            label={isFrench ? "Question" : "Question"}
+          />
+          <AssistantAction
+            icon={SlidersHorizontal}
+            label={isFrench ? "Mode" : "Mode"}
+          />
+          <AssistantAction
+            icon={RefreshCw}
+            label={isFrench ? "Reset" : "Reset"}
+          />
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-stone-50 p-4">
+        <ChatBubble
+          role="assistant"
+          text={
+            isFrench
+              ? "Bonjour. Je peux aider a verifier la qualite des donnees, expliquer les tendances, comparer les sites et preparer une synthese pour l'equipe ou les partenaires."
+              : "Hello. I can help check data quality, explain trends, compare facilities, and prepare a summary for teams or partners."
+          }
+        />
+        <ChatBubble
+          role="user"
+          text={
+            isFrench
+              ? "Analyse le contexte selectionne et propose les points d'attention."
+              : "Analyze the selected context and suggest attention points."
+          }
+        />
+        <ChatBubble
+          role="assistant"
+          text={
+            isFrench
+              ? "Pret. Dans la version connectee, je lirai les exports du projet actif, citerai les indicateurs utilises et separerai les faits des hypotheses."
+              : "Ready. In the connected version, I will read the active project's exports, cite the indicators used, and separate facts from hypotheses."
+          }
+        />
+
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+            {isFrench ? "Suggestions" : "Suggestions"}
+          </p>
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-left text-sm leading-5 text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+              onClick={() => setDraft(suggestion)}
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="shrink-0 border-t border-stone-200 bg-white p-4">
+        <div className="mb-3 flex gap-2">
+          <Button variant="outline" size="sm" className="flex-1">
+            <Paperclip className="h-4 w-4" aria-hidden="true" />
+            {isFrench ? "Joindre" : "Attach"}
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1">
+            <FileText className="h-4 w-4" aria-hidden="true" />
+            {isFrench ? "Rapport" : "Report"}
+          </Button>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder={
+              isFrench
+                ? "Posez une question sur les donnees..."
+                : "Ask a question about the data..."
+            }
+          />
+          <Button size="icon" title={isFrench ? "Envoyer" : "Send"}>
+            <Send className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        </div>
+        <p className="mt-2 text-xs leading-5 text-stone-500">
+          {isFrench
+            ? "Prototype UI: la connexion aux donnees et au modele sera branchee ensuite."
+            : "Prototype UI: data and model connections will be wired next."}
+        </p>
+      </div>
+    </aside>
+  );
+}
+
+function AssistantAction({
+  icon: Icon,
+  label,
+}: {
+  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      className="flex h-10 items-center justify-center gap-2 rounded-md border border-stone-200 bg-white text-xs font-semibold text-stone-700 hover:bg-stone-100"
+    >
+      <Icon className="h-4 w-4" aria-hidden={true} />
+      {label}
+    </button>
+  );
+}
+
+function ChatBubble({ role, text }: { role: "assistant" | "user"; text: string }) {
+  const isAssistant = role === "assistant";
+
+  return (
+    <div className={cn("flex", isAssistant ? "justify-start" : "justify-end")}>
+      <div
+        className={cn(
+          "max-w-[88%] rounded-lg px-3 py-2 text-sm leading-6 shadow-sm",
+          isAssistant
+            ? "border border-stone-200 bg-white text-stone-700"
+            : "bg-emerald-600 text-white",
+        )}
+      >
+        {text}
+      </div>
+    </div>
   );
 }
 
