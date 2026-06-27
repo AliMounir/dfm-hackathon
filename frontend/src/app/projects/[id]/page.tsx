@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getDashboardPlan } from "@/features/dashboard/api/dashboard";
+import { DynamicDashboard } from "@/features/dashboard/components/dynamic-dashboard";
 import { projects } from "@/lib/projects";
 
 const FUNCTIONS = [
@@ -16,6 +18,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const project = projects.find((p) => p.id === id);
   if (!project) notFound();
+
+  // Agent-composed dashboard (falls back to a rule-based plan, or null if the
+  // backend isn't running).
+  const plan = await getDashboardPlan(id);
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 p-6">
@@ -40,14 +46,18 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Récit d&apos;impact</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm leading-relaxed text-neutral-700">
-          {project.story.fr}
-        </CardContent>
-      </Card>
+      {plan ? (
+        <DynamicDashboard project={project} plan={plan} />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Tableau de bord dynamique</CardTitle>
+            <CardDescription>
+              Démarrez le backend (uvicorn) pour générer le tableau de bord via l&apos;agent.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
     </main>
   );
 }

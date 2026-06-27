@@ -21,11 +21,20 @@ class Settings(BaseSettings):
     # Where the M&E project data lives (REDCap/DHIS2/Excel exports, etc.).
     data_dir: Path = _REPO_ROOT / "data"
 
-    # LLM provider for the assistant — Anthropic Claude by default.
-    llm_provider: str = "anthropic"
-    llm_model: str = "claude-sonnet-4-6"
-    anthropic_api_key: str = ""
+    # LLM provider for the agent — OpenAI by default.
+    llm_provider: str = "openai"
+    llm_model: str = "gpt-4o-mini"
     openai_api_key: str = ""
+    anthropic_api_key: str = ""
+
+    @property
+    def llm_configured(self) -> bool:
+        """True when the active provider has an API key set."""
+        if self.llm_provider == "openai":
+            return bool(self.openai_api_key)
+        if self.llm_provider == "anthropic":
+            return bool(self.anthropic_api_key)
+        return False
 
     @property
     def cors_origins_list(self) -> list[str]:
