@@ -35,14 +35,15 @@ import {
   Paperclip,
   RefreshCw,
   Send,
-  Settings,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   Stethoscope,
   TrendingDown,
   TrendingUp,
+  Upload,
   Users,
+  X,
 } from "lucide-react";
 import {
   Bar,
@@ -110,7 +111,40 @@ const copy = {
     options: "Options",
     qualityMode: "Qualite des donnees",
     reportMode: "Rapport",
-    settings: "Parametres",
+    uploadData: "Importer",
+    uploadTitle: "Importer des donnees",
+    uploadLead:
+      "Ajoutez des exports Excel, CSV, REDCap, DHIS2 ou registres, puis choisissez le projet de destination.",
+    uploadDropTitle: "Glissez vos fichiers ici",
+    uploadDropHelp: "ou choisissez des fichiers depuis votre ordinateur",
+    chooseFiles: "Choisir des fichiers",
+    selectedFiles: "Fichiers selectionnes",
+    noFilesSelected: "Aucun fichier selectionne",
+    projectAssignment: "Affectation projet",
+    targetProject: "Projet cible",
+    autoAssign: "Affectation automatique",
+    autoAssignHelp: "Detecter le projet depuis le nom du fichier",
+    createNewProject: "Creer un nouveau projet",
+    newProjectNameUpload: "Nom du nouveau projet",
+    workflowPreview: "Suivi du workflow",
+    workflowReady: "Pret a traiter",
+    workflowInProgress: "Workflow prepare",
+    workflowDone: "Termine",
+    workflowActive: "En cours",
+    workflowWaiting: "En attente",
+    uploadStageReceived: "Fichier recu",
+    uploadStageFolder: "Dossier projet selectionne ou cree",
+    uploadStageConvert: "Conversion XLSX vers Markdown",
+    uploadStageExtract: "Lecture et extraction des informations",
+    uploadStageQuality: "Donnees manquantes signalees",
+    uploadStageApproval: "Validation utilisateur avant import final",
+    startWorkflow: "Lancer le workflow",
+    filters: "Filtres",
+    close: "Fermer",
+    applyFilters: "Appliquer",
+    startDate: "Date debut",
+    endDate: "Date fin",
+    filterContext: "Contexte",
     language: "FR",
     suggestedAction: "Action suggeree",
     whyItMatters: "Pourquoi c'est important",
@@ -161,7 +195,40 @@ const copy = {
     options: "Options",
     qualityMode: "Data quality",
     reportMode: "Report",
-    settings: "Settings",
+    uploadData: "Upload",
+    uploadTitle: "Upload data",
+    uploadLead:
+      "Add Excel, CSV, REDCap, DHIS2, or register exports, then choose the destination project.",
+    uploadDropTitle: "Drag files here",
+    uploadDropHelp: "or choose files from your computer",
+    chooseFiles: "Choose files",
+    selectedFiles: "Selected files",
+    noFilesSelected: "No files selected",
+    projectAssignment: "Project assignment",
+    targetProject: "Target project",
+    autoAssign: "Auto assign",
+    autoAssignHelp: "Detect the project from the file name",
+    createNewProject: "Create new project",
+    newProjectNameUpload: "New project name",
+    workflowPreview: "Workflow progress",
+    workflowReady: "Ready to process",
+    workflowInProgress: "Workflow prepared",
+    workflowDone: "Done",
+    workflowActive: "In progress",
+    workflowWaiting: "Waiting",
+    uploadStageReceived: "File received",
+    uploadStageFolder: "Project folder selected or created",
+    uploadStageConvert: "XLSX converted to Markdown",
+    uploadStageExtract: "File read and information extracted",
+    uploadStageQuality: "Missing data flagged",
+    uploadStageApproval: "User approval before final import",
+    startWorkflow: "Start workflow",
+    filters: "Filters",
+    close: "Close",
+    applyFilters: "Apply",
+    startDate: "Start date",
+    endDate: "End date",
+    filterContext: "Context",
     language: "EN",
     suggestedAction: "Suggested action",
     whyItMatters: "Why it matters",
@@ -219,6 +286,8 @@ export default function Home() {
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isAssistantOpen, setIsAssistantOpen] = useState(true);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [customProjects, setCustomProjects] = useState<Project[]>([]);
@@ -480,19 +549,15 @@ export default function Home() {
                 )}
               </div>
             </div>
-
-            {isLeftSidebarOpen && selectedProject && (
-              <SidebarFilters
-                language={language}
-                selectedProjectId={selectedProject.id}
-                labels={t}
-              />
-            )}
           </div>
 
           <div className={cn("shrink-0 border-t border-[#F5F3EF]/10 p-4", !isLeftSidebarOpen && "px-2")}>
             <div className={cn("grid gap-2", isLeftSidebarOpen ? "grid-cols-3" : "grid-cols-1")}>
-              <SidebarTool icon={FileText} label={t.reportMode} />
+              <SidebarTool
+                icon={Upload}
+                label={t.uploadData}
+                onClick={() => setIsUploadModalOpen(true)}
+              />
               <SidebarTool
                 icon={Languages}
                 label={language === "fr" ? "English" : "Francais"}
@@ -500,7 +565,11 @@ export default function Home() {
                   setLanguage((current) => (current === "fr" ? "en" : "fr"))
                 }
               />
-              <SidebarTool icon={Settings} label={t.settings} />
+              <SidebarTool
+                icon={SlidersHorizontal}
+                label={t.filters}
+                onClick={() => setIsFilterModalOpen(true)}
+              />
             </div>
           </div>
         </aside>
@@ -858,6 +927,27 @@ export default function Home() {
           selectedSection={selectedSection}
           onToggle={() => setIsAssistantOpen((current) => !current)}
         />
+        {isUploadModalOpen && (
+          <UploadModal
+            labels={t}
+            projects={projectList}
+            selectedProjectId={selectedProject?.id ?? null}
+            onClose={() => setIsUploadModalOpen(false)}
+          />
+        )}
+        <FilterModal
+          isOpen={isFilterModalOpen}
+          labels={t}
+          selectedProjectId={selectedProject?.id ?? null}
+          selectedProjectName={
+            selectedProject
+              ? selectedSection
+                ? `${selectedProject.name} / ${selectedSection.label[language]}`
+                : selectedProject.name
+              : t.overview
+          }
+          onClose={() => setIsFilterModalOpen(false)}
+        />
       </div>
     </main>
   );
@@ -882,6 +972,273 @@ function SidebarTool({
     >
       <Icon className="h-4 w-4" aria-hidden={true} />
     </button>
+  );
+}
+
+type UploadFilePreview = {
+  name: string;
+  size: string;
+  kind: string;
+};
+
+function UploadModal({
+  labels,
+  projects,
+  selectedProjectId,
+  onClose,
+}: {
+  labels: (typeof copy)["fr"];
+  projects: Project[];
+  selectedProjectId: string | null;
+  onClose: () => void;
+}) {
+  const [targetProjectId, setTargetProjectId] = useState(
+    selectedProjectId ?? "auto",
+  );
+  const [uploadedFiles, setUploadedFiles] = useState<UploadFilePreview[]>([]);
+
+  function handleFiles(files: FileList | File[]) {
+    const selectedFiles = Array.from(files).map((file) => ({
+      name: file.name,
+      size: formatFileSize(file.size),
+      kind: file.name.split(".").pop()?.toUpperCase() ?? "DATA",
+    }));
+
+    setUploadedFiles(selectedFiles);
+  }
+
+  const hasFiles = uploadedFiles.length > 0;
+  const workflowProgress = hasFiles ? 72 : 6;
+  const workflowStages = [
+    labels.uploadStageReceived,
+    labels.uploadStageFolder,
+    labels.uploadStageConvert,
+    labels.uploadStageExtract,
+    labels.uploadStageQuality,
+    labels.uploadStageApproval,
+  ].map((stage, index) => ({
+    stage,
+    state: !hasFiles
+      ? "waiting"
+      : index < 4
+        ? "done"
+        : index === 4
+          ? "active"
+          : "waiting",
+  }));
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/45 px-4 py-6 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="upload-title"
+    >
+      <div className="flex h-[min(760px,calc(100vh-3rem))] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-stone-200 bg-[#F5F3EF] shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-stone-200 bg-white px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#2FA66A]">
+              {labels.uploadData}
+            </p>
+            <h2
+              id="upload-title"
+              className="mt-1 text-lg font-semibold tracking-normal text-[#153B36]"
+            >
+              {labels.uploadTitle}
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-stone-600">
+              {labels.uploadLead}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            title={labels.close}
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col gap-4 p-5">
+          <div className="flex flex-col gap-2 rounded-lg border border-stone-200 bg-white p-3 sm:flex-row sm:items-center">
+            <span className="text-sm font-semibold text-stone-700">
+              {labels.targetProject}
+            </span>
+            <select
+              value={targetProjectId}
+              onChange={(event) => setTargetProjectId(event.target.value)}
+              className="h-10 min-w-0 flex-1 rounded-md border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-800 outline-none ring-[#2FA66A]/30 transition focus:ring-4"
+            >
+              <option value="auto">{labels.autoAssign}</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+              <option value="new">{labels.createNewProject}</option>
+            </select>
+          </div>
+
+          <div
+            className={cn(
+              "flex min-h-0 flex-1 flex-col rounded-lg border-2 bg-white",
+              hasFiles
+                ? "border-[#2FA66A]/30"
+                : "items-center justify-center border-dashed border-[#2FA66A]/40 px-6 py-10 text-center",
+            )}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              handleFiles(event.dataTransfer.files);
+            }}
+          >
+            {!hasFiles ? (
+              <>
+                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-md bg-[#153B36] text-[#F5F3EF]">
+                  <Upload className="h-7 w-7" aria-hidden="true" />
+                </div>
+                <p className="text-xl font-semibold tracking-normal text-stone-950">
+                  {labels.uploadDropTitle}
+                </p>
+                <p className="mt-2 max-w-sm text-sm leading-6 text-stone-500">
+                  {labels.uploadDropHelp}
+                </p>
+                <label className="mt-6 inline-flex h-10 cursor-pointer items-center justify-center rounded-md bg-[#F4A623] px-4 text-sm font-semibold text-[#153B36] hover:bg-[#F4A623]/90">
+                  {labels.chooseFiles}
+                  <input
+                    type="file"
+                    multiple
+                    accept=".xlsx,.xls,.csv,.tsv,.json,.zip"
+                    className="sr-only"
+                    onChange={(event) => {
+                      if (event.target.files) handleFiles(event.target.files);
+                    }}
+                  />
+                </label>
+              </>
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-5">
+                <div className="flex flex-col gap-3 border-b border-stone-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-stone-950">
+                      {labels.workflowPreview}
+                    </p>
+                    <p className="mt-1 text-sm text-stone-500">
+                      {uploadedFiles.length} {labels.selectedFiles.toLowerCase()}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="info">{labels.workflowInProgress}</Badge>
+                    <label className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-700 hover:bg-stone-50">
+                      {labels.chooseFiles}
+                      <input
+                        type="file"
+                        multiple
+                        accept=".xlsx,.xls,.csv,.tsv,.json,.zip"
+                        className="sr-only"
+                        onChange={(event) => {
+                          if (event.target.files) handleFiles(event.target.files);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 py-4 lg:grid-cols-[0.85fr_1fr]">
+                  <div className="space-y-2">
+                    {uploadedFiles.map((file) => (
+                      <div
+                        key={`${file.name}-${file.size}`}
+                        className="flex items-center gap-3 rounded-md border border-stone-200 bg-stone-50 px-3 py-2"
+                      >
+                        <FileSpreadsheet
+                          className="h-4 w-4 shrink-0 text-[#2FA66A]"
+                          aria-hidden="true"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-stone-800">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-stone-500">
+                            {file.kind} - {file.size}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div>
+                    <Progress value={workflowProgress} />
+                    <div className="mt-4 space-y-2">
+                      {workflowStages.map((stage) => (
+                        <div
+                          key={stage.stage}
+                          className="flex items-center gap-3 rounded-md bg-stone-50 px-3 py-2"
+                        >
+                          <div
+                            className={cn(
+                              "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+                              stage.state === "done"
+                                ? "bg-[#2FA66A] text-white"
+                                : stage.state === "active"
+                                  ? "bg-[#F4A623] text-[#153B36]"
+                                  : "bg-stone-200 text-stone-500",
+                            )}
+                          >
+                            {stage.state === "done" ? (
+                              <CheckCircle2
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
+                            ) : stage.state === "active" ? (
+                              <RefreshCw
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <ClipboardList
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-stone-800">
+                              {stage.stage}
+                            </p>
+                            <p className="text-xs text-stone-500">
+                              {stage.state === "done"
+                                ? labels.workflowDone
+                                : stage.state === "active"
+                                  ? labels.workflowActive
+                                  : labels.workflowWaiting}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-stone-200 bg-white px-5 py-4">
+          <Button variant="outline" onClick={onClose}>
+            {labels.close}
+          </Button>
+          <Button
+            className="bg-[#153B36] text-[#F5F3EF] hover:bg-[#153B36]/90"
+            disabled={!hasFiles}
+            onClick={onClose}
+          >
+            {labels.startWorkflow}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1161,68 +1518,122 @@ function ProjectSectionNav({
   );
 }
 
-function SidebarFilters({
+function FilterModal({
+  isOpen,
   selectedProjectId,
+  selectedProjectName,
   labels,
+  onClose,
 }: {
-  selectedProjectId: string;
-  language: Language;
+  isOpen: boolean;
+  selectedProjectId: string | null;
+  selectedProjectName: string;
   labels: (typeof copy)["fr"];
+  onClose: () => void;
 }) {
-  const filterOptions = getSidebarFilterOptions(selectedProjectId);
+  const filterOptions = selectedProjectId
+    ? getSidebarFilterOptions(selectedProjectId)
+    : [];
+
+  if (!isOpen) return null;
 
   return (
-    <div className="border-t border-[#F5F3EF]/10 px-4 py-5">
-      <p className="mb-3 px-1 text-base font-bold text-[#F5F3EF]">
-        {labels.reportPeriod}
-      </p>
-      <div className="grid grid-cols-[1fr_auto_1fr] overflow-hidden rounded-md border border-[#F5F3EF]/25 bg-[#F5F3EF] text-sm font-semibold text-stone-700">
-        <div className="px-3 py-3 text-center">2025-12-27</div>
-        <div className="border-x border-stone-300 px-4 py-3 text-center text-stone-500">
-          to
-        </div>
-        <div className="px-3 py-3 text-center">2026-06-27</div>
-      </div>
-
-      {filterOptions.length > 0 && (
-        <div className="mt-5 space-y-3">
-          {filterOptions.map((option) => (
-            <label
-              key={option}
-              className="flex items-center gap-3 text-sm font-semibold text-[#F5F3EF]"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/45 px-4 py-6 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="filters-title"
+    >
+      <div className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-lg border border-stone-200 bg-[#F5F3EF] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-stone-200 bg-white px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#2FA66A]">
+              {labels.filterContext}: {selectedProjectName}
+            </p>
+            <h2
+              id="filters-title"
+              className="mt-1 text-lg font-semibold tracking-normal text-[#153B36]"
             >
-              <input
-                type="checkbox"
-                defaultChecked
-                className="h-4 w-4 accent-[#2FA66A]"
-              />
-              {option}
-            </label>
-          ))}
+              {labels.reportPeriod}
+            </h2>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            title={labels.close}
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </Button>
         </div>
-      )}
 
-      <div className="mt-6">
-        <p className="mb-3 px-1 text-sm font-bold text-[#F5F3EF]">
-          {labels.periodType}
-        </p>
-        <div className="space-y-3">
-          {[labels.monthly, labels.quarterly, labels.semester, labels.annual].map(
-            (period, index) => (
-              <label
-                key={period}
-                className="flex items-center gap-3 text-sm font-semibold text-[#F5F3EF]"
-              >
-                <input
-                  type="radio"
-                  name="period-type"
-                  defaultChecked={index === 0}
-                  className="h-4 w-4 accent-[#2FA66A]"
-                />
-                {period}
-              </label>
-            ),
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="space-y-2 text-sm font-semibold text-stone-700">
+              <span>{labels.startDate}</span>
+              <Input type="date" defaultValue="2025-12-27" />
+            </label>
+            <label className="space-y-2 text-sm font-semibold text-stone-700">
+              <span>{labels.endDate}</span>
+              <Input type="date" defaultValue="2026-06-27" />
+            </label>
+          </div>
+
+          <div>
+            <p className="mb-3 text-sm font-semibold text-stone-900">
+              {labels.periodType}
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {[labels.monthly, labels.quarterly, labels.semester, labels.annual].map(
+                (period, index) => (
+                  <label
+                    key={period}
+                    className="flex items-center gap-3 rounded-md border border-stone-200 bg-white px-3 py-3 text-sm font-semibold text-stone-700"
+                  >
+                    <input
+                      type="radio"
+                      name="period-type"
+                      defaultChecked={index === 0}
+                      className="h-4 w-4 accent-[#2FA66A]"
+                    />
+                    {period}
+                  </label>
+                ),
+              )}
+            </div>
+          </div>
+
+          {filterOptions.length > 0 && (
+            <div>
+              <p className="mb-3 text-sm font-semibold text-stone-900">
+                {selectedProjectName}
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {filterOptions.map((option) => (
+                  <label
+                    key={option}
+                    className="flex items-center gap-3 rounded-md border border-stone-200 bg-white px-3 py-3 text-sm font-semibold text-stone-700"
+                  >
+                    <input
+                      type="checkbox"
+                      defaultChecked
+                      className="h-4 w-4 accent-[#2FA66A]"
+                    />
+                    {option}
+                  </label>
+                ))}
+              </div>
+            </div>
           )}
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-stone-200 bg-white px-5 py-4">
+          <Button variant="outline" onClick={onClose}>
+            {labels.close}
+          </Button>
+          <Button className="bg-[#153B36] text-[#F5F3EF] hover:bg-[#153B36]/90" onClick={onClose}>
+            {labels.applyFilters}
+          </Button>
         </div>
       </div>
     </div>
@@ -1297,6 +1708,21 @@ function getSidebarFilterOptions(projectId: string) {
   };
 
   return optionsByProject[projectId] ?? [];
+}
+
+function formatFileSize(size: number) {
+  if (size < 1024) return `${size} B`;
+
+  const units = ["KB", "MB", "GB"];
+  let value = size / 1024;
+  let unitIndex = 0;
+
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
 function SeverityBadge({
