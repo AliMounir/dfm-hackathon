@@ -112,8 +112,6 @@ const copy = {
     reportMode: "Rapport",
     settings: "Parametres",
     language: "FR",
-    ask: "Poser une question",
-    askPlaceholder: "Ex: Quels CSB ont le plus de cas compliques ?",
     suggestedAction: "Action suggeree",
     whyItMatters: "Pourquoi c'est important",
     noProject:
@@ -165,8 +163,6 @@ const copy = {
     reportMode: "Report",
     settings: "Settings",
     language: "EN",
-    ask: "Ask question",
-    askPlaceholder: "Example: Which facilities have the most complicated cases?",
     suggestedAction: "Suggested action",
     whyItMatters: "Why it matters",
     noProject: "Select a project on the left to see its detailed dashboard.",
