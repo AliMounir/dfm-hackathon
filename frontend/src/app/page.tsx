@@ -81,8 +81,8 @@ import { cn } from "@/lib/utils";
 
 const copy = {
   fr: {
-    appTitle: "DFM M&E Assistant",
-    appSubtitle: "Qualite, interpretation et rapports",
+    appTitle: "Hazava AI",
+    appSubtitle: "Assistant M&E pour DFM",
     overview: "Vue ensemble",
     allProjects: "Tous les projets",
     addProject: "Ajouter un projet",
@@ -132,8 +132,8 @@ const copy = {
     annual: "Annuel",
   },
   en: {
-    appTitle: "DFM M&E Assistant",
-    appSubtitle: "Quality, interpretation, and reporting",
+    appTitle: "Hazava AI",
+    appSubtitle: "M&E Assistant for DFM",
     overview: "Overview",
     allProjects: "All projects",
     addProject: "Add project",
@@ -324,26 +324,28 @@ export default function Home() {
       <div className="flex min-h-screen flex-col lg:flex-row">
         <aside
           className={cn(
-            "flex w-full flex-col bg-[#153b36] text-white transition-[width] duration-200 lg:fixed lg:inset-y-0 lg:h-screen",
+            "flex w-full flex-col bg-[#153B36] text-[#F5F3EF] transition-[width] duration-200 lg:fixed lg:inset-y-0 lg:h-screen",
             isLeftSidebarOpen ? "lg:w-[320px]" : "lg:w-[72px]",
           )}
         >
-          <div className={cn("shrink-0 border-b border-white/10 py-5", isLeftSidebarOpen ? "px-5" : "px-2")}>
+          <div className={cn("shrink-0 border-b border-[#F5F3EF]/10 py-5", isLeftSidebarOpen ? "px-5" : "px-2")}>
             <div className={cn("flex items-center gap-3", !isLeftSidebarOpen && "justify-center")}>
-              <div className={cn("flex h-10 w-10 items-center justify-center rounded-md bg-white text-[#153b36]", !isLeftSidebarOpen && "hidden")}>
+              <div className={cn("flex h-10 w-10 items-center justify-center rounded-md bg-[#F4A623] text-[#153B36] shadow-sm", !isLeftSidebarOpen && "hidden")}>
                 <HeartPulse className="h-5 w-5" aria-hidden="true" />
               </div>
               <div className={cn("min-w-0 flex-1", !isLeftSidebarOpen && "hidden")}>
-                <h1 className="text-lg font-semibold tracking-normal">
+                <h1 className="text-lg font-semibold tracking-normal text-[#F5F3EF]">
                   {t.appTitle}
                 </h1>
-                <p className="text-xs text-white/70">{t.appSubtitle}</p>
+                <p className="text-xs font-medium text-[#F5F3EF]/70">
+                  {t.appSubtitle}
+                </p>
               </div>
               <Button
                 title={isLeftSidebarOpen ? "Collapse navigation" : "Open navigation"}
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 shrink-0 text-white hover:bg-white/10 hover:text-white"
+                className="h-9 w-9 shrink-0 text-[#F5F3EF] hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]"
                 onClick={() => setIsLeftSidebarOpen((current) => !current)}
               >
                 {isLeftSidebarOpen ? (
@@ -363,8 +365,8 @@ export default function Home() {
                     "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold transition-colors",
                     !isLeftSidebarOpen && "justify-center px-0",
                     selectedProjectId === null
-                      ? "bg-white text-[#153b36]"
-                      : "text-white/80 hover:bg-white/10 hover:text-white",
+                      ? "bg-[#F5F3EF] text-[#153B36]"
+                      : "text-[#F5F3EF]/80 hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
                   )}
                   onClick={() => {
                     setSelectedProjectId(null);
@@ -390,8 +392,8 @@ export default function Home() {
                           "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left transition-colors",
                           !isLeftSidebarOpen && "justify-center px-0",
                           active
-                            ? "bg-white text-[#153b36]"
-                            : "text-white/80 hover:bg-white/10 hover:text-white",
+                            ? "bg-[#F5F3EF] text-[#153B36]"
+                            : "text-[#F5F3EF]/80 hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
                         )}
                         onClick={() => {
                           if (active) {
@@ -420,7 +422,7 @@ export default function Home() {
                       </button>
 
                       {isLeftSidebarOpen && expanded && project.sections.length > 0 && (
-                        <div className="mb-2 mt-1 border-l border-white/10 pl-3">
+                        <div className="mb-2 mt-1 border-l border-[#F4A623]/40 pl-3">
                           <div className="space-y-1">
                             {project.sections.map((section) => (
                               <ProjectSectionNav
@@ -444,7 +446,7 @@ export default function Home() {
 
                 <button
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white",
+                    "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold text-[#F5F3EF]/70 transition-colors hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
                     !isLeftSidebarOpen && "justify-center px-0",
                   )}
                   onClick={() => setIsAdding((current) => !current)}
@@ -456,7 +458,7 @@ export default function Home() {
                 </button>
 
                 {isLeftSidebarOpen && isAdding && (
-                  <div className="flex gap-2 rounded-md bg-white/10 p-2">
+                  <div className="flex gap-2 rounded-md bg-[#F5F3EF]/10 p-2">
                     <Input
                       value={newProjectName}
                       onChange={(event) => setNewProjectName(event.target.value)}
@@ -464,7 +466,7 @@ export default function Home() {
                         if (event.key === "Enter") addProject();
                       }}
                       placeholder={t.newProjectPlaceholder}
-                      className="border-white/10 bg-white text-stone-950"
+                      className="border-[#F5F3EF]/10 bg-[#F5F3EF] text-stone-950"
                     />
                     <Button
                       title={t.addProject}
@@ -488,7 +490,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className={cn("shrink-0 border-t border-white/10 p-4", !isLeftSidebarOpen && "px-2")}>
+          <div className={cn("shrink-0 border-t border-[#F5F3EF]/10 p-4", !isLeftSidebarOpen && "px-2")}>
             <div className={cn("grid gap-2", isLeftSidebarOpen ? "grid-cols-3" : "grid-cols-1")}>
               <SidebarTool icon={FileText} label={t.reportMode} />
               <SidebarTool
@@ -876,7 +878,7 @@ function SidebarTool({
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="flex h-10 items-center justify-center rounded-md bg-white/10 text-white/80 hover:bg-white/15 hover:text-white"
+      className="flex h-10 items-center justify-center rounded-md bg-[#F5F3EF]/10 text-[#F5F3EF]/80 hover:bg-[#F4A623]/20 hover:text-[#F5F3EF]"
     >
       <Icon className="h-4 w-4" aria-hidden={true} />
     </button>
@@ -942,7 +944,7 @@ function AssistantPanel({
     <aside className="fixed inset-y-0 right-0 z-20 hidden w-[380px] flex-col border-l border-stone-200 bg-white shadow-sm lg:flex">
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-stone-200 px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#153B36] text-[#F5F3EF] ring-2 ring-[#F4A623]/25">
             <Bot className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
@@ -1017,7 +1019,7 @@ function AssistantPanel({
             <button
               key={suggestion}
               type="button"
-              className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-left text-sm leading-5 text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+              className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-left text-sm leading-5 text-stone-700 hover:border-[#2FA66A]/50 hover:bg-[#2FA66A]/10"
               onClick={() => setDraft(suggestion)}
             >
               {suggestion}
@@ -1089,7 +1091,7 @@ function ChatBubble({ role, text }: { role: "assistant" | "user"; text: string }
           "max-w-[88%] rounded-lg px-3 py-2 text-sm leading-6 shadow-sm",
           isAssistant
             ? "border border-stone-200 bg-white text-stone-700"
-            : "bg-emerald-600 text-white",
+            : "bg-[#153B36] text-[#F5F3EF]",
         )}
       >
         {text}
@@ -1122,10 +1124,10 @@ function ProjectSectionNav({
         className={cn(
           "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors",
           active
-            ? "bg-white/15 text-white"
+            ? "bg-[#F4A623]/20 text-[#F5F3EF]"
             : hasActiveChild
-              ? "text-white"
-              : "text-white/65 hover:bg-white/10 hover:text-white",
+              ? "text-[#F5F3EF]"
+              : "text-[#F5F3EF]/65 hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
           depth > 0 && "pl-8",
         )}
         onClick={() => onSelect(section.id)}
@@ -1135,7 +1137,7 @@ function ProjectSectionNav({
           {section.label[language]}
         </span>
         {section.files.length > 0 && (
-          <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-white/60">
+          <span className="rounded bg-[#F5F3EF]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#F5F3EF]/60">
             {section.files.length}
           </span>
         )}
@@ -1170,11 +1172,11 @@ function SidebarFilters({
   const filterOptions = getSidebarFilterOptions(selectedProjectId);
 
   return (
-    <div className="border-t border-white/10 px-4 py-5">
-      <p className="mb-3 px-1 text-base font-bold text-white">
+    <div className="border-t border-[#F5F3EF]/10 px-4 py-5">
+      <p className="mb-3 px-1 text-base font-bold text-[#F5F3EF]">
         {labels.reportPeriod}
       </p>
-      <div className="grid grid-cols-[1fr_auto_1fr] overflow-hidden rounded-md border border-white/25 bg-white text-sm font-semibold text-stone-700">
+      <div className="grid grid-cols-[1fr_auto_1fr] overflow-hidden rounded-md border border-[#F5F3EF]/25 bg-[#F5F3EF] text-sm font-semibold text-stone-700">
         <div className="px-3 py-3 text-center">2025-12-27</div>
         <div className="border-x border-stone-300 px-4 py-3 text-center text-stone-500">
           to
@@ -1187,12 +1189,12 @@ function SidebarFilters({
           {filterOptions.map((option) => (
             <label
               key={option}
-              className="flex items-center gap-3 text-sm font-semibold text-white"
+              className="flex items-center gap-3 text-sm font-semibold text-[#F5F3EF]"
             >
               <input
                 type="checkbox"
                 defaultChecked
-                className="h-4 w-4 accent-sky-500"
+                className="h-4 w-4 accent-[#2FA66A]"
               />
               {option}
             </label>
@@ -1201,7 +1203,7 @@ function SidebarFilters({
       )}
 
       <div className="mt-6">
-        <p className="mb-3 px-1 text-sm font-bold text-white">
+        <p className="mb-3 px-1 text-sm font-bold text-[#F5F3EF]">
           {labels.periodType}
         </p>
         <div className="space-y-3">
@@ -1209,13 +1211,13 @@ function SidebarFilters({
             (period, index) => (
               <label
                 key={period}
-                className="flex items-center gap-3 text-sm font-semibold text-white"
+                className="flex items-center gap-3 text-sm font-semibold text-[#F5F3EF]"
               >
                 <input
                   type="radio"
                   name="period-type"
                   defaultChecked={index === 0}
-                  className="h-4 w-4 accent-sky-500"
+                  className="h-4 w-4 accent-[#2FA66A]"
                 />
                 {period}
               </label>

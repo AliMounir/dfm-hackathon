@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DFM M&E Assistant",
+  title: "Hazava AI",
   description:
-    "Prototype assistant for Doctors for Madagascar monitoring, evaluation, data quality, and reporting.",
+    "M&E Assistant for Doctors for Madagascar monitoring, evaluation, data quality, and reporting.",
 };
 
 export default function RootLayout({
