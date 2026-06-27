@@ -41,6 +41,27 @@ export type SitePoint = {
   change: number;
 };
 
+export type ProjectSection = {
+  id: string;
+  label: LocalizedText;
+  icon:
+    | "activity"
+    | "ambulance"
+    | "baby"
+    | "book"
+    | "bus"
+    | "chart"
+    | "clipboard"
+    | "file"
+    | "map"
+    | "megaphone"
+    | "money"
+    | "shield"
+    | "users";
+  files: string[];
+  children?: ProjectSection[];
+};
+
 export type Project = {
   id: string;
   name: string;
@@ -56,6 +77,7 @@ export type Project = {
   insights: Insight[];
   suggestedQuestions: LocalizedText[];
   story: LocalizedText;
+  sections: ProjectSection[];
 };
 
 export const projects: Project[] = [
@@ -211,6 +233,41 @@ export const projects: Project[] = [
       fr: "Le projet MCHP montre une forte couverture d'echographies avec 8,744 femmes enceintes atteintes. L'assistant met en avant les zones ou les suivis, les cas compliques et la qualite des identifiants doivent etre verifies avant interpretation.",
       en: "The MCHP project shows strong ultrasound coverage with 8,744 pregnant women reached. The assistant highlights where follow-ups, complicated cases, and identifier quality should be reviewed before interpretation.",
     },
+    sections: [
+      section("ambulance", "Ambulance", "Ambulance", "ambulance", [
+        "AMB_MCHP-2026-06-27.xlsx",
+      ]),
+      section("echographie", "Echographie", "Ultrasound", "activity", [
+        "ECHO_MCHP-2026-06-27.xlsx",
+      ]),
+      section("sensibilisation", "Sensibilisation", "Awareness", "megaphone", [
+        "TA-2026-06-27.xlsx",
+      ]),
+      section("carte-reference", "Carte de reference", "Reference map", "map", [
+        "CR_MCHP-2026-06-27.xlsx",
+      ]),
+      section("assurance-qualite-5s", "Assurance qualite 5S", "5S quality assurance", "shield", [
+        "TA-2026-06-27.xlsx",
+      ]),
+      {
+        ...section("registre", "Registre", "Register", "book", [
+          "ACC_MCHP-2026-06-27.xlsx",
+          "CPN_MCHP-2026-06-27.xlsx",
+          "PF_MCHP-2026-06-27.xlsx",
+        ]),
+        children: [
+          section("accouchement", "Accouchement", "Delivery", "baby", [
+            "ACC_MCHP-2026-06-27.xlsx",
+          ]),
+          section("cpn", "CPN", "ANC", "clipboard", [
+            "CPN_MCHP-2026-06-27.xlsx",
+          ]),
+          section("pf", "PF", "Family planning", "users", [
+            "PF_MCHP-2026-06-27.xlsx",
+          ]),
+        ],
+      },
+    ],
   },
   {
     id: "soameva",
@@ -233,6 +290,11 @@ export const projects: Project[] = [
       fr: "SOAMEVA peut utiliser l'assistant pour transformer les donnees communautaires en messages clairs sur la couverture, les orientations et les zones a renforcer.",
       en: "SOAMEVA can use the assistant to turn community data into clear messages about coverage, referrals, and areas needing support.",
     },
+    sections: [
+      section("tableau-soameva", "Tableau SOAMEVA", "SOAMEVA dashboard", "file", [
+        "SOAMEVA.html",
+      ]),
+    ],
   },
   {
     id: "miray-tb-parsite",
@@ -255,6 +317,11 @@ export const projects: Project[] = [
       fr: "MIRAY TB PARSITE peut prioriser les sites avec donnees incompletes, pertes de suivi ou ecarts entre notification et traitement.",
       en: "MIRAY TB PARSITE can prioritize sites with incomplete data, loss to follow-up, or gaps between notification and treatment.",
     },
+    sections: [
+      section("analyse-par-site", "Analyse par site", "Site analysis", "chart", []),
+      section("cohortes-tb", "Cohortes TB", "TB cohorts", "clipboard", []),
+      section("qualite-donnees", "Qualite des donnees", "Data quality", "shield", []),
+    ],
   },
   {
     id: "miray-tb-general",
@@ -277,6 +344,17 @@ export const projects: Project[] = [
       fr: "La vue generale TB aide a repérer les ruptures de tendance et a preparer des explications coherentes pour les equipes et partenaires.",
       en: "The general TB view helps spot trend breaks and prepare consistent explanations for teams and partners.",
     },
+    sections: [
+      section("donnees-export", "Donnees exportees", "Exported data", "file", [
+        "donnees_export_2026-06-27.xlsx",
+      ]),
+      section("depistage", "Depistage", "Screening", "activity", [
+        "donnees_export_2026-06-27.xlsx",
+      ]),
+      section("cohortes", "Cohortes", "Cohorts", "clipboard", [
+        "donnees_export_2026-06-27.xlsx",
+      ]),
+    ],
   },
   {
     id: "mafy",
@@ -299,6 +377,36 @@ export const projects: Project[] = [
       fr: "MAFY peut utiliser les controles automatiques pour fiabiliser les indicateurs avant les reunions de pilotage.",
       en: "MAFY can use automated checks to make indicators more reliable before steering meetings.",
     },
+    sections: [
+      {
+        ...section("sensibilisation", "Sensibilisation", "Awareness", "users", [
+          "SENSIBILISATION_STAFFDFM_MAFY-2026-06-27.xlsx",
+          "SENSIBILISATION_AC_MAFY-2026-06-27.xlsx",
+          "export_sensibilisation_2026-06-27.xlsx",
+        ]),
+        children: [
+          section("resume-staff-dfm", "Resume : STAFF DFM", "Summary: DFM staff", "chart", [
+            "SENSIBILISATION_STAFFDFM_MAFY-2026-06-27.xlsx",
+          ]),
+          section("detail-staff-dfm", "Detail : STAFF DFM", "DFM staff detail", "file", [
+            "SENSIBILISATION_STAFFDFM_MAFY-2026-06-27.xlsx",
+          ]),
+          section("resume-ac", "Resume : AC", "Summary: CHW", "chart", [
+            "SENSIBILISATION_AC_MAFY-2026-06-27.xlsx",
+          ]),
+          section("detail-ac", "Detail : AC", "CHW detail", "file", [
+            "SENSIBILISATION_AC_MAFY-2026-06-27.xlsx",
+            "export_sensibilisation_2026-06-27.xlsx",
+          ]),
+        ],
+      },
+      section("carte-reference", "Carte de reference", "Reference map", "map", [
+        "CR_DATA_2026-06-27.xlsx",
+      ]),
+      section("registre", "Registre", "Register", "book", [
+        "REGISTRE_CONSULTATION_REACT()_2026-06-27.xlsx",
+      ]),
+    ],
   },
   {
     id: "tia-longo",
@@ -321,6 +429,27 @@ export const projects: Project[] = [
       fr: "TIA LONGO peut transformer ses donnees de terrain en syntheses courtes pour les coordinateurs et partenaires locaux.",
       en: "TIA LONGO can turn field data into short summaries for coordinators and local partners.",
     },
+    sections: [
+      section("tl1-tia-aina", "TL.1. TIA AINA", "TL.1. TIA AINA", "money", [
+        "TS_2026-06-27.xlsx",
+      ]),
+      section("tl2-gec", "TL.2. GEC (VOAMAMI)", "TL.2. GEC (VOAMAMI)", "users", [
+        "VOAMAMI_2026-06-27.xlsx",
+      ]),
+      section("tl3-culture-financiere", "TL.3. Culture financiere", "TL.3. Financial literacy", "chart", [
+        "VOAMAMI_2026-06-27.xlsx",
+      ]),
+      section("tl4-transport", "TL.4. Transport subventionne", "TL.4. Subsidized transport", "bus", [
+        "TS_2026-06-27.xlsx",
+      ]),
+      section("sensibilisation", "Sensibilisation", "Awareness", "megaphone", [
+        "SENS-2026-06-27.xlsx",
+        "SENS_MCHP-2026-06-27.xlsx",
+      ]),
+      section("registre-csb", "Registre CSB", "CSB register", "book", [
+        "REGISTRE_C_2026-06-27.xlsx",
+      ]),
+    ],
   },
   {
     id: "profess",
@@ -343,6 +472,17 @@ export const projects: Project[] = [
       fr: "PROFESS peut relier les donnees de supervision aux plans d'action et suivre les ameliorations visibles dans le temps.",
       en: "PROFESS can connect supervision data to action plans and track visible improvements over time.",
     },
+    sections: [
+      section("qualite-services", "Qualite des services", "Service quality", "shield", [
+        "data_PROFESS_2026-06-27.xlsx",
+      ]),
+      section("supervision", "Supervision", "Supervision", "clipboard", [
+        "data_PROFESS_2026-06-27.xlsx",
+      ]),
+      section("plans-action", "Plans d'action", "Action plans", "file", [
+        "data_PROFESS_2026-06-27.xlsx",
+      ]),
+    ],
   },
 ];
 
@@ -516,4 +656,19 @@ function demoSites(): SitePoint[] {
     { site: "Ambovombe", value: 58, change: 3 },
     { site: "Tsihombe", value: 51, change: -8 },
   ];
+}
+
+function section(
+  id: string,
+  fr: string,
+  en: string,
+  icon: ProjectSection["icon"],
+  files: string[],
+): ProjectSection {
+  return {
+    id,
+    label: { fr, en },
+    icon,
+    files,
+  };
 }

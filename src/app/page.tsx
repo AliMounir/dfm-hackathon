@@ -4,21 +4,30 @@ import { type ComponentType, useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
+  Ambulance,
+  Baby,
   BarChart3,
+  BookOpen,
   Bot,
+  Bus,
   CheckCircle2,
   ChevronRight,
   ClipboardCheck,
+  ClipboardList,
   CloudRain,
   Database,
   FileText,
+  FileSpreadsheet,
   FolderPlus,
   Globe2,
+  HandCoins,
   HeartPulse,
   Languages,
   LayoutDashboard,
   LineChart,
+  Map,
   MapPin,
+  Megaphone,
   MessageSquareText,
   Microscope,
   Plus,
@@ -59,6 +68,7 @@ import {
   type Metric,
   type MetricTone,
   type Project,
+  type ProjectSection,
   overviewMetrics,
   overviewMonthly,
   projects,
@@ -71,6 +81,7 @@ const copy = {
     appSubtitle: "Qualite, interpretation et rapports",
     overview: "Vue ensemble",
     allProjects: "Tous les projets",
+    projectSubsets: "Sous-pages projet",
     addProject: "Ajouter un projet",
     addProjectShort: "Ajouter",
     newProjectPlaceholder: "Nom du nouveau projet",
@@ -85,6 +96,8 @@ const copy = {
       "Tableau de bord projet avec indicateurs, controles qualite et explications generees pour l'equipe.",
     dataFolder: "Dossier donnees",
     dataSources: "Sources",
+    activeDataset: "Jeu de donnees actif",
+    attachedFiles: "Fichiers rattaches",
     activityTrend: "Tendance activite et risques",
     facilityFocus: "Sites a regarder",
     qualityChecks: "Controles qualite",
@@ -110,12 +123,19 @@ const copy = {
     targetLabel: "Cible",
     readyForGithub:
       "Les dossiers de donnees sont prets pour GitHub; ajoutez les exports dans chaque dossier projet.",
+    reportPeriod: "Periode du rapport",
+    periodType: "Selection le type de periode:",
+    monthly: "Mensuel",
+    quarterly: "Trimestriel",
+    semester: "Semestriel",
+    annual: "Annuel",
   },
   en: {
     appTitle: "DFM M&E Assistant",
     appSubtitle: "Quality, interpretation, and reporting",
     overview: "Overview",
     allProjects: "All projects",
+    projectSubsets: "Project subpages",
     addProject: "Add project",
     addProjectShort: "Add",
     newProjectPlaceholder: "New project name",
@@ -130,6 +150,8 @@ const copy = {
       "Project dashboard with indicators, quality checks, and generated explanations for the team.",
     dataFolder: "Data folder",
     dataSources: "Sources",
+    activeDataset: "Active dataset",
+    attachedFiles: "Attached files",
     activityTrend: "Activity and risk trend",
     facilityFocus: "Facilities to review",
     qualityChecks: "Quality checks",
@@ -154,6 +176,12 @@ const copy = {
     targetLabel: "Target",
     readyForGithub:
       "Data folders are ready for GitHub; add exports inside each project folder.",
+    reportPeriod: "Report period",
+    periodType: "Select period type:",
+    monthly: "Monthly",
+    quarterly: "Quarterly",
+    semester: "Semester",
+    annual: "Annual",
   },
 };
 
@@ -167,9 +195,29 @@ const metricToneClasses: Record<MetricTone, string> = {
 
 const projectIcons = [HeartPulse, Stethoscope, Microscope, Activity];
 
+const sectionIconMap: Record<
+  ProjectSection["icon"],
+  ComponentType<{ className?: string; "aria-hidden"?: boolean }>
+> = {
+  activity: Activity,
+  ambulance: Ambulance,
+  baby: Baby,
+  book: BookOpen,
+  bus: Bus,
+  chart: BarChart3,
+  clipboard: ClipboardList,
+  file: FileSpreadsheet,
+  map: Map,
+  megaphone: Megaphone,
+  money: HandCoins,
+  shield: ShieldCheck,
+  users: Users,
+};
+
 export default function Home() {
   const [language, setLanguage] = useState<Language>("fr");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -189,6 +237,19 @@ export default function Home() {
   const selectedProject = projectList.find(
     (project) => project.id === selectedProjectId,
   );
+  const selectedSection = selectedProject
+    ? findProjectSection(selectedProject.sections, selectedSectionId)
+    : undefined;
+  const selectedSectionFiles = selectedSection?.files ?? [];
+  const activeDatasetLabel = selectedSection
+    ? selectedSection.label[language]
+    : selectedProject
+      ? language === "fr"
+        ? "Vue projet"
+        : "Project overview"
+      : language === "fr"
+        ? "Tous les projets"
+        : "All projects";
 
   const selectedMetrics = selectedProject?.metrics ?? overviewMetrics;
   const selectedMonthly = selectedProject?.monthly ?? overviewMonthly;
@@ -251,10 +312,12 @@ export default function Home() {
         fr: "Ajoutez les exports du projet pour generer une synthese.",
         en: "Add project exports to generate a summary.",
       },
+      sections: [],
     };
 
     setCustomProjects((current) => [...current, project]);
     setSelectedProjectId(project.id);
+    setSelectedSectionId(null);
     setNewProjectName("");
     setIsAdding(false);
   }
@@ -298,7 +361,10 @@ export default function Home() {
                   ? "bg-white text-[#153b36]"
                   : "text-white/80 hover:bg-white/10 hover:text-white",
               )}
-              onClick={() => setSelectedProjectId(null)}
+              onClick={() => {
+                setSelectedProjectId(null);
+                setSelectedSectionId(null);
+              }}
             >
               <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
               {t.overview}
@@ -361,27 +427,67 @@ export default function Home() {
                   const active = selectedProjectId === project.id;
 
                   return (
-                    <button
-                      key={project.id}
-                      className={cn(
-                        "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left transition-colors",
-                        active
-                          ? "bg-white text-[#153b36]"
-                          : "text-white/80 hover:bg-white/10 hover:text-white",
+                    <div key={project.id}>
+                      <button
+                        className={cn(
+                          "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left transition-colors",
+                          active
+                            ? "bg-white text-[#153b36]"
+                            : "text-white/80 hover:bg-white/10 hover:text-white",
+                        )}
+                        onClick={() => {
+                          setSelectedProjectId(project.id);
+                          setSelectedSectionId(null);
+                        }}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                          {project.name}
+                        </span>
+                        <ChevronRight
+                          className={cn(
+                            "h-4 w-4 shrink-0 transition-transform",
+                            active && "rotate-90",
+                          )}
+                          aria-hidden="true"
+                        />
+                      </button>
+
+                      {active && project.sections.length > 0 && (
+                        <div className="mb-2 mt-1 border-l border-white/10 pl-3">
+                          <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-white/45">
+                            {t.projectSubsets}
+                          </p>
+                          <div className="space-y-1">
+                            {project.sections.map((section) => (
+                              <ProjectSectionNav
+                                key={section.id}
+                                section={section}
+                                selectedSectionId={selectedSectionId}
+                                language={language}
+                                onSelect={(sectionId) => {
+                                  setSelectedProjectId(project.id);
+                                  setSelectedSectionId(sectionId);
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </div>
                       )}
-                      onClick={() => setSelectedProjectId(project.id)}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                      <span className="min-w-0 flex-1 truncate text-sm font-semibold">
-                        {project.name}
-                      </span>
-                      <ChevronRight className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    </button>
+                    </div>
                   );
                 })}
               </div>
             </div>
           </div>
+
+          {selectedProject && (
+            <SidebarFilters
+              language={language}
+              selectedProjectId={selectedProject.id}
+              labels={t}
+            />
+          )}
 
           <div className="mt-auto border-t border-white/10 p-4">
             <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-white/60">
@@ -414,12 +520,23 @@ export default function Home() {
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <Badge variant="neutral">{t.demoBadge}</Badge>
                   <Badge variant="info">{t.activePeriod}: {t.periodValue}</Badge>
+                  <Badge variant="default">
+                    {t.activeDataset}: {activeDatasetLabel}
+                  </Badge>
                 </div>
                 <h2 className="text-2xl font-semibold tracking-normal text-stone-950">
-                  {selectedProject?.name ?? t.overviewTitle}
+                  {selectedProject
+                    ? selectedSection
+                      ? `${selectedProject.name} / ${selectedSection.label[language]}`
+                      : selectedProject.name
+                    : t.overviewTitle}
                 </h2>
                 <p className="mt-1 max-w-4xl text-sm leading-6 text-stone-600">
-                  {selectedProject ? selectedProject.focus[language] : t.overviewLead}
+                  {selectedProject
+                    ? selectedSectionFiles.length > 0
+                      ? `${selectedProject.focus[language]} ${t.attachedFiles}: ${selectedSectionFiles.join(", ")}.`
+                      : selectedProject.focus[language]
+                    : t.overviewLead}
                 </p>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -479,7 +596,9 @@ export default function Home() {
                       {t.activityTrend}
                     </h3>
                     <p className="text-sm leading-6 text-stone-600">
-                      {selectedProject ? t.selectedLead : t.readyForGithub}
+                      {selectedProject
+                        ? `${t.selectedLead} ${t.activeDataset}: ${activeDatasetLabel}.`
+                        : t.readyForGithub}
                     </p>
                   </div>
                   <Badge variant="default">
@@ -532,7 +651,9 @@ export default function Home() {
                   </h3>
                   <p className="text-sm leading-6 text-stone-600">
                     {selectedProject
-                      ? selectedProject.folder
+                      ? selectedSectionFiles.length > 0
+                        ? `${selectedProject.folder} / ${selectedSectionFiles.join(", ")}`
+                        : selectedProject.folder
                       : "data/projects/*"}
                   </p>
                 </div>
@@ -583,7 +704,9 @@ export default function Home() {
                       {t.qualityChecks}
                     </h3>
                     <p className="text-sm leading-6 text-stone-600">
-                      {selectedProject?.folder ?? "data/projects"}
+                      {selectedProject
+                        ? `${selectedProject.folder} - ${activeDatasetLabel}`
+                        : "data/projects"}
                     </p>
                   </div>
                   <Badge variant="warning">
@@ -641,7 +764,9 @@ export default function Home() {
                     </h3>
                     <p className="text-sm leading-6 text-stone-600">
                       {selectedProject
-                        ? selectedProject.dataSources.join(" / ")
+                        ? selectedSectionFiles.length > 0
+                          ? selectedSectionFiles.join(" / ")
+                          : selectedProject.dataSources.join(" / ")
                         : "REDCap / DHIS2 / Excel"}
                     </p>
                   </div>
@@ -763,6 +888,135 @@ function SidebarTool({
   );
 }
 
+function ProjectSectionNav({
+  section,
+  selectedSectionId,
+  language,
+  onSelect,
+  depth = 0,
+}: {
+  section: ProjectSection;
+  selectedSectionId: string | null;
+  language: Language;
+  onSelect: (sectionId: string) => void;
+  depth?: number;
+}) {
+  const Icon = sectionIconMap[section.icon];
+  const active = selectedSectionId === section.id;
+  const hasActiveChild =
+    section.children?.some((child) => child.id === selectedSectionId) ?? false;
+
+  return (
+    <div>
+      <button
+        className={cn(
+          "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors",
+          active
+            ? "bg-white/15 text-white"
+            : hasActiveChild
+              ? "text-white"
+              : "text-white/65 hover:bg-white/10 hover:text-white",
+          depth > 0 && "pl-8",
+        )}
+        onClick={() => onSelect(section.id)}
+      >
+        <Icon className="h-4 w-4 shrink-0" aria-hidden={true} />
+        <span className="min-w-0 flex-1 truncate font-semibold">
+          {section.label[language]}
+        </span>
+        {section.files.length > 0 && (
+          <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-white/60">
+            {section.files.length}
+          </span>
+        )}
+      </button>
+
+      {section.children && (
+        <div className="mt-1 space-y-1">
+          {section.children.map((child) => (
+            <ProjectSectionNav
+              key={child.id}
+              section={child}
+              selectedSectionId={selectedSectionId}
+              language={language}
+              onSelect={onSelect}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SidebarFilters({
+  selectedProjectId,
+  labels,
+}: {
+  selectedProjectId: string;
+  language: Language;
+  labels: (typeof copy)["fr"];
+}) {
+  const filterOptions = getSidebarFilterOptions(selectedProjectId);
+
+  return (
+    <div className="border-t border-white/10 px-4 py-5">
+      <p className="mb-3 px-1 text-base font-bold text-white">
+        {labels.reportPeriod}
+      </p>
+      <div className="grid grid-cols-[1fr_auto_1fr] overflow-hidden rounded-md border border-white/25 bg-white text-sm font-semibold text-stone-700">
+        <div className="px-3 py-3 text-center">2025-12-27</div>
+        <div className="border-x border-stone-300 px-4 py-3 text-center text-stone-500">
+          to
+        </div>
+        <div className="px-3 py-3 text-center">2026-06-27</div>
+      </div>
+
+      {filterOptions.length > 0 && (
+        <div className="mt-5 space-y-3">
+          {filterOptions.map((option) => (
+            <label
+              key={option}
+              className="flex items-center gap-3 text-sm font-semibold text-white"
+            >
+              <input
+                type="checkbox"
+                defaultChecked
+                className="h-4 w-4 accent-sky-500"
+              />
+              {option}
+            </label>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6">
+        <p className="mb-3 px-1 text-sm font-bold text-white">
+          {labels.periodType}
+        </p>
+        <div className="space-y-3">
+          {[labels.monthly, labels.quarterly, labels.semester, labels.annual].map(
+            (period, index) => (
+              <label
+                key={period}
+                className="flex items-center gap-3 text-sm font-semibold text-white"
+              >
+                <input
+                  type="radio"
+                  name="period-type"
+                  defaultChecked={index === 0}
+                  className="h-4 w-4 accent-sky-500"
+                />
+                {period}
+              </label>
+            ),
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MetricCard({
   metric,
   language,
@@ -802,6 +1056,35 @@ function MetricCard({
       </CardContent>
     </Card>
   );
+}
+
+function findProjectSection(
+  sections: ProjectSection[],
+  sectionId: string | null,
+): ProjectSection | undefined {
+  if (!sectionId) return undefined;
+
+  for (const section of sections) {
+    if (section.id === sectionId) return section;
+
+    const child = section.children
+      ? findProjectSection(section.children, sectionId)
+      : undefined;
+
+    if (child) return child;
+  }
+
+  return undefined;
+}
+
+function getSidebarFilterOptions(projectId: string) {
+  const optionsByProject: Record<string, string[]> = {
+    mafy: ["Toliara-I", "Ampanihy-Ouest", "Taolagnaro"],
+    mchp: ["Manambaro", "Ejeda"],
+    profess: ["Qualite 5S", "Supervision", "Plan d'action"],
+  };
+
+  return optionsByProject[projectId] ?? [];
 }
 
 function SeverityBadge({
