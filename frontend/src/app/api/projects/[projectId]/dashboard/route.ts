@@ -5,6 +5,7 @@ import {
   createOverviewDashboardPlan,
   findProject,
 } from "@/lib/dashboard-api";
+import { backendResponse, fetchBackendApi } from "@/lib/backend-proxy";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,11 @@ export async function GET(_request: Request, context: RouteContext) {
 
   if (projectId === "overview") {
     return NextResponse.json(createOverviewDashboardPlan());
+  }
+
+  const backend = await fetchBackendApi(`/projects/${projectId}/dashboard`);
+  if (backend) {
+    return backendResponse(backend);
   }
 
   const project = findProject(projectId);

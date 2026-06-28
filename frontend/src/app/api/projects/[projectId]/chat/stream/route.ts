@@ -1,4 +1,5 @@
 import { createChatResponse, findProject } from "@/lib/dashboard-api";
+import { backendResponse, fetchBackendApi } from "@/lib/backend-proxy";
 
 export const runtime = "nodejs";
 
@@ -10,13 +11,24 @@ type RouteContext = {
 
 export async function POST(request: Request, context: RouteContext) {
   const { projectId } = await context.params;
+  const bodyText = await request.text();
+  const backend = await fetchBackendApi(`/projects/${projectId}/chat/stream`, {
+    method: "POST",
+    headers: { "Content-Type": request.headers.get("Content-Type") ?? "application/json" },
+    body: bodyText,
+  });
+
+  if (backend) {
+    return backendResponse(backend);
+  }
+
   const project = findProject(projectId);
 
   if (!project) {
     return Response.json({ error: "Project not found" }, { status: 404 });
   }
 
-  const body = (await request.json().catch(() => ({}))) as { language?: "fr" | "en"; message?: string };
+  const body = parseJsonBody(bodyText) as { language?: "fr" | "en"; message?: string };
   const response = createChatResponse(project, body.message ?? "");
   const encoder = new TextEncoder();
   const reply = body.language === "en" ? response.reply.en : response.reply.fr;
@@ -40,4 +52,12 @@ export async function POST(request: Request, context: RouteContext) {
       "Content-Type": "text/event-stream; charset=utf-8",
     },
   });
+}
+
+function parseJsonBody(bodyText: string): unknown {
+  try {
+    return bodyText ? JSON.parse(bodyText) : {};
+  } catch {
+    return {};
+  }
 }

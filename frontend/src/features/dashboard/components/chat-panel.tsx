@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Bot, PanelRightClose, PanelRightOpen, SendHorizontal, Trash2 } from "lucide-react";
 
-import { postChat, type DashboardOp, type WidgetRef } from "@/features/dashboard/api/chat";
+import { postChat, streamChat, type DashboardOp, type WidgetRef } from "@/features/dashboard/api/chat";
 import { useDashboard } from "@/features/dashboard/lib/dashboard-context";
 import { t } from "@/features/shared/lib/i18n";
 
@@ -89,20 +89,32 @@ export function ChatPanel({
         ]
       : [];
     const changes: string[] = [];
+    let received = false;
 
-    // Non-streaming: one request → reply + dashboard operations (reliable).
     try {
-      const res = await postChat(projectId, msg, history, widgets, language);
-      patchLast((p) => ({ ...p, content: t(res.reply, language) || p.content }));
-      if (res.clear) applyOpWithNote({ kind: "clear" }, changes);
-      (res.add_charts ?? []).forEach((s) => applyOpWithNote({ kind: "add_chart", section: s }, changes));
-      (res.add_kpis ?? []).forEach((k) => applyOpWithNote({ kind: "add_kpi", kpi: k }, changes));
-      (res.remove_ids ?? []).forEach((id) => applyOpWithNote({ kind: "remove", id }, changes));
+      await streamChat(projectId, msg, history, widgets, language, (event) => {
+        received = true;
+        if (event.type === "token") patchLast((p) => ({ ...p, content: p.content + event.text }));
+        else if (event.type === "op") applyOpWithNote(event.op, changes);
+      });
     } catch {
-      patchLast((p) => ({
-        ...p,
-        content: p.content || (fr ? "Assistant injoignable (backend démarré ?)." : "Assistant unreachable."),
-      }));
+      received = false;
+    }
+
+    if (!received) {
+      try {
+        const res = await postChat(projectId, msg, history, widgets, language);
+        patchLast((p) => ({ ...p, content: t(res.reply, language) || p.content }));
+        if (res.clear) applyOpWithNote({ kind: "clear" }, changes);
+        (res.add_charts ?? []).forEach((s) => applyOpWithNote({ kind: "add_chart", section: s }, changes));
+        (res.add_kpis ?? []).forEach((k) => applyOpWithNote({ kind: "add_kpi", kpi: k }, changes));
+        (res.remove_ids ?? []).forEach((id) => applyOpWithNote({ kind: "remove", id }, changes));
+      } catch {
+        patchLast((p) => ({
+          ...p,
+          content: p.content || (fr ? "Assistant injoignable (backend démarré ?)." : "Assistant unreachable."),
+        }));
+      }
     }
 
     // Make sure something shows even if only the dashboard changed.
