@@ -59,7 +59,10 @@ export function DashboardProvider({
 
     let alive = true;
     const localPlan = getLocalDashboardPlan(projectId);
-    setLoad({ projectId, plan: localPlan, state: localPlan ? "ok" : "loading" });
+    // Show the "agent is composing…" state while it analyses the data — don't
+    // flash the static fallback first. The canned plan is only used if the
+    // agent call actually fails.
+    setLoad({ projectId, plan: null, state: "loading" });
 
     getDashboardPlan(projectId)
       .then((p) => {
