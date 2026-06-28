@@ -29,11 +29,15 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json(createOverviewDashboardPlan());
   }
 
+  // 1) Preferred: the live agent dashboard from the backend (Railway). The
+  //    backend returns its own rule-based plan if the LLM is unavailable, so a
+  //    200 here is always the best answer we can give.
   const backend = await fetchBackendApi(`/projects/${projectId}/dashboard`);
   if (backend?.ok) {
     return backendResponse(backend);
   }
 
+  // 2) Fallbacks only when the backend is unreachable (not configured / down).
   const project = findProject(projectId);
   if (project) {
     return NextResponse.json(createDashboardPlan(project), {
@@ -64,6 +68,7 @@ export async function GET(_request: Request, context: RouteContext) {
     );
   }
 
+  // 3) Surface the backend error if we had a (non-ok) response.
   if (backend) return backendResponse(backend);
 
   return NextResponse.json({ error: "Project not found" }, { status: 404 });

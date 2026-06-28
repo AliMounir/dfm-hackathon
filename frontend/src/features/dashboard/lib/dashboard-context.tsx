@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { getDashboardPlan } from "@/features/dashboard/api/dashboard";
 import type { DashboardOp } from "@/features/dashboard/api/chat";
@@ -53,12 +53,15 @@ export function DashboardProvider({
     plan: DashboardPlan | null;
     state: State;
   }>({ projectId: null, plan: null, state: "idle" });
+  const localPlan = useMemo(
+    () => (projectId ? getLocalDashboardPlan(projectId) : null),
+    [projectId],
+  );
 
   useEffect(() => {
     if (!projectId) return;
 
     let alive = true;
-    const localPlan = getLocalDashboardPlan(projectId);
     // Show the "agent is composing…" state while it analyses the data — don't
     // flash the static fallback first. The canned plan is only used if the
     // agent call actually fails.
@@ -77,7 +80,7 @@ export function DashboardProvider({
     return () => {
       alive = false;
     };
-  }, [projectId, refreshKey]);
+  }, [localPlan, projectId, refreshKey]);
 
   const plan = load.projectId === projectId ? load.plan : null;
   const state: State = !projectId
