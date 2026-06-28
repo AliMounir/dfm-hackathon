@@ -12,7 +12,7 @@ export default async function ChatPage({
   const project = projects.find((p) => p.id === pid) ?? projects[0];
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-6">
-      <Link href="/" className="text-sm text-neutral-500 hover:underline">
+      <Link href="/" className="text-sm text-muted hover:underline">
         ← Accueil
       </Link>
       <div className="min-h-[60vh]">

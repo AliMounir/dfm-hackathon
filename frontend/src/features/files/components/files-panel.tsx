@@ -26,12 +26,12 @@ export function FilesPanel({ project, lang = "fr" }: { project: Project; lang?: 
       <CardContent className="space-y-3">
         <div className="flex flex-wrap gap-1.5">
           {project.dataSources.map((s) => (
-            <Badge key={s} className="bg-neutral-100 text-neutral-700">
+            <Badge key={s} className="bg-mist text-muted">
               {s}
             </Badge>
           ))}
         </div>
-        <div className="rounded-lg border border-dashed p-6 text-center text-sm text-neutral-500">
+        <div className="border border-dashed border-line p-6 text-center text-sm text-muted">
           {lang === "fr"
             ? "TODO(DfM) : déposer un export ici pour l'analyser."
             : "TODO(DfM): drop a data export here to analyse it."}

@@ -9,9 +9,22 @@ import { t } from "@/features/shared/lib/i18n";
 import type { Project } from "@/features/data-quality/lib/types";
 
 const SEVERITY_STYLE: Record<string, string> = {
-  high: "bg-rose-100 text-rose-700",
-  medium: "bg-amber-100 text-amber-700",
-  low: "bg-neutral-100 text-neutral-600",
+  high: "bg-critical-wash text-critical",
+  medium: "bg-caution-wash text-caution",
+  low: "bg-mist text-muted",
+};
+
+// Colored left rail per severity — adds depth and meaning at a glance.
+const SEVERITY_RAIL: Record<string, string> = {
+  high: "border-l-critical",
+  medium: "border-l-caution",
+  low: "border-l-muted",
+};
+
+const SEVERITY_DOT: Record<string, string> = {
+  high: "bg-critical",
+  medium: "bg-caution",
+  low: "bg-muted",
 };
 
 const HEADING: Record<Language, string> = {
@@ -27,14 +40,15 @@ export function DataQualityPanel({ project, lang: initial = "fr" }: { project: P
   const [lang, setLang] = useState<Language>(initial);
   return (
     <section className="space-y-4">
-      <header className="flex items-center justify-between">
+      <header className="flex items-end justify-between">
         <div>
-          <h2 className="text-lg font-semibold">{HEADING[lang]}</h2>
-          <p className="text-sm text-neutral-500">{project.name}</p>
+          <span className="eyebrow mb-2">{lang === "fr" ? "Contrôle qualité" : "Quality control"}</span>
+          <h2 className="text-2xl font-light tracking-tight text-ink">{HEADING[lang]}</h2>
+          <p className="text-sm text-muted">{project.name}</p>
         </div>
         <button
           onClick={() => setLang(lang === "fr" ? "en" : "fr")}
-          className="rounded-md border px-2 py-1 text-xs uppercase"
+          className="border border-line px-2 py-1 text-xs uppercase text-slate hover:bg-mist"
         >
           {lang === "fr" ? "EN" : "FR"}
         </button>
@@ -42,24 +56,27 @@ export function DataQualityPanel({ project, lang: initial = "fr" }: { project: P
 
       <div className="grid gap-3">
         {project.qualityIssues.map((issue) => (
-          <Card key={issue.id}>
+          <Card key={issue.id} className={`border-l-2 ${SEVERITY_RAIL[issue.severity]}`}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between gap-2 text-base">
-                {t(issue.title, lang)}
-                <Badge className={SEVERITY_STYLE[issue.severity]}>
+                <span className="flex items-center gap-2">
+                  <span className={`h-1.5 w-1.5 rounded-full ${SEVERITY_DOT[issue.severity]}`} aria-hidden="true" />
+                  {t(issue.title, lang)}
+                </span>
+                <Badge className={`${SEVERITY_STYLE[issue.severity]} font-medium`}>
                   {issue.severity} · {issue.count}
                 </Badge>
               </CardTitle>
               <CardDescription>{t(issue.whyItMatters, lang)}</CardDescription>
             </CardHeader>
-            <CardContent className="text-sm text-neutral-700">
+            <CardContent className="text-sm text-slate">
               <span className="font-medium">{lang === "fr" ? "Action : " : "Action: "}</span>
               {t(issue.action, lang)}
             </CardContent>
           </Card>
         ))}
         {project.qualityIssues.length === 0 && (
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-muted">
             {lang === "fr" ? "Aucun problème détecté (démo)." : "No issues detected (demo)."}
           </p>
         )}

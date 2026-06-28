@@ -116,17 +116,17 @@ export function ChatPanel({
 
   if (!isOpen) {
     return (
-      <aside className="fixed inset-y-0 right-0 z-20 hidden w-14 flex-col border-l border-stone-200 bg-white shadow-sm lg:flex">
+      <aside className="fixed inset-y-0 right-0 z-20 hidden w-14 flex-col border-l border-line bg-paper shadow-sm lg:flex">
         <button
           type="button"
           aria-label={fr ? "Ouvrir l'assistant" : "Open assistant"}
-          className="flex h-14 items-center justify-center border-b border-stone-200 text-stone-600 hover:bg-stone-100"
+          className="flex h-14 items-center justify-center border-b border-line text-muted hover:bg-mist"
           onClick={onToggle}
         >
           <PanelRightOpen className="h-5 w-5" aria-hidden="true" />
         </button>
         <div className="flex flex-1 items-center justify-center">
-          <div className="-rotate-90 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-stone-400">
+          <div className="-rotate-90 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted">
             Assistant
           </div>
         </div>
@@ -139,15 +139,15 @@ export function ChatPanel({
     : ["Focus on the ACCOUCHEMENT dataset and generate insights", "Show activity by site", "Which files do we have for this project?"];
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-20 hidden w-[380px] flex-col border-l border-stone-200 bg-white shadow-sm lg:flex">
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-stone-200 px-4">
+    <aside className="fixed inset-y-0 right-0 z-20 hidden w-[380px] flex-col border-l border-line bg-paper shadow-sm lg:flex">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#153B36] text-[#F5F3EF] ring-2 ring-[#F4A623]/25">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-azure text-white">
             <Bot className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-stone-950">{fr ? "Assistant M&E" : "M&E Assistant"}</h2>
-            <p className="truncate text-xs text-stone-500">{projectName ?? (fr ? "Aucun projet" : "No project")}</p>
+            <h2 className="truncate text-sm font-semibold text-ink">{fr ? "Assistant M&E" : "M&E Assistant"}</h2>
+            <p className="truncate text-xs text-muted">{projectName ?? (fr ? "Aucun projet" : "No project")}</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -156,7 +156,7 @@ export function ChatPanel({
             aria-label={fr ? "Effacer" : "Clear"}
             title={fr ? "Effacer l'historique" : "Clear history"}
             onClick={() => setMessages([])}
-            className="rounded-md p-2 text-stone-500 hover:bg-stone-100"
+            className="rounded-md p-2 text-muted hover:bg-mist"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -164,34 +164,34 @@ export function ChatPanel({
             type="button"
             aria-label={fr ? "Fermer" : "Close"}
             onClick={onToggle}
-            className="rounded-md p-2 text-stone-500 hover:bg-stone-100"
+            className="rounded-md p-2 text-muted hover:bg-mist"
           >
             <PanelRightClose className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-stone-50 p-4">
+      <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-mist p-4">
         {messages.length === 0 && (
           <div className="space-y-3">
-            <p className="rounded-lg bg-white p-3 text-sm leading-relaxed text-stone-700 shadow-sm">
+            <p className="rounded-lg bg-paper p-3 text-sm leading-relaxed text-slate shadow-sm">
               {fr
                 ? "Bonjour. Je lis les données du projet, j'explique les tendances et je peux modifier le tableau de bord (ajouter des graphiques, approfondir un jeu de données)."
                 : "Hello. I read the project data, explain trends, and can edit the dashboard (add charts, dig into a dataset)."}
             </p>
-            <p className="text-xs font-semibold uppercase tracking-wide text-stone-400">Suggestions</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Suggestions</p>
             {suggestions.map((s) => (
               <button
                 key={s}
                 onClick={() => send(s)}
                 disabled={!projectId}
-                className="block w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-left text-xs text-stone-600 hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-50"
+                className="block w-full rounded-md border border-line bg-paper px-3 py-2 text-left text-xs text-muted hover:border-azure hover:bg-azure-wash disabled:opacity-50"
               >
                 {s}
               </button>
             ))}
             {!projectId && (
-              <p className="text-xs text-stone-400">{fr ? "Sélectionnez un projet pour discuter." : "Select a project to chat."}</p>
+              <p className="text-xs text-muted">{fr ? "Sélectionnez un projet pour discuter." : "Select a project to chat."}</p>
             )}
           </div>
         )}
@@ -200,12 +200,12 @@ export function ChatPanel({
             <div
               className={
                 m.role === "user"
-                  ? "max-w-[85%] rounded-lg bg-emerald-600 px-3 py-2 text-sm text-white"
-                  : "max-w-[92%] rounded-lg bg-white px-3 py-2 text-sm text-stone-800 shadow-sm"
+                  ? "max-w-[85%] rounded-lg bg-azure px-3 py-2 text-sm text-white"
+                  : "max-w-[92%] rounded-lg bg-paper px-3 py-2 text-sm text-slate shadow-sm"
               }
             >
               <p className="whitespace-pre-wrap leading-relaxed">{m.content || (sending && i === messages.length - 1 ? "…" : "")}</p>
-              {m.note && <p className="mt-1 text-[11px] font-medium text-emerald-700">{m.note}</p>}
+              {m.note && <p className="mt-1 text-[11px] font-medium text-azure-deep">{m.note}</p>}
             </div>
           </div>
         ))}
@@ -216,19 +216,19 @@ export function ChatPanel({
           e.preventDefault();
           send(input);
         }}
-        className="flex items-center gap-2 border-t border-stone-200 p-3"
+        className="flex items-center gap-2 border-t border-line p-3"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={sending || !projectId}
           placeholder={fr ? "Écrivez un message…" : "Type a message…"}
-          className="min-w-0 flex-1 rounded-md border border-stone-200 px-3 py-2 text-sm outline-none focus:border-emerald-400 disabled:bg-stone-50"
+          className="min-w-0 flex-1 rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-azure disabled:bg-mist"
         />
         <button
           type="submit"
           disabled={sending || !input.trim() || !projectId}
-          className="rounded-md bg-emerald-600 p-2 text-white disabled:opacity-40"
+          className="rounded-md bg-azure p-2 text-white disabled:opacity-40"
           aria-label="Send"
         >
           <SendHorizontal className="h-4 w-4" />
