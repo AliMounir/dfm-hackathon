@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { getDashboardPlan } from "@/features/dashboard/api/dashboard";
 import type { DashboardOp } from "@/features/dashboard/api/chat";
@@ -53,14 +53,15 @@ export function DashboardProvider({
     plan: DashboardPlan | null;
     state: State;
   }>({ projectId: null, plan: null, state: "idle" });
+  const localPlan = useMemo(
+    () => (projectId ? getLocalDashboardPlan(projectId) : null),
+    [projectId],
+  );
 
   useEffect(() => {
     if (!projectId) return;
 
     let alive = true;
-    const localPlan = getLocalDashboardPlan(projectId);
-    setLoad({ projectId, plan: localPlan, state: localPlan ? "ok" : "loading" });
-
     getDashboardPlan(projectId)
       .then((p) => {
         if (!alive) return;
@@ -74,14 +75,16 @@ export function DashboardProvider({
     return () => {
       alive = false;
     };
-  }, [projectId, refreshKey]);
+  }, [localPlan, projectId, refreshKey]);
 
-  const plan = load.projectId === projectId ? load.plan : null;
+  const plan = load.projectId === projectId ? load.plan ?? localPlan : localPlan;
   const state: State = !projectId
     ? "idle"
     : load.projectId === projectId
       ? load.state
-      : "loading";
+      : localPlan
+        ? "ok"
+        : "loading";
 
   const applyOp = useCallback((op: DashboardOp) => {
     setLoad((current) => {

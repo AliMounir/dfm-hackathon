@@ -25,11 +25,6 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json(createOverviewDashboardPlan());
   }
 
-  const backend = await fetchBackendApi(`/projects/${projectId}/dashboard`);
-  if (backend?.ok) {
-    return backendResponse(backend);
-  }
-
   const project = findProject(projectId);
   if (project) {
     return NextResponse.json(createDashboardPlan(project), {
@@ -39,6 +34,7 @@ export async function GET(_request: Request, context: RouteContext) {
     });
   }
 
+  let supabaseError: unknown = null;
   try {
     const plan = await createSupabaseProjectDashboard(projectId);
     if (plan) {
@@ -49,18 +45,27 @@ export async function GET(_request: Request, context: RouteContext) {
       });
     }
   } catch (error) {
+    supabaseError = error;
+  }
+
+  const backend = await fetchBackendApi(`/projects/${projectId}/dashboard`);
+  if (backend?.ok) {
+    return backendResponse(backend);
+  }
+
+  if (backend) return backendResponse(backend);
+
+  if (supabaseError) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
+          supabaseError instanceof Error
+            ? supabaseError.message
             : "Could not build project dashboard.",
       },
       { status: 500 },
     );
   }
-
-  if (backend) return backendResponse(backend);
 
   return NextResponse.json({ error: "Project not found" }, { status: 404 });
 }
