@@ -5,8 +5,8 @@ import uuid
 
 from app.core.config import get_settings
 from app.domains.dashboard import analytics
+from app.domains.dashboard.deterministic_chat import fallback_response
 from app.domains.dashboard.schemas import (
-    Bilingual,
     ChatRequest,
     ChatResponse,
     KpiCard,
@@ -32,11 +32,7 @@ class ChatService:
     def reply(self, project_id: str, req: ChatRequest) -> ChatResponse:
         settings = get_settings()
         if not settings.llm_configured:
-            return ChatResponse(
-                reply=Bilingual(fr="Assistant non configuré (clé OpenAI manquante).",
-                                en="Assistant not configured (missing OpenAI key)."),
-                generated_by="no-llm",
-            )
+            return fallback_response(project_id, req, generated_by="deterministic:no-llm")
 
         try:
             from app.domains.dashboard.chat_agent import run_chat
@@ -44,11 +40,7 @@ class ChatService:
             out = run_chat(project_id, req)
         except Exception:
             logger.exception("chat agent failed")
-            return ChatResponse(
-                reply=Bilingual(fr="Désolé, une erreur est survenue lors du traitement.",
-                                en="Sorry, something went wrong."),
-                generated_by="error",
-            )
+            return fallback_response(project_id, req, generated_by="deterministic:error-fallback")
 
         charts: list[Section] = []
         for c in out.add_charts:

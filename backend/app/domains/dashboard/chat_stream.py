@@ -14,6 +14,7 @@ from collections.abc import AsyncIterator
 
 from app.core.config import get_settings
 from app.domains.dashboard import analytics
+from app.domains.dashboard.deterministic_chat import fallback_response, stream_events
 from app.domains.dashboard.schemas import Bilingual, ChatRequest, KpiCard, Section
 
 logger = logging.getLogger(__name__)
@@ -74,8 +75,9 @@ def _tone(t: str, default: str) -> str:
 async def stream_chat(project_id: str, req: ChatRequest) -> AsyncIterator[str]:
     settings = get_settings()
     if not settings.llm_configured:
-        yield _sse({"type": "token", "text": "Assistant non configuré (clé OpenAI manquante)."})
-        yield _sse({"type": "done"})
+        response = fallback_response(project_id, req, generated_by="deterministic:no-llm")
+        for event in stream_events(response, req.language):
+            yield _sse(event)
         return
 
     from langchain_core.messages import AIMessageChunk
@@ -164,7 +166,10 @@ async def stream_chat(project_id: str, req: ChatRequest) -> AsyncIterator[str]:
     except Exception:
         logger.exception("chat stream failed")
         if not ops:
-            yield _sse({"type": "token", "text": "Je n'ai pas pu finaliser — reformulez ou précisez le graphique souhaité."})
+            response = fallback_response(project_id, req, generated_by="deterministic:error-fallback")
+            for event in stream_events(response, req.language):
+                yield _sse(event)
+            return
 
     for op in ops:
         yield _sse({"type": "op", "op": op})
