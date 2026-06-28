@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     # LLM provider for the agent — OpenAI by default.
     llm_provider: str = "openai"
     llm_model: str = "gpt-4o-mini"
+    llm_timeout_seconds: float = 20
     openai_api_key: str = ""
     anthropic_api_key: str = ""
 

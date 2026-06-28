@@ -74,6 +74,11 @@ def _tone(t: str, default: str) -> str:
 
 async def stream_chat(project_id: str, req: ChatRequest) -> AsyncIterator[str]:
     settings = get_settings()
+    yield _sse({
+        "type": "token",
+        "text": "Looking at the project data... " if req.language == "en" else "J'analyse les donnees du projet... ",
+    })
+
     if not settings.llm_configured:
         response = fallback_response(project_id, req, generated_by="deterministic:no-llm")
         for event in stream_events(response, req.language):
