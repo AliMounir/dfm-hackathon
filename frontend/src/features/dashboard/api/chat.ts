@@ -1,6 +1,7 @@
 import { API_BASE, apiPost } from "@/features/shared/api/client";
 
 import type { ChatResponse, ChatTurn, KpiCard, Section } from "@/features/dashboard/lib/types";
+import type { Language } from "@/features/shared/lib/i18n";
 
 export type WidgetRef = { id: string; kind: "kpi" | "chart"; title: string };
 
@@ -10,8 +11,9 @@ export async function postChat(
   message: string,
   history: ChatTurn[],
   widgets: WidgetRef[],
+  language?: Language,
 ): Promise<ChatResponse> {
-  return apiPost<ChatResponse>(`/projects/${projectId}/chat`, { message, history, widgets });
+  return apiPost<ChatResponse>(`/projects/${projectId}/chat`, { message, history, widgets, language });
 }
 
 export type DashboardOp =
@@ -31,12 +33,13 @@ export async function streamChat(
   message: string,
   history: ChatTurn[],
   widgets: WidgetRef[],
+  language: Language,
   on: (event: StreamEvent) => void,
 ): Promise<void> {
   const res = await fetch(`${API_BASE}/api/projects/${projectId}/chat/stream`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, history, widgets }),
+    body: JSON.stringify({ message, history, widgets, language }),
   });
   if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
 

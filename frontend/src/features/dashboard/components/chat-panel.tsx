@@ -87,7 +87,7 @@ export function ChatPanel({
     let received = false;
 
     try {
-      await streamChat(projectId, msg, history, widgets, (e) => {
+      await streamChat(projectId, msg, history, widgets, language, (e) => {
         received = true;
         if (e.type === "token") patchLast((p) => ({ ...p, content: p.content + e.text }));
         else if (e.type === "op") applyOpWithNote(e.op, changes);
@@ -99,7 +99,7 @@ export function ChatPanel({
     if (!received) {
       // Fallback: non-streaming endpoint guarantees a visible response.
       try {
-        const res = await postChat(projectId, msg, history, widgets);
+        const res = await postChat(projectId, msg, history, widgets, language);
         patchLast((p) => ({ ...p, content: t(res.reply, language) || p.content }));
         if (res.clear) applyOpWithNote({ kind: "clear" }, changes);
         (res.add_charts ?? []).forEach((s) => applyOpWithNote({ kind: "add_chart", section: s }, changes));

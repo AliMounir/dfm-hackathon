@@ -1,8 +1,12 @@
-// Thin client for the FastAPI backend (see ../../../backend).
-// Components currently read mock data from "@/lib/projects"; switch to these
-// helpers once the backend endpoints return real data. TODO(DfM).
+// Same-origin by default: Next.js API routes run on localhost and Vercel.
+// A non-local NEXT_PUBLIC_API_URL can still be used later for a separate API.
+const configuredApiBase = process.env.NEXT_PUBLIC_API_URL?.trim() ?? "";
+const isOldLocalBackend =
+  configuredApiBase === "http://localhost:8000" ||
+  configuredApiBase === "http://127.0.0.1:8000";
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_BASE =
+  configuredApiBase && !isOldLocalBackend ? configuredApiBase.replace(/\/$/, "") : "";
 
 export async function apiGet<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}/api${path}`, { cache: "no-store" });
