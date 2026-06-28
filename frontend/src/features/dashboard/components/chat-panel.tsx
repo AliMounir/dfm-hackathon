@@ -19,25 +19,45 @@ export function ChatPanel({
   projectName?: string | null;
 }) {
   const { projectId, language, plan, applyOp } = useDashboard();
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messageLoad, setMessageLoad] = useState<{
+    projectId: string | null;
+    messages: Msg[];
+  }>({ projectId: null, messages: [] });
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fr = language === "fr";
+  const messages = messageLoad.projectId === projectId ? messageLoad.messages : [];
 
   // Load persisted history when the project changes.
   useEffect(() => {
-    if (!projectId || typeof window === "undefined") {
-      setMessages([]);
-      return;
-    }
-    try {
-      const raw = window.localStorage.getItem(`dfm-chat-${projectId}`);
-      setMessages(raw ? (JSON.parse(raw) as Msg[]) : []);
-    } catch {
-      setMessages([]);
-    }
+    if (!projectId || typeof window === "undefined") return;
+
+    let alive = true;
+    Promise.resolve().then(() => {
+      try {
+        const raw = window.localStorage.getItem(`dfm-chat-${projectId}`);
+        if (alive) {
+          setMessageLoad({ projectId, messages: raw ? (JSON.parse(raw) as Msg[]) : [] });
+        }
+      } catch {
+        if (alive) setMessageLoad({ projectId, messages: [] });
+      }
+    });
+    return () => {
+      alive = false;
+    };
   }, [projectId]);
+
+  function setMessages(updater: Msg[] | ((messages: Msg[]) => Msg[])) {
+    setMessageLoad((current) => {
+      const currentMessages = current.projectId === projectId ? current.messages : [];
+      const nextMessages =
+        typeof updater === "function" ? updater(currentMessages) : updater;
+
+      return { projectId, messages: nextMessages };
+    });
+  }
 
   // Persist history.
   useEffect(() => {

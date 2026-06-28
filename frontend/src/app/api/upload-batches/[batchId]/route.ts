@@ -32,6 +32,24 @@ type FileRow = {
   updated_at: string;
 };
 
+type ReviewIssue = {
+  id: string;
+  fileId: string;
+  fileName: string;
+  sheetName: string;
+  column: string;
+  rowNumber: number;
+  currentValue: string;
+  suggestedValue: string;
+  status: "open" | "accepted";
+  severity: "high" | "medium" | "low";
+  issueType: string;
+  message: string;
+  suggestedReviewStep: string;
+  agentMessageFr: string;
+  agentSubtextEn: string;
+};
+
 export async function GET(_request: Request, context: RouteContext) {
   const { batchId } = await context.params;
 
@@ -78,7 +96,11 @@ export async function GET(_request: Request, context: RouteContext) {
       updatedAt: step.updated_at,
     }));
 
-    const files = (filesResult.data as FileRow[]).map((file) => ({
+    const allFiles = filesResult.data as FileRow[];
+    const reviewIssues = await loadReviewIssues(supabase, allFiles);
+    const files = allFiles
+      .filter((file) => !isInternalArtifact(file))
+      .map((file) => ({
       id: file.id,
       name: file.original_filename,
       bucket: file.storage_bucket,
@@ -103,6 +125,7 @@ export async function GET(_request: Request, context: RouteContext) {
         updatedAt: batchResult.data.updated_at,
       },
       files,
+      reviewIssues,
       stages: steps,
     });
   } catch (error) {
@@ -116,4 +139,71 @@ export async function GET(_request: Request, context: RouteContext) {
       { status: 500 },
     );
   }
+}
+
+function isInternalArtifact(file: FileRow) {
+  return (
+    file.storage_path.includes("/artifacts/") ||
+    file.status === "converted" ||
+    file.status === "extracted" ||
+    file.status === "missing-data-reported" ||
+    file.status === "reviewed"
+  );
+}
+
+async function loadReviewIssues(
+  supabase: ReturnType<typeof createSupabaseServerClient>,
+  files: FileRow[],
+) {
+  const extractionFiles = files.filter(
+    (file) =>
+      file.storage_path.endsWith(".extraction.json") || file.status === "extracted",
+  );
+  const issues: ReviewIssue[] = [];
+
+  for (const file of extractionFiles) {
+    const downloadResult = await supabase.storage
+      .from(file.storage_bucket)
+      .download(file.storage_path);
+
+    if (downloadResult.error) continue;
+
+    try {
+      const text = await downloadResult.data.text();
+      const parsed = JSON.parse(text) as { reviewIssues?: unknown };
+
+      if (Array.isArray(parsed.reviewIssues)) {
+        issues.push(...parsed.reviewIssues.filter(isReviewIssue));
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return issues.slice(0, 100);
+}
+
+function isReviewIssue(value: unknown): value is ReviewIssue {
+  if (typeof value !== "object" || value === null) return false;
+
+  const issue = value as Record<string, unknown>;
+  return (
+    typeof issue.id === "string" &&
+    typeof issue.fileId === "string" &&
+    typeof issue.fileName === "string" &&
+    typeof issue.sheetName === "string" &&
+    typeof issue.column === "string" &&
+    typeof issue.rowNumber === "number" &&
+    typeof issue.currentValue === "string" &&
+    typeof issue.suggestedValue === "string" &&
+    (issue.status === "open" || issue.status === "accepted") &&
+    (issue.severity === "high" ||
+      issue.severity === "medium" ||
+      issue.severity === "low") &&
+    typeof issue.issueType === "string" &&
+    typeof issue.message === "string" &&
+    typeof issue.suggestedReviewStep === "string" &&
+    typeof issue.agentMessageFr === "string" &&
+    typeof issue.agentSubtextEn === "string"
+  );
 }

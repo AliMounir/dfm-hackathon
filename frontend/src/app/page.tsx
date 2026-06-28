@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, useEffect, useMemo, useState } from "react";
+import { type ComponentType, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -135,9 +135,22 @@ const copy = {
     workflowInProgress: "Workflow prepare",
     workflowDone: "Termine",
     workflowActive: "En cours",
-    workflowWaiting: "En attente",
+    workflowWaiting: "En pause",
     workflowSaved: "Enregistre",
     workflowFailed: "Erreur",
+    reviewIssues: "Points a verifier",
+    reviewIssuesHelp:
+      "Corrigez une valeur manquante ou acceptez le point tel quel avant l'import final.",
+    noReviewIssues: "Aucun probleme detecte. Vous pouvez valider l'import.",
+    editedValue: "Valeur corrigee",
+    acceptIssue: "Accepter",
+    acceptReviewedData: "Valider l'import",
+    savingReview: "Validation...",
+    reviewComplete: "Validation enregistree",
+    fileLabel: "Fichier",
+    sheetLabel: "Feuille",
+    rowLabel: "Ligne",
+    columnLabel: "Colonne",
     uploadStageReceived: "Fichier recu",
     uploadStageFolder: "Dossier projet selectionne ou cree",
     uploadStageConvert: "Conversion XLSX vers Markdown",
@@ -221,9 +234,22 @@ const copy = {
     workflowInProgress: "Workflow prepared",
     workflowDone: "Done",
     workflowActive: "In progress",
-    workflowWaiting: "Waiting",
+    workflowWaiting: "On hold",
     workflowSaved: "Saved",
     workflowFailed: "Failed",
+    reviewIssues: "Issues to review",
+    reviewIssuesHelp:
+      "Edit a missing value or accept the data point as-is before final import.",
+    noReviewIssues: "No issues were detected. You can approve the import.",
+    editedValue: "Corrected value",
+    acceptIssue: "Accept",
+    acceptReviewedData: "Approve import",
+    savingReview: "Approving...",
+    reviewComplete: "Review saved",
+    fileLabel: "File",
+    sheetLabel: "Sheet",
+    rowLabel: "Row",
+    columnLabel: "Column",
     uploadStageReceived: "File received",
     uploadStageFolder: "Project folder selected or created",
     uploadStageConvert: "XLSX converted to Markdown",
@@ -700,13 +726,47 @@ type UploadStageState = "done" | "active" | "waiting" | "error";
 type UploadStageView = {
   key: UploadStageKey;
   state: UploadStageState;
+  message?: string | null;
+};
+
+type StoredUploadFile = {
+  id: string;
+  name: string;
+  sizeBytes: number;
+  kind: string;
+  storagePath: string;
+  status?: string;
+};
+
+type ReviewIssue = {
+  id: string;
+  fileId: string;
+  fileName: string;
+  sheetName: string;
+  column: string;
+  rowNumber: number;
+  currentValue: string;
+  suggestedValue: string;
+  status: "open" | "accepted";
+  severity: "high" | "medium" | "low";
+  issueType: string;
+  message: string;
+  suggestedReviewStep: string;
+  agentMessageFr: string;
+  agentSubtextEn: string;
 };
 
 type UploadResponse = {
   batchId: string;
+  files: StoredUploadFile[];
+  reviewIssues?: ReviewIssue[];
+  summary?: {
+    status?: string;
+  };
   stages: Array<{
     key: UploadStageKey;
     status: UploadStageState;
+    message?: string | null;
   }>;
 };
 
@@ -719,7 +779,10 @@ type UploadBatchStatusResponse = {
   stages: Array<{
     key: UploadStageKey;
     status: UploadStageState;
+    message: string | null;
   }>;
+  files: StoredUploadFile[];
+  reviewIssues?: ReviewIssue[];
 };
 
 function UploadModal({
@@ -744,8 +807,12 @@ function UploadModal({
   const [submittedBatchStatus, setSubmittedBatchStatus] = useState<string | null>(
     null,
   );
+  const [reviewIssues, setReviewIssues] = useState<ReviewIssue[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [isSavingReview, setIsSavingReview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const uploadRunIdRef = useRef(0);
 
   useEffect(() => {
     if (!submittedBatchId) return;
@@ -770,15 +837,25 @@ function UploadModal({
         if (!("batch" in payload) || cancelled) return;
 
         setSubmittedBatchStatus(payload.batch.status);
+        setReviewIssues(payload.reviewIssues ?? []);
         setSubmittedStages(
           payload.stages.map((stage) => ({
             key: stage.key,
             state: stage.status,
+            message: stage.message,
           })),
         );
 
         if (payload.batch.status === "failed" && payload.batch.errorMessage) {
           setUploadError(payload.batch.errorMessage);
+        }
+
+        if (
+          payload.batch.status === "awaiting_approval" ||
+          payload.batch.status === "failed" ||
+          payload.batch.status === "completed"
+        ) {
+          window.clearInterval(intervalId);
         }
       } catch (error) {
         if (!cancelled) {
@@ -789,8 +866,8 @@ function UploadModal({
       }
     }
 
-    refreshBatchStatus();
     const intervalId = window.setInterval(refreshBatchStatus, 3000);
+    refreshBatchStatus();
 
     return () => {
       cancelled = true;
@@ -810,7 +887,10 @@ function UploadModal({
     setSubmittedStages(null);
     setSubmittedBatchId(null);
     setSubmittedBatchStatus(null);
+    setReviewIssues([]);
     setUploadError(null);
+    setReviewError(null);
+    uploadRunIdRef.current += 1;
   }
 
   const hasFiles = uploadedFiles.length > 0;
@@ -818,12 +898,27 @@ function UploadModal({
     isSubmitting || submittedStages !== null || uploadError !== null;
   const workflowStages = getUploadWorkflowStages(hasFiles, isSubmitting, submittedStages);
   const workflowProgress = getUploadWorkflowProgress(workflowStages);
+  const acceptedIssueCount = reviewIssues.filter(
+    (issue) => issue.status === "accepted",
+  ).length;
+  const isReviewReady =
+    Boolean(submittedBatchId) &&
+    (submittedBatchStatus === "awaiting_approval" ||
+      submittedBatchStatus === "completed" ||
+      workflowStages.some((stage) => stage.key === "approval" && stage.state === "active"));
 
   async function submitUpload() {
     if (!hasFiles || isSubmitting) return;
 
+    const runId = uploadRunIdRef.current + 1;
+    uploadRunIdRef.current = runId;
     setIsSubmitting(true);
     setUploadError(null);
+    setReviewError(null);
+    setReviewIssues([]);
+    setSubmittedBatchId(null);
+    setSubmittedBatchStatus("processing");
+    setSubmittedStages(createAnimatedUploadStages("received"));
 
     const formData = new FormData();
     formData.append("projectId", targetProjectId);
@@ -846,18 +941,98 @@ function UploadModal({
         throw new Error("Upload response was missing workflow metadata.");
       }
 
+      const finalStages = payload.stages.map((stage) => ({
+        key: stage.key,
+        state: stage.status,
+        message: stage.message ?? null,
+      }));
+      await playUploadWorkflowAnimation(finalStages, (stages) => {
+        if (uploadRunIdRef.current === runId) {
+          setSubmittedStages(stages);
+        }
+      });
+      if (uploadRunIdRef.current !== runId) return;
+
       setSubmittedBatchId(payload.batchId);
-      setSubmittedBatchStatus("received");
-      setSubmittedStages(
-        payload.stages.map((stage) => ({
-          key: stage.key,
-          state: stage.status,
-        })),
+      setSubmittedBatchStatus(getUploadBatchStatus(payload));
+      setReviewIssues(payload.reviewIssues ?? []);
+      setReviewError(null);
+      setSubmittedStages(finalStages);
+    } catch (error) {
+      if (uploadRunIdRef.current === runId) {
+        setUploadError(error instanceof Error ? error.message : "Upload failed.");
+      }
+    } finally {
+      if (uploadRunIdRef.current === runId) {
+        setIsSubmitting(false);
+      }
+    }
+  }
+
+  function updateReviewIssue(issueId: string, suggestedValue: string) {
+    setReviewIssues((current) =>
+      current.map((issue) =>
+        issue.id === issueId
+          ? { ...issue, suggestedValue, status: "open" }
+          : issue,
+      ),
+    );
+    setReviewError(null);
+  }
+
+  function acceptReviewIssue(issueId: string) {
+    setReviewIssues((current) =>
+      current.map((issue) =>
+        issue.id === issueId ? { ...issue, status: "accepted" } : issue,
+      ),
+    );
+    setReviewError(null);
+  }
+
+  async function approveReview() {
+    if (!submittedBatchId || isSavingReview) return;
+
+    setIsSavingReview(true);
+    setReviewError(null);
+
+    const reviewedIssues = reviewIssues.map((issue) => ({
+      ...issue,
+      status: "accepted" as const,
+    }));
+
+    try {
+      const response = await fetch(`/api/upload-batches/${submittedBatchId}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ issues: reviewedIssues }),
+      });
+      const payload = (await response.json()) as
+        | { batch: { status: string } }
+        | { error?: string };
+
+      if (!response.ok) {
+        throw new Error("error" in payload ? payload.error : "Could not save review.");
+      }
+
+      setReviewIssues(reviewedIssues);
+      setSubmittedBatchStatus("completed");
+      setSubmittedStages((current) =>
+        (current ?? workflowStages).map((stage) =>
+          stage.key === "approval"
+            ? {
+                ...stage,
+                state: "done",
+                message: `${reviewedIssues.length} issue(s) reviewed. Ready for final import.`,
+              }
+            : stage,
+        ),
       );
     } catch (error) {
-      setUploadError(error instanceof Error ? error.message : "Upload failed.");
+      setReviewError(
+        error instanceof Error ? error.message : "Could not save review.",
+      );
     } finally {
-      setIsSubmitting(false);
+      setIsSavingReview(false);
     }
   }
 
@@ -1067,6 +1242,8 @@ function UploadModal({
                                 ? "bg-[#2FA66A] text-white"
                                 : stage.state === "active"
                                   ? "bg-[#F4A623] text-[#153B36]"
+                                  : stage.state === "error"
+                                    ? "bg-rose-600 text-white"
                                   : "bg-stone-200 text-stone-500",
                             )}
                           >
@@ -1077,6 +1254,11 @@ function UploadModal({
                               />
                             ) : stage.state === "active" ? (
                               <RefreshCw
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
+                            ) : stage.state === "error" ? (
+                              <AlertTriangle
                                 className="h-4 w-4"
                                 aria-hidden="true"
                               />
@@ -1092,16 +1274,130 @@ function UploadModal({
                               {getUploadStageLabel(labels, stage.key)}
                             </p>
                             <p className="text-xs text-stone-500">
-                              {stage.state === "done"
-                                ? labels.workflowDone
-                                : stage.state === "active"
-                                  ? labels.workflowActive
-                                  : labels.workflowWaiting}
+                              {stage.message ??
+                                (stage.state === "done"
+                                  ? labels.workflowDone
+                                  : stage.state === "active"
+                                    ? labels.workflowActive
+                                    : stage.state === "error"
+                                      ? labels.workflowFailed
+                                      : labels.workflowWaiting)}
                             </p>
                           </div>
                         </div>
                       ))}
                     </div>
+                    {isReviewReady ? (
+                      <div className="mt-4 rounded-md border border-amber-200 bg-white p-3">
+                        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-stone-900">
+                              {labels.reviewIssues}
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-stone-500">
+                              {reviewIssues.length > 0
+                                ? labels.reviewIssuesHelp
+                                : labels.noReviewIssues}
+                            </p>
+                          </div>
+                          {reviewIssues.length > 0 && (
+                            <Badge variant="warning">
+                              {acceptedIssueCount}/{reviewIssues.length}
+                            </Badge>
+                          )}
+                        </div>
+
+                        {reviewError && (
+                          <div className="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
+                            {reviewError}
+                          </div>
+                        )}
+
+                        <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                          {reviewIssues.map((issue) => (
+                            <div
+                              key={issue.id}
+                              className={cn(
+                                "rounded-md border px-3 py-2",
+                                issue.status === "accepted"
+                                  ? "border-emerald-200 bg-emerald-50"
+                                  : "border-stone-200 bg-stone-50",
+                              )}
+                            >
+                              <div className="flex flex-wrap items-center gap-2">
+                                <SeverityBadge severity={issue.severity} count={1} />
+                                <Badge variant="neutral">
+                                  {issue.issueType.replace(/_/g, " ")}
+                                </Badge>
+                                <span className="text-xs font-semibold text-stone-700">
+                                  {labels.rowLabel} {issue.rowNumber}
+                                </span>
+                                {issue.column && (
+                                  <span className="text-xs text-stone-500">
+                                    {labels.columnLabel}: {issue.column}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-1 text-xs font-semibold leading-5 text-stone-800">
+                                {issue.agentMessageFr || issue.message}
+                              </p>
+                              <p className="mt-0.5 text-xs leading-5 text-stone-500">
+                                EN: {issue.agentSubtextEn || issue.suggestedReviewStep}
+                              </p>
+                              <p className="mt-1 truncate text-xs text-stone-500">
+                                {labels.fileLabel}: {issue.fileName} / {labels.sheetLabel}:{" "}
+                                {issue.sheetName}
+                              </p>
+                              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                                <Input
+                                  value={issue.suggestedValue}
+                                  onChange={(event) =>
+                                    updateReviewIssue(issue.id, event.target.value)
+                                  }
+                                  placeholder={labels.editedValue}
+                                  disabled={submittedBatchStatus === "completed"}
+                                  className="h-8 text-xs"
+                                />
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant={
+                                    issue.status === "accepted" ? "secondary" : "outline"
+                                  }
+                                  disabled={submittedBatchStatus === "completed"}
+                                  onClick={() => acceptReviewIssue(issue.id)}
+                                >
+                                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                  {labels.acceptIssue}
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-3 flex items-center justify-between gap-3 border-t border-stone-100 pt-3">
+                          <p className="text-xs font-semibold text-stone-500">
+                            {submittedBatchStatus === "completed"
+                              ? labels.reviewComplete
+                              : `${acceptedIssueCount}/${reviewIssues.length} ${labels.workflowDone.toLowerCase()}`}
+                          </p>
+                          <Button
+                            type="button"
+                            size="sm"
+                            disabled={
+                              !submittedBatchId ||
+                              submittedBatchStatus === "completed" ||
+                              isSavingReview
+                            }
+                            onClick={approveReview}
+                          >
+                            {isSavingReview
+                              ? labels.savingReview
+                              : labels.acceptReviewedData}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
                     </div>
                   </div>
                 )}
@@ -1611,20 +1907,16 @@ function getUploadWorkflowStages(
     "approval",
   ];
 
-  return initialStages.map((key, index) => ({
-    key,
-    state: !hasFiles
-      ? "waiting"
-      : isSubmitting
-        ? index === 0
-          ? "active"
-          : "waiting"
-        : index === 0
-          ? "done"
-          : index === 1
-            ? "active"
-            : "waiting",
-  }));
+  return initialStages.map((key, index) => {
+    let state: UploadStageState = "waiting";
+    if (hasFiles && index === 0) state = "active";
+
+    return {
+      key,
+      state,
+      message: null,
+    };
+  });
 }
 
 function getUploadWorkflowProgress(stages: UploadStageView[]) {
@@ -1632,6 +1924,90 @@ function getUploadWorkflowProgress(stages: UploadStageView[]) {
   const active = stages.some((stage) => stage.state === "active") ? 0.5 : 0;
 
   return ((completed + active) / stages.length) * 100;
+}
+
+function createAnimatedUploadStages(
+  activeKey: UploadStageKey,
+  finalStages: UploadStageView[] = [],
+) {
+  const order = getUploadStageOrder();
+  const activeIndex = order.indexOf(activeKey);
+
+  return order.map((key, index) => {
+    const finalStage = finalStages.find((stage) => stage.key === key);
+    let state: UploadStageState = "waiting";
+
+    if (index < activeIndex) state = "done";
+    if (index === activeIndex) state = "active";
+
+    return {
+      key,
+      state,
+      message: index < activeIndex ? finalStage?.message ?? null : null,
+    };
+  });
+}
+
+async function playUploadWorkflowAnimation(
+  finalStages: UploadStageView[],
+  updateStages: (stages: UploadStageView[]) => void,
+) {
+  const order = getUploadStageOrder();
+
+  for (const key of order) {
+    const finalStage = finalStages.find((stage) => stage.key === key);
+    updateStages(createAnimatedUploadStages(key, finalStages));
+    await waitForUploadStage(550);
+
+    if (finalStage?.state === "active") {
+      updateStages(finalStages);
+      await waitForUploadStage(350);
+      return;
+    }
+
+    updateStages(
+      order.map((stageKey, index) => {
+        const finalItem = finalStages.find((stage) => stage.key === stageKey);
+        const currentIndex = order.indexOf(key);
+
+        return {
+          key: stageKey,
+          state:
+            index <= currentIndex
+              ? finalItem?.state === "error"
+                ? "error"
+                : "done"
+              : "waiting",
+          message: index <= currentIndex ? finalItem?.message ?? null : null,
+        };
+      }),
+    );
+    await waitForUploadStage(250);
+  }
+
+  updateStages(finalStages);
+}
+
+function waitForUploadStage(milliseconds: number) {
+  const delay = Math.floor(120 + Math.random() * Math.max(milliseconds - 120, 0));
+
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, delay);
+  });
+}
+
+function getUploadBatchStatus(payload: UploadResponse) {
+  if (payload.summary?.status) return payload.summary.status;
+
+  const approvalStage = payload.stages.find((stage) => stage.key === "approval");
+  if (approvalStage?.status === "active") return "awaiting_approval";
+  if (approvalStage?.status === "done") return "completed";
+
+  return "processing";
+}
+
+function getUploadStageOrder(): UploadStageKey[] {
+  return ["received", "folder", "convert", "extract", "quality", "approval"];
 }
 
 function getUploadStageLabel(
