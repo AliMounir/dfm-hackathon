@@ -34,11 +34,10 @@ Set this Vercel variable to the Railway service URL, without `/api`:
 BACKEND_API_URL=https://your-railway-service.up.railway.app
 ```
 
-Keep `NEXT_PUBLIC_API_URL` empty. The browser calls Vercel `/api/...`; Vercel
-server routes proxy dashboard/chat requests to Railway and fall back to local
-prototype data only when `BACKEND_API_URL` is not configured. If the variable is
-set but Railway is unreachable, the app returns a visible backend error instead
-of silently showing prototype chat.
+Keep `NEXT_PUBLIC_API_URL` empty. The browser always calls Vercel `/api/...`;
+Vercel server routes proxy dashboard/chat requests to Railway and fall back to
+local prototype data if Railway is not configured or temporarily unreachable, so
+the dashboard does not go blank during demos.
 
 Check the Vercel-to-Railway connection at:
 

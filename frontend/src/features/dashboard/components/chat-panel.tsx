@@ -112,7 +112,7 @@ export function ChatPanel({
       } catch {
         patchLast((p) => ({
           ...p,
-          content: p.content || (fr ? "Assistant injoignable (backend démarré ?)." : "Assistant unreachable."),
+          content: p.content || (fr ? "Assistant temporairement indisponible." : "Assistant temporarily unavailable."),
         }));
       }
     }

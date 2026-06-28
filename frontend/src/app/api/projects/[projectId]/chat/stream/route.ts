@@ -1,10 +1,5 @@
 import { createChatResponse, findProject } from "@/lib/dashboard-api";
-import {
-  backendResponse,
-  backendUnavailableResponse,
-  fetchBackendApi,
-  isBackendApiConfigured,
-} from "@/lib/backend-proxy";
+import { backendResponse, fetchBackendApi } from "@/lib/backend-proxy";
 
 export const runtime = "nodejs";
 
@@ -23,16 +18,14 @@ export async function POST(request: Request, context: RouteContext) {
     body: bodyText,
   });
 
-  if (backend) {
+  if (backend?.ok) {
     return backendResponse(backend);
-  }
-  if (isBackendApiConfigured()) {
-    return backendUnavailableResponse("Railway backend streaming chat route is not reachable.");
   }
 
   const project = findProject(projectId);
 
   if (!project) {
+    if (backend) return backendResponse(backend);
     return Response.json({ error: "Project not found" }, { status: 404 });
   }
 
@@ -58,6 +51,7 @@ export async function POST(request: Request, context: RouteContext) {
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
       "Content-Type": "text/event-stream; charset=utf-8",
+      "x-hazava-backend": "local-fallback",
     },
   });
 }

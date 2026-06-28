@@ -19,8 +19,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const project = projects.find((p) => p.id === id);
   if (!project) notFound();
 
-  // Agent-composed dashboard (falls back to a rule-based plan, or null if the
-  // backend isn't running).
+  // Agent-composed dashboard, with a local prototype fallback from the API route.
   const plan = await getDashboardPlan(id);
 
   return (
@@ -53,7 +52,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <CardHeader>
             <CardTitle className="text-base">Tableau de bord dynamique</CardTitle>
             <CardDescription>
-              Démarrez le backend (uvicorn) pour générer le tableau de bord via l&apos;agent.
+              Tableau de bord temporairement indisponible.
             </CardDescription>
           </CardHeader>
         </Card>
