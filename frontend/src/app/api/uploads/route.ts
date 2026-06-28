@@ -29,7 +29,7 @@ type ProjectTarget = {
   id: string;
   name: string;
   folder: string;
-  source: "existing" | "auto" | "created";
+  source: "existing" | "auto";
 };
 
 type UploadedFileRecord = {
@@ -127,7 +127,21 @@ export async function POST(request: Request) {
 
   const supabase = createSupabaseServerClient();
   const batchId = randomUUID();
-  const targetProject = resolveProjectTarget(projectId, files);
+  let targetProject: ProjectTarget;
+
+  try {
+    targetProject = await resolveProjectTarget(supabase, projectId, files);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Select an existing project before uploading.",
+      },
+      { status: 400 },
+    );
+  }
 
   const projectResult = await supabase.from("projects").upsert(
     {
@@ -267,7 +281,11 @@ export async function POST(request: Request) {
   }
 }
 
-function resolveProjectTarget(projectId: string, files: File[]): ProjectTarget {
+async function resolveProjectTarget(
+  supabase: ReturnType<typeof createSupabaseServerClient>,
+  projectId: string,
+  files: File[],
+): Promise<ProjectTarget> {
   if (projectId !== "auto" && projectId !== "new") {
     const project = projects.find((candidate) => candidate.id === projectId);
 
@@ -279,11 +297,55 @@ function resolveProjectTarget(projectId: string, files: File[]): ProjectTarget {
         source: "existing",
       };
     }
+
+    const persistedProject = await supabase
+      .from("projects")
+      .select("id,name,folder_path,description")
+      .eq("id", projectId)
+      .maybeSingle();
+
+    if (persistedProject.error) {
+      throw new Error(persistedProject.error.message);
+    }
+
+    if (persistedProject.data?.description) {
+      return {
+        id: persistedProject.data.id,
+        name: persistedProject.data.name,
+        folder: persistedProject.data.folder_path,
+        source: "existing",
+      };
+    }
+
+    throw new Error("Select a saved project before uploading this file.");
   }
 
   if (projectId === "auto") {
+    const persistedProjects = await supabase
+      .from("projects")
+      .select("id,name,folder_path,description")
+      .not("description", "is", null);
+
+    if (persistedProjects.error) {
+      throw new Error(persistedProjects.error.message);
+    }
+
+    const availableProjects = mergeProjectTargets([
+      ...projects.map((project) => ({
+        id: project.id,
+        name: project.name,
+        folder: project.folder,
+        source: "auto" as const,
+      })),
+      ...(persistedProjects.data ?? []).map((project) => ({
+        id: project.id,
+        name: project.name,
+        folder: project.folder_path,
+        source: "auto" as const,
+      })),
+    ]);
     const filenames = files.map((file) => file.name.toLowerCase()).join(" ");
-    const inferredProject = projects.find((project) => {
+    const inferredProject = availableProjects.find((project) => {
       const projectTokens = [project.id, project.name, project.folder]
         .join(" ")
         .toLowerCase()
@@ -301,17 +363,25 @@ function resolveProjectTarget(projectId: string, files: File[]): ProjectTarget {
         source: "auto",
       };
     }
+
+    throw new Error(
+      "Could not auto-detect the project from this filename. Select or create a project first, then upload the file.",
+    );
   }
 
-  const fallbackName = titleizeFileStem(files[0]?.name ?? "uploaded-project");
-  const fallbackId = slugify(fallbackName || "uploaded-project");
+  throw new Error("Create the project first, then upload the file into that project.");
+}
 
-  return {
-    id: fallbackId,
-    name: fallbackName,
-    folder: `data/projects/${fallbackId}`,
-    source: "created",
-  };
+function mergeProjectTargets(projectTargets: ProjectTarget[]) {
+  const targetMap = new globalThis.Map<string, ProjectTarget>();
+
+  for (const projectTarget of projectTargets) {
+    if (!targetMap.has(projectTarget.id)) {
+      targetMap.set(projectTarget.id, projectTarget);
+    }
+  }
+
+  return Array.from(targetMap.values());
 }
 
 function detectFileKind(filename: string, mimeType: string) {
@@ -331,16 +401,6 @@ function sanitizeFileName(filename: string) {
   const extension = extensionParts.length > 0 ? `.${extensionParts.pop()}` : "";
 
   return `${slugify(name || "upload")}${extension.toLowerCase()}`;
-}
-
-function titleizeFileStem(filename: string) {
-  const stem = filename.replace(/\.[^.]+$/, "");
-
-  return stem
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function slugify(value: string) {

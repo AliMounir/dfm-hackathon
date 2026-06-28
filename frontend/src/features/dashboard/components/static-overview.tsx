@@ -54,7 +54,7 @@ export function StaticOverview({ onSelect, language = "fr" }: { onSelect: (id: s
   if (state === "error" || !data)
     return (
       <p className="text-sm text-muted">
-        {tr("Backend non disponible — démarrez-le sur :8000.", "Backend not reachable — start it on :8000.")}
+        {tr("Vue d'ensemble temporairement indisponible.", "Overview temporarily unavailable.")}
       </p>
     );
 

@@ -1,21 +1,26 @@
-// Same-origin by default: Next.js API routes run on localhost and Vercel.
-// A non-local NEXT_PUBLIC_API_URL can still be used later for a separate API.
-const configuredApiBase = process.env.NEXT_PUBLIC_API_URL?.trim() ?? "";
-const isOldLocalBackend =
-  configuredApiBase === "http://localhost:8000" ||
-  configuredApiBase === "http://127.0.0.1:8000";
+// Always use the same-origin Next.js API routes. Those server routes decide
+// whether to proxy to Railway or use the local prototype fallback.
+export const API_BASE = "";
 
-export const API_BASE =
-  configuredApiBase && !isOldLocalBackend ? configuredApiBase.replace(/\/$/, "") : "";
+function apiUrl(path: string): string {
+  const apiPath = `/api${path}`;
+  if (typeof window !== "undefined") return apiPath;
+
+  const serverOrigin = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+
+  return `${serverOrigin}${apiPath}`;
+}
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}/api${path}`, { cache: "no-store" });
+  const res = await fetch(apiUrl(path), { cache: "no-store" });
   if (!res.ok) throw new Error(`GET ${path} -> ${res.status}`);
   return res.json() as Promise<T>;
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${API_BASE}/api${path}`, {
+  const res = await fetch(apiUrl(path), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

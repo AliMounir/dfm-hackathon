@@ -17,7 +17,7 @@ export function AgentDashboardSection() {
   if (state === "error" || !plan)
     return (
       <p className="text-sm text-muted">
-        {language === "fr" ? "Backend non disponible — démarrez-le sur :8000." : "Backend not reachable — start it on :8000."}
+        {language === "fr" ? "Tableau de bord temporairement indisponible." : "Dashboard temporarily unavailable."}
       </p>
     );
 

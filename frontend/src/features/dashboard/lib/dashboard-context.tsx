@@ -28,10 +28,12 @@ export function useDashboard(): Ctx {
 export function DashboardProvider({
   projectId,
   language,
+  refreshKey = 0,
   children,
 }: {
   projectId: string | null;
   language: Language;
+  refreshKey?: number;
   children: React.ReactNode;
 }) {
   const [load, setLoad] = useState<{
@@ -51,7 +53,7 @@ export function DashboardProvider({
     return () => {
       alive = false;
     };
-  }, [projectId]);
+  }, [projectId, refreshKey]);
 
   const plan = load.projectId === projectId ? load.plan : null;
   const state: State = !projectId
