@@ -1,0 +1,313 @@
+{"kind":"deck","id":"pr/ngxrjp","name":"Deck"}
+{"kind":"layout","layoutId":"942c1832-9f26-4be0-80b9-66f747c07986","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"ba761cdf-adb9-47b8-a050-96a41a71debc","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/bibp7j","slide":1,"title":"H","textShapes":16}
+{"kind":"shape","id":"sh/oza1gvy9","slide":1,"bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/zed8v6ps","slide":1,"bbox":[812,0,468,720]}
+{"kind":"shape","id":"sh/6xkf6dcb","slide":1,"bbox":[72,77,30,30]}
+{"kind":"textbox","id":"sh/hwfyxobm","slide":1,"text":"H","textPreview":"H","textChars":1,"textLines":1,"bbox":[72,78,30,30]}
+{"kind":"textbox","id":"sh/obm58z25","slide":1,"text":"Hazava AI","textPreview":"Hazava AI","textChars":9,"textLines":1,"bbox":[114,70,220,36]}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":1,"text":"M&E Assistant for DFM","textPreview":"M&E Assistant for DFM","textChars":21,"textLines":1,"bbox":[115,104,260,24]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":1,"text":"AI-supported M&E for Doctors for Madagascar","textPreview":"AI-supported M&E for Doctors for Madagascar","textChars":43,"textLines":1,"bbox":[72,188,640,168]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":1,"text":"From raw Excel, REDCap and DHIS2 exports to French-first data quality findings, risk windows and donor-ready stories.","textPreview":"From raw Excel, REDCap and DHIS2 exports to French-first data quality findings, risk windows and donor-ready stories.","textChars":117,"textLines":1,"bbox":[76,384,610,88]}
+{"kind":"shape","id":"sh/sfil0rqd","slide":1,"bbox":[76,514,176,36]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":1,"text":"Hackathon pitch","textPreview":"Hackathon pitch","textChars":15,"textLines":1,"bbox":[90,520,148,24]}
+{"kind":"shape","id":"sh/je9cvixc","slide":1,"bbox":[270,514,224,36]}
+{"kind":"textbox","id":"sh/8z25kb6x","slide":1,"text":"Implemented prototype","textPreview":"Implemented prototype","textChars":21,"textLines":1,"bbox":[284,520,196,24]}
+{"kind":"shape","id":"sh/1gvy90je","slide":1,"bbox":[724,116,488,470]}
+{"kind":"shape","id":"sh/q1orytsv","slide":1,"bbox":[724,116,488,52]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":1,"text":"MCHP / Echographie","textPreview":"MCHP / Echographie","textChars":18,"textLines":1,"bbox":[752,130,320,26]}
+{"kind":"shape","id":"sh/87ed8bat","slide":1,"bbox":[1108,126,58,36]}
+{"kind":"textbox","id":"sh/xs72x4na","slide":1,"text":"FR","textPreview":"FR","textChars":2,"textLines":1,"bbox":[1122,132,30,24]}
+{"kind":"shape","id":"sh/qd4vmtwr","slide":1,"bbox":[752,198,133.33,112]}
+{"kind":"shape","id":"sh/fyxobm58","slide":1,"bbox":[752,198,8,112]}
+{"kind":"textbox","id":"sh/7y1kre1w","slide":1,"text":"10,169","textPreview":"10,169","textChars":6,"textLines":1,"bbox":[768,220,103.33,38]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":1,"text":"Ultrasounds","textPreview":"Ultrasounds","textChars":11,"textLines":1,"bbox":[768,264,103.33,38]}
+{"kind":"shape","id":"sh/p4r65wju","slide":1,"bbox":[901.33,198,133.33,112]}
+{"kind":"shape","id":"sh/wjudg7ad","slide":1,"bbox":[901.33,198,8,112]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":1,"text":"8,744","textPreview":"8,744","textChars":5,"textLines":1,"bbox":[917.33,220,103.33,38]}
+{"kind":"textbox","id":"sh/i5sneloj","slide":1,"text":"Pregnant women","textPreview":"Pregnant women","textChars":14,"textLines":1,"bbox":[917.33,264,103.33,38]}
+{"kind":"shape","id":"sh/pwb2hwfy","slide":1,"bbox":[1050.67,198,133.33,112]}
+{"kind":"shape","id":"sh/0bi9s36h","slide":1,"bbox":[1050.67,198,8,112]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":1,"text":"4.5%","textPreview":"4.5%","textChars":4,"textLines":1,"bbox":[1066.67,220,103.33,38]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":1,"text":"Complicated cases","textPreview":"Complicated cases","textChars":17,"textLines":1,"bbox":[1066.67,264,103.33,38]}
+{"kind":"shape","id":"sh/8bat47y1","slide":1,"bbox":[752,340,432,220]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":1,"text":"Volume mensuel vs cible","textPreview":"Volume mensuel vs cible","textChars":23,"textLines":1,"bbox":[774,358,388,28]}
+{"kind":"shape","id":"sh/q5o7qpg3","slide":1,"bbox":[790,469,32,61]}
+{"kind":"shape","id":"sh/jqh0fepk","slide":1,"bbox":[846,458,32,72]}
+{"kind":"shape","id":"sh/8nqxs72x","slide":1,"bbox":[902,441,32,89]}
+{"kind":"shape","id":"sh/18jqh0fe","slide":1,"bbox":[958,445,32,85]}
+{"kind":"shape","id":"sh/qh0fepkz","slide":1,"bbox":[1014,435,32,95]}
+{"kind":"shape","id":"sh/j2t83itg","slide":1,"bbox":[1070,403,32,127]}
+{"kind":"notes","id":"nt/bibp7j","slide":1,"text":""}
+{"kind":"slide","id":"sl/82dzxw","slide":2,"title":"HAZAVA AI","textShapes":14}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":2,"text":"HAZAVA AI","textPreview":"HAZAVA AI","textChars":9,"textLines":1,"bbox":[64,42,280,30]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":2,"text":"The problem: valuable data, slow insight","textPreview":"The problem: valuable data, slow insight","textChars":40,"textLines":1,"bbox":[64,74,880,60]}
+{"kind":"shape","id":"sh/7ed8bat4","slide":2,"bbox":[64,140,96,5]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":2,"text":"DFM already collects high-value M&E data, but the path from export to decision still depends on manual checking, contextual interpretation and report writing.","textPreview":"DFM already collects high-value M&E data, but the path from export to decision still depends on manual checking, contextual interpretatio...","textChars":158,"textLines":1,"bbox":[64,178,700,72]}
+{"kind":"shape","id":"sh/p8nqxs72","slide":2,"bbox":[72,292,312,110]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":2,"text":"REDCap exports","textPreview":"REDCap exports","textChars":14,"textLines":1,"bbox":[94,312,260,30]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":2,"text":"forms, registers, project indicators","textPreview":"forms, registers, project indicators","textChars":36,"textLines":1,"bbox":[94,350,260,34]}
+{"kind":"shape","id":"sh/wjudg7ad","slide":2,"bbox":[432,292,312,110]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":2,"text":"DHIS2 service data","textPreview":"DHIS2 service data","textChars":18,"textLines":1,"bbox":[454,312,260,30]}
+{"kind":"textbox","id":"sh/lwval87e","slide":2,"text":"utilisation, facility activity","textPreview":"utilisation, facility activity","textChars":30,"textLines":1,"bbox":[454,350,260,34]}
+{"kind":"shape","id":"sh/wb2hwfyx","slide":2,"bbox":[72,434,312,110]}
+{"kind":"textbox","id":"sh/3q5o7qpg","slide":2,"text":"TB cohorts","textPreview":"TB cohorts","textChars":10,"textLines":1,"bbox":[94,454,260,30]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":2,"text":"follow-up, outcomes, completeness","textPreview":"follow-up, outcomes, completeness","textChars":33,"textLines":1,"bbox":[94,492,260,34]}
+{"kind":"shape","id":"sh/loj2t83i","slide":2,"bbox":[432,434,312,110]}
+{"kind":"textbox","id":"sh/w3m94fu1","slide":2,"text":"Dashboards & Excel","textPreview":"Dashboards & Excel","textChars":18,"textLines":1,"bbox":[454,454,260,30]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":2,"text":"MCHP, MAFY, TIA LONGO, PROF","textPreview":"MCHP, MAFY, TIA LONGO, PROF","textChars":27,"textLines":1,"bbox":[454,492,260,34]}
+{"kind":"shape","id":"sh/ex0nuxc3","slide":2,"bbox":[840,214,320,330]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":2,"text":"Manual bottleneck","textPreview":"Manual bottleneck","textChars":17,"textLines":1,"bbox":[878,254,244,36]}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":2,"text":"1. Check missing and implausible values\n2. Explain trends and gaps\n3. Prepare reports for different audiences\n4. Translate insight into clear French","textPreview":"1. Check missing and implausible values | 2. Explain trends and gaps | 3. Prepare reports for different audiences | 4. Translate insight ...","textChars":148,"textLines":4,"bbox":[878,318,244,156]}
+{"kind":"shape","id":"sh/8v6psfil","slide":2,"bbox":[878,500,244,5]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":2,"text":"Result: useful data arrives late, with inconsistent explanations and preventable quality risks.","textPreview":"Result: useful data arrives late, with inconsistent explanations and preventable quality risks.","textChars":95,"textLines":1,"bbox":[826,570,348,58]}
+{"kind":"notes","id":"nt/82dzxw","slide":2,"text":""}
+{"kind":"slide","id":"sl/kkmi5e","slide":3,"title":"HAZAVA AI","textShapes":20}
+{"kind":"textbox","id":"sh/czed8v6p","slide":3,"text":"HAZAVA AI","textPreview":"HAZAVA AI","textChars":9,"textLines":1,"bbox":[64,42,280,30]}
+{"kind":"textbox","id":"sh/neloj2t8","slide":3,"text":"Hazava AI: a practical M&E co-pilot","textPreview":"Hazava AI: a practical M&E co-pilot","textChars":35,"textLines":1,"bbox":[64,74,880,60]}
+{"kind":"shape","id":"sh/ytsvu9kn","slide":3,"bbox":[64,140,96,5]}
+{"kind":"textbox","id":"sh/5sneloj2","slide":3,"text":"Hazava sits between project data and project decisions. It does the first pass, explains what it found, and keeps a human approval step before final import.","textPreview":"Hazava sits between project data and project decisions. It does the first pass, explains what it found, and keeps a human approval step b...","textChars":156,"textLines":1,"bbox":[64,178,760,68]}
+{"kind":"shape","id":"sh/cbulwval","slide":3,"bbox":[68,292,270,152]}
+{"kind":"shape","id":"sh/nqxs72x4","slide":3,"bbox":[86,310,38,38]}
+{"kind":"textbox","id":"sh/u54zidon","slide":3,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[86,316,38,28]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":3,"text":"Upload","textPreview":"Upload","textChars":6,"textLines":1,"bbox":[138,310,182,34]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":3,"text":"Drop Excel, CSV, REDCap or DHIS2 exports into the right project.","textPreview":"Drop Excel, CSV, REDCap or DHIS2 exports into the right project.","textChars":64,"textLines":1,"bbox":[138,350,182,74]}
+{"kind":"shape","id":"sh/qxs72x4n","slide":3,"bbox":[364,292,270,152]}
+{"kind":"shape","id":"sh/fil0rqd4","slide":3,"bbox":[382,310,38,38]}
+{"kind":"textbox","id":"sh/83itgfml","slide":3,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[382,316,38,28]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":3,"text":"Check","textPreview":"Check","textChars":5,"textLines":1,"bbox":[434,310,182,34]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":3,"text":"Detect missing values, duplicates and implausible entries.","textPreview":"Detect missing values, duplicates and implausible entries.","textChars":58,"textLines":1,"bbox":[434,350,182,74]}
+{"kind":"shape","id":"sh/fu18jqh0","slide":3,"bbox":[660,292,270,152]}
+{"kind":"shape","id":"sh/4fu18jqh","slide":3,"bbox":[678,310,38,38]}
+{"kind":"textbox","id":"sh/x0nuxc3y","slide":3,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[678,316,38,28]}
+{"kind":"textbox","id":"sh/mlkjm1cf","slide":3,"text":"Explain","textPreview":"Explain","textChars":7,"textLines":1,"bbox":[730,310,182,34]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":3,"text":"Write clear French explanations with review actions.","textPreview":"Write clear French explanations with review actions.","textChars":52,"textLines":1,"bbox":[730,350,182,74]}
+{"kind":"shape","id":"sh/36hcrmhk","slide":3,"bbox":[956,292,256,152]}
+{"kind":"shape","id":"sh/eloj2t83","slide":3,"bbox":[974,310,38,38]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":3,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[974,316,38,28]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":3,"text":"Act","textPreview":"Act","textChars":3,"textLines":1,"bbox":[1026,310,168,34]}
+{"kind":"textbox","id":"sh/7u54zido","slide":3,"text":"Update dashboards, risk windows and team stories.","textPreview":"Update dashboards, risk windows and team stories.","textChars":49,"textLines":1,"bbox":[1026,350,168,74]}
+{"kind":"shape","id":"sh/ed8bat47","slide":3,"bbox":[86,498,1098,108]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":3,"text":"Three functions in one workflow","textPreview":"Three functions in one workflow","textChars":31,"textLines":1,"bbox":[122,524,410,34]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":3,"text":"Data quality checking","textPreview":"Data quality checking","textChars":21,"textLines":1,"bbox":[564,526,192,28]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":3,"text":"Gap and risk exploration","textPreview":"Gap and risk exploration","textChars":24,"textLines":1,"bbox":[774,526,220,28]}
+{"kind":"textbox","id":"sh/e1w7mp0b","slide":3,"text":"Insight storytelling","textPreview":"Insight storytelling","textChars":20,"textLines":1,"bbox":[1012,526,160,28]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":3,"text":"Built for DFM's actual project structure: MCHP, MAFY, TIA LONGO, MIRAY TB, SOAMEVA and PROFESS.","textPreview":"Built for DFM's actual project structure: MCHP, MAFY, TIA LONGO, MIRAY TB, SOAMEVA and PROFESS.","textChars":95,"textLines":1,"bbox":[122,566,1010,28]}
+{"kind":"notes","id":"nt/kkmi5e","slide":3,"text":""}
+{"kind":"slide","id":"sl/jt3fcl","slide":4,"title":"HAZAVA AI","textShapes":25}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":4,"text":"HAZAVA AI","textPreview":"HAZAVA AI","textChars":9,"textLines":1,"bbox":[64,42,280,30]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":4,"text":"What judges can demo","textPreview":"What judges can demo","textChars":20,"textLines":1,"bbox":[64,74,880,60]}
+{"kind":"shape","id":"sh/47y1kre1","slide":4,"bbox":[64,140,96,5]}
+{"kind":"textbox","id":"sh/bat47y1k","slide":4,"text":"A French-first Next.js application with project navigation, dashboards, upload workflow, filters and a collapsible assistant.","textPreview":"A French-first Next.js application with project navigation, dashboards, upload workflow, filters and a collapsible assistant.","textChars":125,"textLines":1,"bbox":[64,178,694,44]}
+{"kind":"shape","id":"sh/mp0bi9s3","slide":4,"bbox":[72,258,220,376]}
+{"kind":"shape","id":"sh/tgfmlkjm","slide":4,"bbox":[90,282,30,30]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":4,"text":"H","textPreview":"H","textChars":1,"textLines":1,"bbox":[90,283,30,28]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":4,"text":"Hazava AI","textPreview":"Hazava AI","textChars":9,"textLines":1,"bbox":[132,280,142,28]}
+{"kind":"textbox","id":"sh/mhk3q5o7","slide":4,"text":"M&E Assistant","textPreview":"M&E Assistant","textChars":13,"textLines":1,"bbox":[132,310,142,20]}
+{"kind":"shape","id":"sh/0z61032l","slide":4,"bbox":[88,360,188,36]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":4,"text":"Vue globale","textPreview":"Vue globale","textChars":11,"textLines":1,"bbox":[106,368,162,22]}
+{"kind":"shape","id":"sh/itgfmlkj","slide":4,"bbox":[88,408,188,36]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":4,"text":"MCHP","textPreview":"MCHP","textChars":4,"textLines":1,"bbox":[106,416,162,22]}
+{"kind":"shape","id":"sh/0nuxc3yl","slide":4,"bbox":[88,456,188,36]}
+{"kind":"textbox","id":"sh/p8nqxs72","slide":4,"text":"MAFY","textPreview":"MAFY","textChars":4,"textLines":1,"bbox":[106,464,162,22]}
+{"kind":"shape","id":"sh/ih4byhgn","slide":4,"bbox":[88,504,188,36]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":4,"text":"TIA LONGO","textPreview":"TIA LONGO","textChars":9,"textLines":1,"bbox":[106,512,162,22]}
+{"kind":"shape","id":"sh/wjudg7ad","slide":4,"bbox":[88,552,188,36]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":4,"text":"PROFESS","textPreview":"PROFESS","textChars":7,"textLines":1,"bbox":[106,560,162,22]}
+{"kind":"shape","id":"sh/9gr2p8nq","slide":4,"bbox":[88,600,188,36]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":4,"text":"+ Nouveau","textPreview":"+ Nouveau","textChars":9,"textLines":1,"bbox":[106,608,162,22]}
+{"kind":"shape","id":"sh/ra5gbq1o","slide":4,"bbox":[322,236,570,450]}
+{"kind":"shape","id":"sh/2p8nqxs7","slide":4,"bbox":[322,236,570,52]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":4,"text":"MCHP / Echographie","textPreview":"MCHP / Echographie","textChars":18,"textLines":1,"bbox":[350,250,320,26]}
+{"kind":"shape","id":"sh/kjm1cfa9","slide":4,"bbox":[788,246,58,36]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":4,"text":"FR","textPreview":"FR","textChars":2,"textLines":1,"bbox":[802,252,30,24]}
+{"kind":"shape","id":"sh/2hwfyxob","slide":4,"bbox":[350,318,160.67,112]}
+{"kind":"shape","id":"sh/9w3m94fu","slide":4,"bbox":[350,318,8,112]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":4,"text":"10,169","textPreview":"10,169","textChars":6,"textLines":1,"bbox":[366,340,130.67,38]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":4,"text":"Ultrasounds","textPreview":"Ultrasounds","textChars":11,"textLines":1,"bbox":[366,384,130.67,38]}
+{"kind":"shape","id":"sh/judg7ads","slide":4,"bbox":[526.67,318,160.67,112]}
+{"kind":"shape","id":"sh/cfa9w3m9","slide":4,"bbox":[526.67,318,8,112]}
+{"kind":"textbox","id":"sh/1032lszq","slide":4,"text":"8,744","textPreview":"8,744","textChars":5,"textLines":1,"bbox":[542.67,340,130.67,38]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":4,"text":"Pregnant women","textPreview":"Pregnant women","textChars":14,"textLines":1,"bbox":[542.67,384,130.67,38]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":4,"bbox":[703.33,318,160.67,112]}
+{"kind":"shape","id":"sh/c7u54zid","slide":4,"bbox":[703.33,318,8,112]}
+{"kind":"textbox","id":"sh/1orytsvu","slide":4,"text":"4.5%","textPreview":"4.5%","textChars":4,"textLines":1,"bbox":[719.33,340,130.67,38]}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":4,"text":"Complicated cases","textPreview":"Complicated cases","textChars":17,"textLines":1,"bbox":[719.33,384,130.67,38]}
+{"kind":"shape","id":"sh/nap4r65w","slide":4,"bbox":[350,460,514,220]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":4,"text":"Volume mensuel vs cible","textPreview":"Volume mensuel vs cible","textChars":23,"textLines":1,"bbox":[372,478,470,28]}
+{"kind":"shape","id":"sh/at47y1kr","slide":4,"bbox":[388,589,32,61]}
+{"kind":"shape","id":"sh/lkjm1cfa","slide":4,"bbox":[457,578,32,72]}
+{"kind":"shape","id":"sh/szqtcj6t","slide":4,"bbox":[526,561,32,89]}
+{"kind":"shape","id":"sh/32lszqtc","slide":4,"bbox":[595,565,32,85]}
+{"kind":"shape","id":"sh/ahoza1gv","slide":4,"bbox":[664,555,32,95]}
+{"kind":"shape","id":"sh/l87ed8ba","slide":4,"bbox":[733,523,32,127]}
+{"kind":"shape","id":"sh/sneloj2t","slide":4,"bbox":[928,236,244,420]}
+{"kind":"textbox","id":"sh/3q5o7qpg","slide":4,"text":"Assistant M&E","textPreview":"Assistant M&E","textChars":13,"textLines":1,"bbox":[962,270,176,32]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":4,"text":"Posez une question sur les donnees du projet.","textPreview":"Posez une question sur les donnees du projet.","textChars":45,"textLines":1,"bbox":[962,318,176,58]}
+{"kind":"shape","id":"sh/o7qpg3ex","slide":4,"bbox":[962,392,176,78]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":4,"text":"Quels CSB ont besoin d'attention ?","textPreview":"Quels CSB ont besoin d'attention ?","textChars":34,"textLines":1,"bbox":[982,408,136,44]}
+{"kind":"shape","id":"sh/61032lsz","slide":4,"bbox":[962,492,176,98]}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":4,"text":"Belafike et Ejeda ressortent: verifier activite et identifiants.","textPreview":"Belafike et Ejeda ressortent: verifier activite et identifiants.","textChars":64,"textLines":1,"bbox":[982,508,138,64]}
+{"kind":"notes","id":"nt/jt3fcl","slide":4,"text":""}
+{"kind":"slide","id":"sl/s4zm0a","slide":5,"title":"HAZAVA AI","textShapes":13}
+{"kind":"textbox","id":"sh/9w3m94fu","slide":5,"text":"HAZAVA AI","textPreview":"HAZAVA AI","textChars":9,"textLines":1,"bbox":[64,42,280,30]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":5,"text":"Function 1: data quality checking","textPreview":"Function 1: data quality checking","textChars":33,"textLines":1,"bbox":[64,74,880,60]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":5,"bbox":[64,140,96,5]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":5,"text":"Hazava reviews structured exports and turns technical flags into human-readable next actions, in French.","textPreview":"Hazava reviews structured exports and turns technical flags into human-readable next actions, in French.","textChars":104,"textLines":1,"bbox":[64,178,780,58]}
+{"kind":"shape","id":"sh/9knih4by","slide":5,"bbox":[76,278,318,112]}
+{"kind":"shape","id":"sh/2t83itgf","slide":5,"bbox":[76,278,8,112]}
+{"kind":"textbox","id":"sh/re1w7mp0","slide":5,"text":"124","textPreview":"124","textChars":3,"textLines":1,"bbox":[100,300,280,38]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":5,"text":"suivis sans identifiant complet","textPreview":"suivis sans identifiant complet","textChars":31,"textLines":1,"bbox":[100,344,280,38]}
+{"kind":"shape","id":"sh/9gr2p8nq","slide":5,"bbox":[428,278,318,112]}
+{"kind":"shape","id":"sh/dg7adsji","slide":5,"bbox":[428,278,8,112]}
+{"kind":"textbox","id":"sh/ovahoza1","slide":5,"text":"318","textPreview":"318","textChars":3,"textLines":1,"bbox":[452,300,280,38]}
+{"kind":"textbox","id":"sh/vahoza1g","slide":5,"text":"valeurs placeholder a verifier","textPreview":"valeurs placeholder a verifier","textChars":30,"textLines":1,"bbox":[452,344,280,38]}
+{"kind":"shape","id":"sh/6tovahoz","slide":5,"bbox":[780,278,318,112]}
+{"kind":"shape","id":"sh/d8v6psfi","slide":5,"bbox":[780,278,8,112]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":5,"text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[804,300,280,38]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":5,"text":"noms de CSB a harmoniser","textPreview":"noms de CSB a harmoniser","textChars":24,"textLines":1,"bbox":[804,344,280,38]}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":5,"bbox":[86,418,1092,198]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":5,"text":"Example explanation","textPreview":"Example explanation","textChars":19,"textLines":1,"bbox":[122,446,300,32]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":5,"text":"Probleme: certains suivis n'ont pas d'identifiant patient complet.","textPreview":"Probleme: certains suivis n'ont pas d'identifiant patient complet.","textChars":66,"textLines":1,"bbox":[122,490,480,46]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":5,"text":"Pourquoi: le lien entre premiere echographie et suivi peut etre perdu avant l'analyse du parcours de soins.","textPreview":"Pourquoi: le lien entre premiere echographie et suivi peut etre perdu avant l'analyse du parcours de soins.","textChars":107,"textLines":1,"bbox":[122,548,500,48]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":5,"text":"Action proposee: verifier QR codes, noms et dates avant le rapport mensuel; garder la validation humaine avant import final.","textPreview":"Action proposee: verifier QR codes, noms et dates avant le rapport mensuel; garder la validation humaine avant import final.","textChars":124,"textLines":1,"bbox":[682,494,448,76]}
+{"kind":"notes","id":"nt/s4zm0a","slide":5,"text":""}
+{"kind":"slide","id":"sl/ltdp4g","slide":6,"title":"HAZAVA AI","textShapes":17}
+{"kind":"textbox","id":"sh/l87ed8ba","slide":6,"text":"HAZAVA AI","textPreview":"HAZAVA AI","textChars":9,"textLines":1,"bbox":[64,42,280,30]}
+{"kind":"textbox","id":"sh/ahoza1gv","slide":6,"text":"Function 2: healthcare gap and risk explorer","textPreview":"Function 2: healthcare gap and risk explorer","textChars":44,"textLines":1,"bbox":[64,74,880,60]}
+{"kind":"shape","id":"sh/32lszqtc","slide":6,"bbox":[64,140,96,5]}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":6,"text":"The assistant connects utilisation trends with seasonality and access context to surface places and periods that deserve earlier attention.","textPreview":"The assistant connects utilisation trends with seasonality and access context to surface places and periods that deserve earlier attention.","textChars":139,"textLines":1,"bbox":[64,178,780,60]}
+{"kind":"shape","id":"sh/lkjm1cfa","slide":6,"bbox":[72,272,670,320]}
+{"kind":"textbox","id":"sh/at47y1kr","slide":6,"text":"Service volume vs expected target","textPreview":"Service volume vs expected target","textChars":33,"textLines":1,"bbox":[108,300,430,30]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":6,"text":"Services","textPreview":"Services","textChars":8,"textLines":1,"bbox":[468,304,86,24]}
+{"kind":"textbox","id":"sh/w3m94fu1","slide":6,"text":"Target","textPreview":"Target","textChars":6,"textLines":1,"bbox":[576,304,76,24]}
+{"kind":"shape","id":"sh/loj2t83i","slide":6,"bbox":[112,388,570,1]}
+{"kind":"shape","id":"sh/9knih4by","slide":6,"bbox":[112,426,570,1]}
+{"kind":"shape","id":"sh/kzupwb2h","slide":6,"bbox":[112,464,570,1]}
+{"kind":"shape","id":"sh/re1w7mp0","slide":6,"bbox":[112,502,570,1]}
+{"kind":"shape","id":"sh/2t83itgf","slide":6,"bbox":[140,458,28,70]}
+{"kind":"shape","id":"sh/9w3m94fu","slide":6,"bbox":[172,451,22,77]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":6,"text":"Jan","textPreview":"Jan","textChars":3,"textLines":1,"bbox":[134,540,68,22]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":6,"bbox":[226,446,28,82]}
+{"kind":"shape","id":"sh/25kb6xkf","slide":6,"bbox":[258,451,22,77]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":6,"text":"Feb","textPreview":"Feb","textChars":3,"textLines":1,"bbox":[220,540,68,22]}
+{"kind":"shape","id":"sh/kjm1cfa9","slide":6,"bbox":[312,427,28,101]}
+{"kind":"shape","id":"sh/wfyxobm5","slide":6,"bbox":[344,439,22,89]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":6,"text":"Mar","textPreview":"Mar","textChars":3,"textLines":1,"bbox":[306,540,68,22]}
+{"kind":"shape","id":"sh/ed8bat47","slide":6,"bbox":[398,432,28,96]}
+{"kind":"shape","id":"sh/7u54zido","slide":6,"bbox":[430,439,22,89]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":6,"text":"Apr","textPreview":"Apr","textChars":3,"textLines":1,"bbox":[392,540,68,22]}
+{"kind":"shape","id":"sh/lc7u54zi","slide":6,"bbox":[484,420,28,108]}
+{"kind":"shape","id":"sh/eloj2t83","slide":6,"bbox":[516,427,22,101]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":6,"text":"May","textPreview":"May","textChars":3,"textLines":1,"bbox":[478,540,68,22]}
+{"kind":"shape","id":"sh/wval87ed","slide":6,"bbox":[570,383,28,145]}
+{"kind":"shape","id":"sh/pg3ex0nu","slide":6,"bbox":[602,427,22,101]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":6,"text":"Jun","textPreview":"Jun","textChars":3,"textLines":1,"bbox":[564,540,68,22]}
+{"kind":"shape","id":"sh/m1cfa9w3","slide":6,"bbox":[780,272,378,344]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":6,"text":"Risk window surfaced","textPreview":"Risk window surfaced","textChars":20,"textLines":1,"bbox":[820,306,300,34]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":6,"text":"Hazava flags an access-sensitive period when utilisation falls below expectation or complicated cases rise.","textPreview":"Hazava flags an access-sensitive period when utilisation falls below expectation or complicated cases rise.","textChars":107,"textLines":1,"bbox":[820,360,284,78]}
+{"kind":"shape","id":"sh/bat47y1k","slide":6,"bbox":[820,468,146,36]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":6,"text":"Seasonality","textPreview":"Seasonality","textChars":11,"textLines":1,"bbox":[834,474,118,24]}
+{"kind":"shape","id":"sh/tgfmlkjm","slide":6,"bbox":[982,468,148,36]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":6,"text":"Facility gaps","textPreview":"Facility gaps","textChars":13,"textLines":1,"bbox":[996,474,120,24]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":6,"text":"Output: review facilities, validate data and prepare outreach before the gap becomes a reporting surprise.","textPreview":"Output: review facilities, validate data and prepare outreach before the gap becomes a reporting surprise.","textChars":106,"textLines":1,"bbox":[820,532,294,70]}
+{"kind":"notes","id":"nt/ltdp4g","slide":6,"text":""}
+{"kind":"slide","id":"sl/eu75a8","slide":7,"title":"HAZAVA AI","textShapes":13}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":7,"text":"HAZAVA AI","textPreview":"HAZAVA AI","textChars":9,"textLines":1,"bbox":[64,42,280,30]}
+{"kind":"textbox","id":"sh/gfmlkjm1","slide":7,"text":"Function 3: insight and impact storytelling","textPreview":"Function 3: insight and impact storytelling","textChars":43,"textLines":1,"bbox":[64,74,880,60]}
+{"kind":"shape","id":"sh/90je9cvi","slide":7,"bbox":[64,140,96,5]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":7,"text":"Hazava turns selected indicators into audience-ready explanations: project team briefings, donor updates and partner-facing summaries.","textPreview":"Hazava turns selected indicators into audience-ready explanations: project team briefings, donor updates and partner-facing summaries.","textChars":134,"textLines":1,"bbox":[64,178,800,60]}
+{"kind":"shape","id":"sh/rmhk3q5o","slide":7,"bbox":[82,276,515,308]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":7,"text":"French-first coordinator Q&A","textPreview":"French-first coordinator Q&A","textChars":28,"textLines":1,"bbox":[122,312,410,34]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":7,"text":"Question","textPreview":"Question","textChars":8,"textLines":1,"bbox":[122,374,130,26]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":7,"text":"Qu'est-ce qui a change dans le projet MCHP ce mois-ci ?","textPreview":"Qu'est-ce qui a change dans le projet MCHP ce mois-ci ?","textChars":55,"textLines":1,"bbox":[122,404,410,44]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":7,"text":"Answer","textPreview":"Answer","textChars":6,"textLines":1,"bbox":[122,478,130,26]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":7,"text":"L'activite reste forte; deux sites demandent verification avant le rapport.","textPreview":"L'activite reste forte; deux sites demandent verification avant le rapport.","textChars":75,"textLines":1,"bbox":[122,508,410,58]}
+{"kind":"shape","id":"sh/ih4byhgn","slide":7,"bbox":[646,276,510,308]}
+{"kind":"textbox","id":"sh/p8nqxs72","slide":7,"text":"Impact story generated","textPreview":"Impact story generated","textChars":22,"textLines":1,"bbox":[686,312,370,34]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":7,"text":"MCHP reached 8,744 pregnant women and completed 10,169 ultrasounds in the reporting period. The data story is strong coverage, paired with a clear quality message: verify follow-up identifiers and complicated-case classification before external reporting.","textPreview":"MCHP reached 8,744 pregnant women and completed 10,169 ultrasounds in the reporting period. The data story is strong coverage, paired wit...","textChars":255,"textLines":1,"bbox":[686,370,412,132]}
+{"kind":"shape","id":"sh/7ed8bat4","slide":7,"bbox":[686,528,132,36]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":7,"text":"Team brief","textPreview":"Team brief","textChars":10,"textLines":1,"bbox":[700,534,104,24]}
+{"kind":"shape","id":"sh/pkzupwb2","slide":7,"bbox":[838,528,150,36]}
+{"kind":"textbox","id":"sh/0z61032l","slide":7,"text":"Donor update","textPreview":"Donor update","textChars":12,"textLines":1,"bbox":[852,534,122,24]}
+{"kind":"shape","id":"sh/7qpg3ex0","slide":7,"bbox":[1008,528,138,36]}
+{"kind":"textbox","id":"sh/i5sneloj","slide":7,"text":"Partner note","textPreview":"Partner note","textChars":12,"textLines":1,"bbox":[1022,534,110,24]}
+{"kind":"notes","id":"nt/eu75a8","slide":7,"text":""}
+{"kind":"slide","id":"sl/0lmkjl","slide":8,"title":"HAZAVA AI","textShapes":12}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":8,"text":"HAZAVA AI","textPreview":"HAZAVA AI","textChars":9,"textLines":1,"bbox":[64,42,280,30]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":8,"text":"Implementation: simple, credible, extensible","textPreview":"Implementation: simple, credible, extensible","textChars":44,"textLines":1,"bbox":[64,74,880,60]}
+{"kind":"shape","id":"sh/ih4byhgn","slide":8,"bbox":[64,140,96,5]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":8,"text":"We built the prototype around an implementation path DFM can actually maintain: Next.js UI, Supabase storage and workflow metadata, and an AI processing layer.","textPreview":"We built the prototype around an implementation path DFM can actually maintain: Next.js UI, Supabase storage and workflow metadata, and a...","textChars":159,"textLines":1,"bbox":[64,178,860,60]}
+{"kind":"shape","id":"sh/0z61032l","slide":8,"bbox":[80,306,250,204]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":8,"text":"Frontend","textPreview":"Frontend","textChars":8,"textLines":1,"bbox":[106,336,198,32]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":8,"text":"Next.js + Tailwind\nProject sidebar\ndashboards, upload,\nfilters and chat","textPreview":"Next.js + Tailwind | Project sidebar | dashboards, upload, | filters and chat","textChars":71,"textLines":4,"bbox":[106,386,198,88]}
+{"kind":"shape","id":"sh/pwb2hwfy","slide":8,"bbox":[372,306,250,204]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":8,"text":"Data layer","textPreview":"Data layer","textChars":10,"textLines":1,"bbox":[398,336,198,32]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":8,"text":"Supabase Storage\nPostgres metadata\nproject files and\nworkflow tables","textPreview":"Supabase Storage | Postgres metadata | project files and | workflow tables","textChars":68,"textLines":4,"bbox":[398,386,198,88]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":8,"bbox":[664,306,250,204]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":8,"text":"AI services","textPreview":"AI services","textChars":11,"textLines":1,"bbox":[690,336,198,32]}
+{"kind":"textbox","id":"sh/1orytsvu","slide":8,"text":"Parsing pipeline\nquality checks\nretrieval and\nexplanations","textPreview":"Parsing pipeline | quality checks | retrieval and | explanations","textChars":58,"textLines":4,"bbox":[690,386,198,88]}
+{"kind":"shape","id":"sh/u9knih4b","slide":8,"bbox":[956,306,250,204]}
+{"kind":"textbox","id":"sh/judg7ads","slide":8,"text":"Human control","textPreview":"Human control","textChars":13,"textLines":1,"bbox":[982,336,198,32]}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":8,"text":"Approval gate\ntransparent findings\nclear actions\naudit trail","textPreview":"Approval gate | transparent findings | clear actions | audit trail","textChars":60,"textLines":4,"bbox":[982,386,198,88]}
+{"kind":"shape","id":"sh/1032lszq","slide":8,"bbox":[100,558,1080,54]}
+{"kind":"textbox","id":"sh/udg7adsj","slide":8,"text":"Workflow status: file received > folder selected > converted > extracted > quality flags > approval.","textPreview":"Workflow status: file received > folder selected > converted > extracted > quality flags > approval.","textChars":100,"textLines":1,"bbox":[128,572,1020,26]}
+{"kind":"notes","id":"nt/0lmkjl","slide":8,"text":""}
+{"kind":"slide","id":"sl/lbur0h","slide":9,"title":"HAZAVA AI","textShapes":11}
+{"kind":"textbox","id":"sh/1gvy90je","slide":9,"text":"HAZAVA AI","textPreview":"HAZAVA AI","textChars":9,"textLines":1,"bbox":[64,42,280,30]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":9,"text":"Why this can win the hackathon","textPreview":"Why this can win the hackathon","textChars":30,"textLines":1,"bbox":[64,74,880,60]}
+{"kind":"shape","id":"sh/je9cvixc","slide":9,"bbox":[64,140,96,5]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":9,"text":"Hazava is not just a chatbot. It is a workflow for turning DFM's existing monitoring data into governed, explainable decisions.","textPreview":"Hazava is not just a chatbot. It is a workflow for turning DFM's existing monitoring data into governed, explainable decisions.","textChars":127,"textLines":1,"bbox":[64,178,800,60]}
+{"kind":"shape","id":"sh/xs72x4na","slide":9,"bbox":[82,282,500,300]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":9,"text":"Built around real DFM structure","textPreview":"Built around real DFM structure","textChars":31,"textLines":1,"bbox":[122,320,410,32]}
+{"kind":"shape","id":"sh/fmlkjm1c","slide":9,"bbox":[122,382,34,28]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":9,"text":"Project selector mirrors DFM dashboards","textPreview":"Project selector mirrors DFM dashboards","textChars":39,"textLines":1,"bbox":[170,383,390,30]}
+{"kind":"shape","id":"sh/x4nap4r6","slide":9,"bbox":[122,428,34,28]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":9,"text":"MCHP subpages: ambulance, echographie, register, 5S","textPreview":"MCHP subpages: ambulance, echographie, register, 5S","textChars":51,"textLines":1,"bbox":[170,429,390,30]}
+{"kind":"shape","id":"sh/8bat47y1","slide":9,"bbox":[122,474,34,28]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":9,"text":"Upload workflow wired for teammate processing pipeline","textPreview":"Upload workflow wired for teammate processing pipeline","textChars":54,"textLines":1,"bbox":[170,475,390,30]}
+{"kind":"shape","id":"sh/q5o7qpg3","slide":9,"bbox":[122,520,34,28]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":9,"text":"French-first assistant with English toggle","textPreview":"French-first assistant with English toggle","textChars":42,"textLines":1,"bbox":[170,521,390,30]}
+{"kind":"shape","id":"sh/8nqxs72x","slide":9,"bbox":[642,282,500,300]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":9,"text":"Judge value in one sentence","textPreview":"Judge value in one sentence","textChars":27,"textLines":1,"bbox":[682,320,390,32]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":9,"text":"Hazava turns raw field data into clear management action while preserving human review.","textPreview":"Hazava turns raw field data into clear management action while preserving human review.","textChars":87,"textLines":1,"bbox":[682,382,390,100]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":9,"text":"AI gives experts a reliable first read without replacing their judgement.","textPreview":"AI gives experts a reliable first read without replacing their judgement.","textChars":73,"textLines":1,"bbox":[682,506,390,58]}
+{"kind":"notes","id":"nt/lbur0h","slide":9,"text":""}
+{"kind":"slide","id":"sl/q7q568","slide":10,"title":"H","textShapes":21}
+{"kind":"shape","id":"sh/ap4r65wj","slide":10,"bbox":[72,71,30,30]}
+{"kind":"textbox","id":"sh/hgn29gr2","slide":10,"text":"H","textPreview":"H","textChars":1,"textLines":1,"bbox":[72,72,30,30]}
+{"kind":"textbox","id":"sh/svu9knih","slide":10,"text":"Hazava AI","textPreview":"Hazava AI","textChars":9,"textLines":1,"bbox":[114,64,220,36]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":10,"text":"M&E Assistant for DFM","textPreview":"M&E Assistant for DFM","textChars":21,"textLines":1,"bbox":[115,98,260,24]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":10,"text":"Pilot-ready ask","textPreview":"Pilot-ready ask","textChars":15,"textLines":1,"bbox":[72,170,600,64]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":10,"text":"Let Hazava process a first DFM vertical slice end to end, starting with MCHP ultrasound and register data, then expand across projects.","textPreview":"Let Hazava process a first DFM vertical slice end to end, starting with MCHP ultrasound and register data, then expand across projects.","textChars":135,"textLines":1,"bbox":[76,260,610,88]}
+{"kind":"shape","id":"sh/s36hcrmh","slide":10,"bbox":[76,392,622,74]}
+{"kind":"shape","id":"sh/3m94fu18","slide":10,"bbox":[98,411,36,36]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":10,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[98,417,36,24]}
+{"kind":"textbox","id":"sh/kf6dcbul","slide":10,"text":"Validate MCHP rules","textPreview":"Validate MCHP rules","textChars":19,"textLines":1,"bbox":[164,406,300,24]}
+{"kind":"textbox","id":"sh/d0z61032","slide":10,"text":"Confirm required fields, plausible ranges and facility naming standards.","textPreview":"Confirm required fields, plausible ranges and facility naming standards.","textChars":72,"textLines":1,"bbox":[164,434,500,26]}
+{"kind":"shape","id":"sh/29gr2p8n","slide":10,"bbox":[76,480,622,74]}
+{"kind":"shape","id":"sh/vu9knih4","slide":10,"bbox":[98,499,36,36]}
+{"kind":"textbox","id":"sh/knih4byh","slide":10,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[98,505,36,24]}
+{"kind":"textbox","id":"sh/d8bat47y","slide":10,"text":"Connect contextual data","textPreview":"Connect contextual data","textChars":23,"textLines":1,"bbox":[164,494,300,24]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":10,"text":"Add rainfall, seasonality and access proxies for risk-window analysis.","textPreview":"Add rainfall, seasonality and access proxies for risk-window analysis.","textChars":70,"textLines":1,"bbox":[164,522,500,26]}
+{"kind":"shape","id":"sh/v6psfil0","slide":10,"bbox":[76,568,622,74]}
+{"kind":"shape","id":"sh/kre1w7mp","slide":10,"bbox":[98,587,36,36]}
+{"kind":"textbox","id":"sh/dcbulwva","slide":10,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[98,593,36,24]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":10,"text":"Co-design outputs","textPreview":"Co-design outputs","textChars":17,"textLines":1,"bbox":[164,582,300,24]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":10,"text":"Tune French explanations, donor summaries and team dashboards with DFM users.","textPreview":"Tune French explanations, donor summaries and team dashboards with DFM users.","textChars":77,"textLines":1,"bbox":[164,610,500,26]}
+{"kind":"shape","id":"sh/zupwb2hw","slide":10,"bbox":[780,102,360,530]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":10,"text":"Expected impact","textPreview":"Expected impact","textChars":15,"textLines":1,"bbox":[828,150,264,36]}
+{"kind":"shape","id":"sh/hcrmhk3q","slide":10,"bbox":[830,218,260,112]}
+{"kind":"shape","id":"sh/orytsvu9","slide":10,"bbox":[830,218,8,112]}
+{"kind":"textbox","id":"sh/z61032ls","slide":10,"text":"Faster","textPreview":"Faster","textChars":6,"textLines":1,"bbox":[854,240,222,38]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":10,"text":"raw data to insight","textPreview":"raw data to insight","textChars":19,"textLines":1,"bbox":[854,284,222,38]}
+{"kind":"shape","id":"sh/hk3q5o7q","slide":10,"bbox":[830,346,260,112]}
+{"kind":"shape","id":"sh/oza1gvy9","slide":10,"bbox":[830,346,8,112]}
+{"kind":"textbox","id":"sh/idonyd0z","slide":10,"text":"Cleaner","textPreview":"Cleaner","textChars":7,"textLines":1,"bbox":[854,368,222,38]}
+{"kind":"textbox","id":"sh/byhgn29g","slide":10,"text":"data before reporting","textPreview":"data before reporting","textChars":21,"textLines":1,"bbox":[854,412,222,38]}
+{"kind":"shape","id":"sh/0je9cvix","slide":10,"bbox":[830,474,260,112]}
+{"kind":"shape","id":"sh/t47y1kre","slide":10,"bbox":[830,474,8,112]}
+{"kind":"textbox","id":"sh/il0rqd4v","slide":10,"text":"Earlier","textPreview":"Earlier","textChars":7,"textLines":1,"bbox":[854,496,222,38]}
+{"kind":"textbox","id":"sh/b6xkf6dc","slide":10,"text":"signals of service gaps","textPreview":"signals of service gaps","textChars":23,"textLines":1,"bbox":[854,540,222,38]}
+{"kind":"notes","id":"nt/q7q568","slide":10,"text":""}
