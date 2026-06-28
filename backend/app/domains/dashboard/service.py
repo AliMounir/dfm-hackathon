@@ -1,126 +1,84 @@
-"""Dashboard composition service.
+"""Dashboard composition service (v4).
 
-Uses the LLM agent when an API key is configured; otherwise (and on agent
-failure) returns a deterministic, signal-driven fallback plan so the endpoint
-always works — even before the OpenAI key is added.
+Precomputes the data menu, asks the agent (one LLM call) to curate it, then
+attaches the real values/data. Deterministic fallback when no key / on failure.
 """
 
 import logging
 
 from app.core.config import get_settings
-from app.domains.dashboard.schemas import DashboardPlan, WidgetSpec
-from app.domains.dashboard.tools import compute_data_signals, get_project_summary
+from app.domains.dashboard import analytics
+from app.domains.dashboard.schemas import Bilingual, DashboardPlan, KpiCard, Section
 
 logger = logging.getLogger(__name__)
 
+_TONES = ["emerald", "violet", "cyan", "amber", "rose"]
 
-def _t(fr: str, en: str) -> dict:
-    return {"fr": fr, "en": en}
+
+def _t(fr: str, en: str) -> Bilingual:
+    return Bilingual(fr=fr, en=en)
 
 
 class DashboardService:
     def compose(self, project_id: str) -> DashboardPlan:
-        settings = get_settings()
-        if settings.llm_configured:
-            try:
-                from app.domains.dashboard.agent import compose_dashboard
-
-                return compose_dashboard(project_id)
-            except Exception:
-                logger.exception("dashboard agent failed; using rule-based fallback")
-        return self._fallback(project_id)
-
-    def _fallback(self, project_id: str) -> DashboardPlan:
-        """Deterministic plan driven by compute_data_signals (no LLM)."""
-        summary = get_project_summary(project_id)
-        if "error" in summary:
+        menu = analytics.dashboard_menu(project_id)
+        if not menu["kpis"] and not menu["charts"]:
             return DashboardPlan(
                 project_id=project_id,
-                summary=_t("Projet inconnu.", "Unknown project."),
-                widgets=[],
-                generated_by="rule-based-fallback",
+                description=_t("Aucune donnée analysable.", "No analysable data."),
+                kpis=[], sections=[], generated_by="no-data",
             )
-        sig = compute_data_signals(project_id)
-        avail = summary["available"]
-        widgets: list[WidgetSpec] = []
-        p = 1
 
-        if avail["metrics"]:
-            widgets.append(WidgetSpec(
-                type="metric_cards", data_key="metrics", priority=p,
-                title=_t("Indicateurs clés", "Key metrics"),
-                rationale=_t("Vue d'ensemble chiffrée du projet.", "At-a-glance project numbers."),
-            )); p += 1
+        kpi_by = {k["id"]: k for k in menu["kpis"]}
+        chart_by = {c["id"]: c for c in menu["charts"]}
+        settings = get_settings()
 
-        if sig.get("high_severity_issue_count", 0) > 0 and avail["quality_issues"]:
-            widgets.append(WidgetSpec(
-                type="quality_issues", data_key="qualityIssues", priority=p,
-                title=_t("Problèmes de qualité prioritaires", "Priority data-quality issues"),
-                rationale=_t(
-                    f"{sig['high_severity_issue_count']} problème(s) de gravité élevée à corriger avant interprétation.",
-                    f"{sig['high_severity_issue_count']} high-severity issue(s) to fix before interpreting the data."),
-            )); p += 1
+        if settings.llm_configured:
+            try:
+                from app.domains.dashboard.agent import compose_design
 
-        if sig.get("below_target_months") or sig.get("seasonal_dip_month"):
-            month = sig.get("seasonal_dip_month") or (sig["below_target_months"][0] if sig.get("below_target_months") else "")
-            widgets.append(WidgetSpec(
-                type="seasonal_risk", data_key="derived", priority=p,
-                title=_t("Fenêtre de risque saisonnier", "Seasonal risk window"),
-                rationale=_t(
-                    f"Activité sous la cible / baisse notable autour de {month}.",
-                    f"Activity below target / notable drop around {month}."),
-                config={"highlight_month": month},
-            )); p += 1
+                d = compose_design(project_id, menu)
+                kpis = [
+                    KpiCard(tone=c.tone, icon=c.icon, title=c.title,
+                            value=kpi_by[c.id]["value"], helper=c.helper)
+                    for c in d.kpis if c.id in kpi_by
+                ]
+                sections = [
+                    Section(tone=c.tone, type=chart_by[c.id]["type"], title=c.title,
+                            insight=c.insight, data=chart_by[c.id]["data"])
+                    for c in d.sections if c.id in chart_by
+                ]
+                if kpis or sections:
+                    return DashboardPlan(
+                        project_id=project_id, description=d.description, kpis=kpis,
+                        sections=sections, generated_by=f"openai:{settings.llm_model}",
+                    )
+                logger.warning("agent returned no valid ids; using fallback")
+            except Exception:
+                logger.exception("dashboard agent failed; using rule-based fallback")
 
-        if avail["monthly_points"]:
-            widgets.append(WidgetSpec(
-                type="utilisation_trend", data_key="monthly", priority=p,
-                title=_t("Tendance d'utilisation vs cible", "Utilisation vs target"),
-                rationale=_t(
-                    f"Tendance des services {('en baisse' if sig.get('service_trend') == 'down' else 'à suivre')}.",
-                    f"Service trend is {sig.get('service_trend', 'flat')}."),
-            )); p += 1
+        return self._fallback(project_id, menu)
 
-        if sig.get("declining_sites"):
-            names = ", ".join(s["site"] for s in sig["declining_sites"])
-            widgets.append(WidgetSpec(
-                type="site_comparison", data_key="sites", priority=p,
-                title=_t("Comparaison par site", "Site comparison"),
-                rationale=_t(f"Sites en baisse : {names}.", f"Declining sites: {names}."),
-            )); p += 1
-
-        if sig.get("risks_rising") and avail["monthly_points"]:
-            widgets.append(WidgetSpec(
-                type="risk_trend", data_key="monthly", priority=p,
-                title=_t("Tendance des risques", "Risk trend"),
-                rationale=_t("Les cas à risque augmentent sur la période.", "At-risk cases rising over the period."),
-            )); p += 1
-
-        if avail["insights"]:
-            widgets.append(WidgetSpec(
-                type="insight_cards", data_key="insights", priority=p,
-                title=_t("Analyses", "Insights"),
-                rationale=_t("Pistes d'interprétation des données.", "Interpretation leads for the data."),
-            )); p += 1
-
-        if avail["has_story"]:
-            widgets.append(WidgetSpec(
-                type="impact_story", data_key="story", priority=p,
-                title=_t("Récit d'impact", "Impact story"),
-                rationale=_t("Synthèse narrative pour équipe/bailleurs.", "Narrative summary for team/donors."),
-            )); p += 1
-
-        widgets.append(WidgetSpec(
-            type="suggested_questions", data_key="suggestedQuestions", priority=p,
-            title=_t("Questions suggérées", "Suggested questions"),
-            rationale=_t("Point d'entrée pour interroger l'assistant.", "Entry point to ask the assistant."),
-        ))
-
+    def _fallback(self, project_id: str, menu: dict) -> DashboardPlan:
+        facts = analytics.project_facts(project_id)
+        kpis = [
+            KpiCard(tone=_TONES[i % len(_TONES)], icon="activity",
+                    title=_t(k["hint"], k["hint"]), value=k["value"], helper=Bilingual())
+            for i, k in enumerate(menu["kpis"][:5])
+        ]
+        sections = [
+            Section(tone=_TONES[i % len(_TONES)], type=c["type"],
+                    title=_t(c["hint"], c["hint"]),
+                    insight=_t("Calculé à partir des données.", "Computed from the data."),
+                    data=c["data"])
+            for i, c in enumerate(menu["charts"][:5])
+        ]
         return DashboardPlan(
             project_id=project_id,
-            summary=_t(
-                "Plan généré par règles (ajoutez une clé OpenAI pour l'agent).",
-                "Rule-based plan (add an OpenAI key to use the agent)."),
-            widgets=widgets,
-            generated_by="rule-based-fallback",
+            description=_t(
+                f"Ce projet contient {facts['n_records']} enregistrement(s) sur "
+                f"{facts['n_files']} fichier(s). (Ajoutez une clé OpenAI pour l'agent.)",
+                f"This project holds {facts['n_records']} record(s) across {facts['n_files']} "
+                "file(s). (Add an OpenAI key for the agent.)"),
+            kpis=kpis, sections=sections, generated_by="rule-based-fallback",
         )

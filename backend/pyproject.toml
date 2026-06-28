@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.32",
+    "python-multipart>=0.0.9",
     "pydantic>=2.9",
     "pydantic-settings>=2.5",
     "python-dotenv>=1.0",
@@ -17,6 +18,10 @@ dependencies = [
     "langchain-core>=0.3",
     "langchain-openai>=0.2",
     "langgraph>=0.2",
+    # Dashboard analytics: read + aggregate the data exports at runtime.
+    "pandas>=2.2",
+    "openpyxl>=3.1",
+    "lxml>=5.0",
 ]
 
 [dependency-groups]
@@ -24,6 +29,10 @@ dev = [
     "ruff>=0.7",
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
+    # Used by scripts/parse_data.py to profile the data exports into Markdown.
+    "pandas>=2.2",
+    "openpyxl>=3.1",
+    "lxml>=5.0",
 ]
 
 [tool.ruff]

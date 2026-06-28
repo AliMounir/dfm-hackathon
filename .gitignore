@@ -25,3 +25,8 @@ __pycache__/
 
 # Claude Code local tooling/state
 .claude/
+
+# Generated data artifacts (regenerate with backend/scripts/parse_data.py)
+data/projects/**/*.md
+data/**/_parsed.json
+data/DATA_OVERVIEW.md

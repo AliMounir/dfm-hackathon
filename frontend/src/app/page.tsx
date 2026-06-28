@@ -70,6 +70,7 @@ import {
   projects,
 } from "@/lib/projects";
 import { cn } from "@/lib/utils";
+import { AgentDashboardSection } from "@/features/dashboard/components/agent-dashboard-section";
 
 const copy = {
   fr: {
@@ -512,6 +513,9 @@ export default function Home() {
           </header>
 
           <div className="space-y-6 px-5 py-6 lg:px-8">
+            {selectedProject && (
+              <AgentDashboardSection projectId={selectedProject.id} language={language} />
+            )}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
                 <TabsTrigger

@@ -1,56 +1,75 @@
-"""Schemas for the dynamic dashboard composer agent.
+"""Schemas for the dynamic dashboard composer agent (v4).
 
-A ``DashboardPlan`` is the agent's output: an ordered list of widgets (chosen
-from the fixed catalog) for the frontend to render when a project is opened.
+Insight-focused. The agent freely CURATES a precomputed data menu: it selects
+KPIs and charts (by id), ORDERS them, assigns a tone + icon, writes titles and a
+one-line insight per chart, and a short description. One LLM call, no tool loop.
+
+  * ``DashboardDesign`` (+ ``KpiChoice`` / ``SectionChoice``) — the LLM OUTPUT
+    (closed schemas for OpenAI strict mode; references menu ids, no raw values).
+  * ``DashboardPlan`` (+ ``KpiCard`` / ``Section``) — the API response, with real
+    values/data attached from the menu.
+
 Mirrored on the frontend in ``frontend/src/features/dashboard/lib/types.ts``.
 """
 
 from typing import Literal
 
-from app.shared.schemas import AppBaseModel, LocalizedText
+from app.shared.schemas import AppBaseModel
 
-# The catalog of widgets the agent may choose from. It cannot invent new ones —
-# it selects, configures, and ranks these (see catalog.py for descriptions).
-WidgetType = Literal[
-    "metric_cards",
-    "utilisation_trend",
-    "risk_trend",
-    "site_comparison",
-    "quality_issues",
-    "insight_cards",
-    "impact_story",
-    "seasonal_risk",
-    "suggested_questions",
-]
-
-# Which slice of the project's data feeds a widget (the frontend reads this key).
-DataKey = Literal[
-    "metrics",
-    "monthly",
-    "sites",
-    "qualityIssues",
-    "insights",
-    "story",
-    "suggestedQuestions",
-    "derived",
-]
+Tone = Literal["emerald", "violet", "cyan", "amber", "rose"]
+Icon = Literal["activity", "users", "heart", "baby", "stethoscope", "alert",
+               "rain", "map", "file", "chart", "calendar", "shield"]
 
 
-class WidgetSpec(AppBaseModel):
-    """One widget the agent decided to show, with placement + justification."""
+class Bilingual(AppBaseModel):
+    fr: str = ""
+    en: str = ""
 
-    type: WidgetType
-    title: LocalizedText
-    data_key: DataKey
-    priority: int  # 1 = most important / shown first
-    rationale: LocalizedText  # why this matters for THIS project (FR-first)
-    config: dict = {}  # optional extras, e.g. {"highlight_month": "Apr"}
+
+# ── LLM output ──────────────────────────────────────────────────────────────
+
+class KpiChoice(AppBaseModel):
+    id: str  # a KPI id from the menu
+    tone: Tone = "emerald"
+    icon: Icon = "activity"
+    title: Bilingual
+    helper: Bilingual
+
+
+class SectionChoice(AppBaseModel):
+    id: str  # a chart id from the menu
+    tone: Tone = "emerald"
+    title: Bilingual
+    insight: Bilingual  # one sentence: what this chart reveals
+
+
+class DashboardDesign(AppBaseModel):
+    description: Bilingual
+    kpis: list[KpiChoice]
+    sections: list[SectionChoice]
+
+
+# ── API response ────────────────────────────────────────────────────────────
+
+class KpiCard(AppBaseModel):
+    tone: str
+    icon: str
+    title: Bilingual
+    value: str
+    helper: Bilingual
+
+
+class Section(AppBaseModel):
+    tone: str
+    type: str  # bar | line
+    title: Bilingual
+    insight: Bilingual
+    data: list
 
 
 class DashboardPlan(AppBaseModel):
-    """The agent's full plan for a project's dashboard."""
-
     project_id: str
-    summary: LocalizedText  # one-line "what to look at first"
-    widgets: list[WidgetSpec]
-    generated_by: str = ""  # e.g. "openai:gpt-4o-mini" or "rule-based-fallback"
+    description: Bilingual
+    kpis: list[KpiCard]
+    sections: list[Section]
+    generated_by: str = ""

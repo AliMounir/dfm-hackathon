@@ -47,7 +47,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       </div>
 
       {plan ? (
-        <DynamicDashboard project={project} plan={plan} />
+        <DynamicDashboard plan={plan} />
       ) : (
         <Card>
           <CardHeader>
