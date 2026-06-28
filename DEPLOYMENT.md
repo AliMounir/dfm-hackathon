@@ -31,7 +31,7 @@ https://your-railway-service.up.railway.app/health
 Set this Vercel variable to the Railway service URL, without `/api`:
 
 ```bash
-BACKEND_API_URL=https://your-railway-service.up.railway.app
+BACKEND_API_URL=https://dfm-hackathon-production.up.railway.app
 ```
 
 Prefer `BACKEND_API_URL`. `NEXT_PUBLIC_API_URL` is also accepted as a legacy
@@ -55,6 +55,10 @@ It should return `"configured": true`, `"ok": true`, and `"source":
 "BACKEND_API_URL"` (or `"NEXT_PUBLIC_API_URL"` if you are using the legacy
 fallback). If it says the backend URL is not set, add the variable in Vercel and
 redeploy.
+
+If the backend health check is OK but chat says `"Assistant not configured"` or
+`"generated_by": "no-llm"`, add `OPENAI_API_KEY` in Railway and redeploy the
+backend service.
 
 Also keep the existing Supabase variables in Vercel for uploads:
 
