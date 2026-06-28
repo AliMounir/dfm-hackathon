@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, useMemo, useState } from "react";
+import { type ComponentType, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -132,6 +132,8 @@ const copy = {
     workflowDone: "Termine",
     workflowActive: "En cours",
     workflowWaiting: "En attente",
+    workflowSaved: "Enregistre",
+    workflowFailed: "Erreur",
     uploadStageReceived: "Fichier recu",
     uploadStageFolder: "Dossier projet selectionne ou cree",
     uploadStageConvert: "Conversion XLSX vers Markdown",
@@ -216,6 +218,8 @@ const copy = {
     workflowDone: "Done",
     workflowActive: "In progress",
     workflowWaiting: "Waiting",
+    workflowSaved: "Saved",
+    workflowFailed: "Failed",
     uploadStageReceived: "File received",
     uploadStageFolder: "Project folder selected or created",
     uploadStageConvert: "XLSX converted to Markdown",
@@ -976,9 +980,45 @@ function SidebarTool({
 }
 
 type UploadFilePreview = {
+  file: File;
   name: string;
   size: string;
   kind: string;
+};
+
+type UploadStageKey =
+  | "received"
+  | "folder"
+  | "convert"
+  | "extract"
+  | "quality"
+  | "approval";
+
+type UploadStageState = "done" | "active" | "waiting" | "error";
+
+type UploadStageView = {
+  key: UploadStageKey;
+  state: UploadStageState;
+};
+
+type UploadResponse = {
+  batchId: string;
+  stages: Array<{
+    key: UploadStageKey;
+    status: UploadStageState;
+  }>;
+};
+
+type UploadBatchStatusResponse = {
+  batch: {
+    id: string;
+    status: string;
+    errorMessage: string | null;
+  };
+  stages: Array<{
+    key: UploadStageKey;
+    status: UploadStageState;
+  }>;
 };
 
 function UploadModal({
@@ -996,36 +1036,129 @@ function UploadModal({
     selectedProjectId ?? "auto",
   );
   const [uploadedFiles, setUploadedFiles] = useState<UploadFilePreview[]>([]);
+  const [submittedStages, setSubmittedStages] = useState<UploadStageView[] | null>(
+    null,
+  );
+  const [submittedBatchId, setSubmittedBatchId] = useState<string | null>(null);
+  const [submittedBatchStatus, setSubmittedBatchStatus] = useState<string | null>(
+    null,
+  );
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!submittedBatchId) return;
+
+    let cancelled = false;
+
+    async function refreshBatchStatus() {
+      try {
+        const response = await fetch(`/api/upload-batches/${submittedBatchId}`, {
+          cache: "no-store",
+        });
+        const payload = (await response.json()) as
+          | UploadBatchStatusResponse
+          | { error?: string };
+
+        if (!response.ok) {
+          throw new Error(
+            "error" in payload ? payload.error : "Could not refresh workflow.",
+          );
+        }
+
+        if (!("batch" in payload) || cancelled) return;
+
+        setSubmittedBatchStatus(payload.batch.status);
+        setSubmittedStages(
+          payload.stages.map((stage) => ({
+            key: stage.key,
+            state: stage.status,
+          })),
+        );
+
+        if (payload.batch.status === "failed" && payload.batch.errorMessage) {
+          setUploadError(payload.batch.errorMessage);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setUploadError(
+            error instanceof Error ? error.message : "Could not refresh workflow.",
+          );
+        }
+      }
+    }
+
+    refreshBatchStatus();
+    const intervalId = window.setInterval(refreshBatchStatus, 3000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [submittedBatchId]);
 
   function handleFiles(files: FileList | File[]) {
     const selectedFiles = Array.from(files).map((file) => ({
+      file,
       name: file.name,
       size: formatFileSize(file.size),
       kind: file.name.split(".").pop()?.toUpperCase() ?? "DATA",
     }));
 
     setUploadedFiles(selectedFiles);
+    setSubmittedStages(null);
+    setSubmittedBatchId(null);
+    setSubmittedBatchStatus(null);
+    setUploadError(null);
   }
 
   const hasFiles = uploadedFiles.length > 0;
-  const workflowProgress = hasFiles ? 72 : 6;
-  const workflowStages = [
-    labels.uploadStageReceived,
-    labels.uploadStageFolder,
-    labels.uploadStageConvert,
-    labels.uploadStageExtract,
-    labels.uploadStageQuality,
-    labels.uploadStageApproval,
-  ].map((stage, index) => ({
-    stage,
-    state: !hasFiles
-      ? "waiting"
-      : index < 4
-        ? "done"
-        : index === 4
-          ? "active"
-          : "waiting",
-  }));
+  const showWorkflow =
+    isSubmitting || submittedStages !== null || uploadError !== null;
+  const workflowStages = getUploadWorkflowStages(hasFiles, isSubmitting, submittedStages);
+  const workflowProgress = getUploadWorkflowProgress(workflowStages);
+
+  async function submitUpload() {
+    if (!hasFiles || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setUploadError(null);
+
+    const formData = new FormData();
+    formData.append("projectId", targetProjectId);
+    uploadedFiles.forEach((uploadFile) => {
+      formData.append("files", uploadFile.file);
+    });
+
+    try {
+      const response = await fetch("/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+      const payload = (await response.json()) as UploadResponse | { error?: string };
+
+      if (!response.ok) {
+        throw new Error("error" in payload ? payload.error : "Upload failed.");
+      }
+
+      if (!("batchId" in payload)) {
+        throw new Error("Upload response was missing workflow metadata.");
+      }
+
+      setSubmittedBatchId(payload.batchId);
+      setSubmittedBatchStatus("received");
+      setSubmittedStages(
+        payload.stages.map((stage) => ({
+          key: stage.key,
+          state: stage.status,
+        })),
+      );
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Upload failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <div
@@ -1122,14 +1255,34 @@ function UploadModal({
                 <div className="flex flex-col gap-3 border-b border-stone-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm font-semibold text-stone-950">
-                      {labels.workflowPreview}
+                      {showWorkflow ? labels.workflowPreview : labels.selectedFiles}
                     </p>
                     <p className="mt-1 text-sm text-stone-500">
-                      {uploadedFiles.length} {labels.selectedFiles.toLowerCase()}
+                      {submittedBatchId
+                        ? `Batch ${submittedBatchId.slice(0, 8)}`
+                        : `${uploadedFiles.length} ${labels.selectedFiles.toLowerCase()}`}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="info">{labels.workflowInProgress}</Badge>
+                    {showWorkflow && (
+                      <Badge
+                        variant={
+                          uploadError || submittedBatchStatus === "failed"
+                            ? "danger"
+                            : submittedBatchId
+                              ? "default"
+                              : "info"
+                        }
+                      >
+                        {uploadError || submittedBatchStatus === "failed"
+                          ? labels.workflowFailed
+                          : isSubmitting
+                            ? labels.workflowActive
+                            : submittedBatchId
+                              ? labels.workflowSaved
+                              : labels.workflowInProgress}
+                      </Badge>
+                    )}
                     <label className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-700 hover:bg-stone-50">
                       {labels.chooseFiles}
                       <input
@@ -1145,8 +1298,33 @@ function UploadModal({
                   </div>
                 </div>
 
-                <div className="grid gap-4 py-4 lg:grid-cols-[0.85fr_1fr]">
-                  <div className="space-y-2">
+                {!showWorkflow ? (
+                  <div className="flex flex-1 items-center justify-center py-8">
+                    <div className="w-full max-w-xl space-y-2">
+                      {uploadedFiles.map((file) => (
+                        <div
+                          key={`${file.name}-${file.size}`}
+                          className="flex items-center gap-3 rounded-md border border-stone-200 bg-stone-50 px-3 py-3"
+                        >
+                          <FileSpreadsheet
+                            className="h-4 w-4 shrink-0 text-[#2FA66A]"
+                            aria-hidden="true"
+                          />
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-stone-800">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-stone-500">
+                              {file.kind} - {file.size}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 py-4 lg:grid-cols-[0.85fr_1fr]">
+                    <div className="space-y-2">
                     {uploadedFiles.map((file) => (
                       <div
                         key={`${file.name}-${file.size}`}
@@ -1166,14 +1344,19 @@ function UploadModal({
                         </div>
                       </div>
                     ))}
-                  </div>
+                    </div>
 
-                  <div>
+                    <div>
+                    {uploadError && (
+                      <div className="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">
+                        {uploadError}
+                      </div>
+                    )}
                     <Progress value={workflowProgress} />
                     <div className="mt-4 space-y-2">
                       {workflowStages.map((stage) => (
                         <div
-                          key={stage.stage}
+                          key={stage.key}
                           className="flex items-center gap-3 rounded-md bg-stone-50 px-3 py-2"
                         >
                           <div
@@ -1205,7 +1388,7 @@ function UploadModal({
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-semibold text-stone-800">
-                              {stage.stage}
+                              {getUploadStageLabel(labels, stage.key)}
                             </p>
                             <p className="text-xs text-stone-500">
                               {stage.state === "done"
@@ -1218,8 +1401,9 @@ function UploadModal({
                         </div>
                       ))}
                     </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
@@ -1231,10 +1415,10 @@ function UploadModal({
           </Button>
           <Button
             className="bg-[#153B36] text-[#F5F3EF] hover:bg-[#153B36]/90"
-            disabled={!hasFiles}
-            onClick={onClose}
+            disabled={!hasFiles || isSubmitting || Boolean(submittedBatchId)}
+            onClick={submitUpload}
           >
-            {labels.startWorkflow}
+            {isSubmitting ? labels.workflowActive : labels.startWorkflow}
           </Button>
         </div>
       </div>
@@ -1708,6 +1892,61 @@ function getSidebarFilterOptions(projectId: string) {
   };
 
   return optionsByProject[projectId] ?? [];
+}
+
+function getUploadWorkflowStages(
+  hasFiles: boolean,
+  isSubmitting: boolean,
+  submittedStages: UploadStageView[] | null,
+): UploadStageView[] {
+  if (submittedStages) return submittedStages;
+
+  const initialStages: UploadStageKey[] = [
+    "received",
+    "folder",
+    "convert",
+    "extract",
+    "quality",
+    "approval",
+  ];
+
+  return initialStages.map((key, index) => ({
+    key,
+    state: !hasFiles
+      ? "waiting"
+      : isSubmitting
+        ? index === 0
+          ? "active"
+          : "waiting"
+        : index === 0
+          ? "done"
+          : index === 1
+            ? "active"
+            : "waiting",
+  }));
+}
+
+function getUploadWorkflowProgress(stages: UploadStageView[]) {
+  const completed = stages.filter((stage) => stage.state === "done").length;
+  const active = stages.some((stage) => stage.state === "active") ? 0.5 : 0;
+
+  return ((completed + active) / stages.length) * 100;
+}
+
+function getUploadStageLabel(
+  labels: (typeof copy)["fr"],
+  key: UploadStageKey,
+) {
+  const labelsByKey: Record<UploadStageKey, string> = {
+    received: labels.uploadStageReceived,
+    folder: labels.uploadStageFolder,
+    convert: labels.uploadStageConvert,
+    extract: labels.uploadStageExtract,
+    quality: labels.uploadStageQuality,
+    approval: labels.uploadStageApproval,
+  };
+
+  return labelsByKey[key];
 }
 
 function formatFileSize(size: number) {

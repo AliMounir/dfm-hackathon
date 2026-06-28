@@ -31,6 +31,7 @@ as WHO guidance.
 │       └── lib/         # projects data (TS contract) + utils
 ├── backend/    # FastAPI service (domain-per-folder) — see backend/README.md
 │   └── app/domains/  # projects, data_quality, health_gaps, insights, chat, files
+├── supabase/   # SQL schema for Storage bucket + upload metadata/workflow tables
 └── data/       # M&E project data (one folder per project), shared by both
     └── projects/  # mchp, soameva, miray-tb-*, mafy, tia-longo, profess
 ```
@@ -46,8 +47,34 @@ Frontend:
 ```bash
 cd frontend
 npm install
+cp .env.example .env.local   # paste Supabase values before testing uploads
 npm run dev          # http://localhost:3000
 ```
+
+Supabase uploads:
+
+1. Create a Supabase project.
+2. Run `supabase/schema.sql` in the Supabase SQL editor.
+3. Paste API values into `frontend/.env.local`.
+4. Use the upload button in the left sidebar.
+
+The upload UI posts files to the Next.js route `POST /api/uploads`, which stores
+source files in Supabase Storage and writes rows to `projects`,
+`upload_batches`, `project_files`, and `upload_workflow_steps`. The bucket is
+private; the service-role key stays server-side.
+
+Useful Supabase-backed prototype routes:
+
+- `GET /api/projects`
+- `POST /api/projects`
+- `POST /api/uploads`
+- `GET /api/projects/:projectId/files`
+- `PATCH /api/upload-batches/:batchId/steps`
+- `GET /api/supabase/health`
+
+After adding `frontend/.env.local`, visit
+`http://localhost:3000/api/supabase/health` to confirm the Supabase URL,
+service-role key, private bucket, and required tables are reachable.
 
 Backend:
 
