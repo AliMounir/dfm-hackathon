@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { type ComponentType, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
@@ -433,8 +434,15 @@ export default function Home() {
         >
           <div className={cn("shrink-0 border-b border-[#F5F3EF]/10 py-5", isLeftSidebarOpen ? "px-5" : "px-2")}>
             <div className={cn("flex items-center gap-3", !isLeftSidebarOpen && "justify-center")}>
-              <div className={cn("flex h-10 w-10 items-center justify-center rounded-md bg-[#F4A623] text-[#153B36] shadow-sm", !isLeftSidebarOpen && "hidden")}>
-                <HeartPulse className="h-5 w-5" aria-hidden="true" />
+              <div className={cn("relative h-14 w-14 overflow-hidden rounded-2xl shadow-sm ring-1 ring-[#F5F3EF]/15", !isLeftSidebarOpen && "hidden")}>
+                <Image
+                  src="/hazava.png"
+                  alt="Hazava AI"
+                  fill
+                  className="rounded-2xl object-cover"
+                  sizes="56px"
+                  priority
+                />
               </div>
               <div className={cn("min-w-0 flex-1", !isLeftSidebarOpen && "hidden")}>
                 <h1 className="text-lg font-semibold tracking-normal text-[#F5F3EF]">
