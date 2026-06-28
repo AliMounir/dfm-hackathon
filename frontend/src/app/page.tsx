@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, useMemo, useState } from "react";
+import { type ComponentType, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -28,13 +28,22 @@ import {
   Megaphone,
   MessageSquareText,
   Microscope,
-  Settings,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  Paperclip,
+  RefreshCw,
+  Send,
   ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
   Stethoscope,
   TrendingDown,
   TrendingUp,
+  Upload,
   Users,
+  X,
 } from "lucide-react";
 import {
   Bar,
@@ -74,8 +83,8 @@ import { AgentDashboardSection } from "@/features/dashboard/components/agent-das
 
 const copy = {
   fr: {
-    appTitle: "DFM M&E Assistant",
-    appSubtitle: "Qualite, interpretation et rapports",
+    appTitle: "Hazava AI",
+    appSubtitle: "Assistant M&E pour DFM",
     overview: "Vue ensemble",
     allProjects: "Tous les projets",
     addProject: "Ajouter un projet",
@@ -103,10 +112,43 @@ const copy = {
     options: "Options",
     qualityMode: "Qualite des donnees",
     reportMode: "Rapport",
-    settings: "Parametres",
+    uploadData: "Importer",
+    uploadTitle: "Importer des donnees",
+    uploadLead:
+      "Ajoutez des exports Excel, CSV, REDCap, DHIS2 ou registres, puis choisissez le projet de destination.",
+    uploadDropTitle: "Glissez vos fichiers ici",
+    uploadDropHelp: "ou choisissez des fichiers depuis votre ordinateur",
+    chooseFiles: "Choisir des fichiers",
+    selectedFiles: "Fichiers selectionnes",
+    noFilesSelected: "Aucun fichier selectionne",
+    projectAssignment: "Affectation projet",
+    targetProject: "Projet cible",
+    autoAssign: "Affectation automatique",
+    autoAssignHelp: "Detecter le projet depuis le nom du fichier",
+    createNewProject: "Creer un nouveau projet",
+    newProjectNameUpload: "Nom du nouveau projet",
+    workflowPreview: "Suivi du workflow",
+    workflowReady: "Pret a traiter",
+    workflowInProgress: "Workflow prepare",
+    workflowDone: "Termine",
+    workflowActive: "En cours",
+    workflowWaiting: "En attente",
+    workflowSaved: "Enregistre",
+    workflowFailed: "Erreur",
+    uploadStageReceived: "Fichier recu",
+    uploadStageFolder: "Dossier projet selectionne ou cree",
+    uploadStageConvert: "Conversion XLSX vers Markdown",
+    uploadStageExtract: "Lecture et extraction des informations",
+    uploadStageQuality: "Donnees manquantes signalees",
+    uploadStageApproval: "Validation utilisateur avant import final",
+    startWorkflow: "Lancer le workflow",
+    filters: "Filtres",
+    close: "Fermer",
+    applyFilters: "Appliquer",
+    startDate: "Date debut",
+    endDate: "Date fin",
+    filterContext: "Contexte",
     language: "FR",
-    ask: "Poser une question",
-    askPlaceholder: "Ex: Quels CSB ont le plus de cas compliques ?",
     suggestedAction: "Action suggeree",
     whyItMatters: "Pourquoi c'est important",
     noProject:
@@ -127,8 +169,8 @@ const copy = {
     annual: "Annuel",
   },
   en: {
-    appTitle: "DFM M&E Assistant",
-    appSubtitle: "Quality, interpretation, and reporting",
+    appTitle: "Hazava AI",
+    appSubtitle: "M&E Assistant for DFM",
     overview: "Overview",
     allProjects: "All projects",
     addProject: "Add project",
@@ -156,10 +198,43 @@ const copy = {
     options: "Options",
     qualityMode: "Data quality",
     reportMode: "Report",
-    settings: "Settings",
+    uploadData: "Upload",
+    uploadTitle: "Upload data",
+    uploadLead:
+      "Add Excel, CSV, REDCap, DHIS2, or register exports, then choose the destination project.",
+    uploadDropTitle: "Drag files here",
+    uploadDropHelp: "or choose files from your computer",
+    chooseFiles: "Choose files",
+    selectedFiles: "Selected files",
+    noFilesSelected: "No files selected",
+    projectAssignment: "Project assignment",
+    targetProject: "Target project",
+    autoAssign: "Auto assign",
+    autoAssignHelp: "Detect the project from the file name",
+    createNewProject: "Create new project",
+    newProjectNameUpload: "New project name",
+    workflowPreview: "Workflow progress",
+    workflowReady: "Ready to process",
+    workflowInProgress: "Workflow prepared",
+    workflowDone: "Done",
+    workflowActive: "In progress",
+    workflowWaiting: "Waiting",
+    workflowSaved: "Saved",
+    workflowFailed: "Failed",
+    uploadStageReceived: "File received",
+    uploadStageFolder: "Project folder selected or created",
+    uploadStageConvert: "XLSX converted to Markdown",
+    uploadStageExtract: "File read and information extracted",
+    uploadStageQuality: "Missing data flagged",
+    uploadStageApproval: "User approval before final import",
+    startWorkflow: "Start workflow",
+    filters: "Filters",
+    close: "Close",
+    applyFilters: "Apply",
+    startDate: "Start date",
+    endDate: "End date",
+    filterContext: "Context",
     language: "EN",
-    ask: "Ask question",
-    askPlaceholder: "Example: Which facilities have the most complicated cases?",
     suggestedAction: "Suggested action",
     whyItMatters: "Why it matters",
     noProject: "Select a project on the left to see its detailed dashboard.",
@@ -214,6 +289,10 @@ export default function Home() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [customProjects, setCustomProjects] = useState<Project[]>([]);
@@ -317,30 +396,51 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-neutral-100 text-stone-950">
       <div className="flex min-h-screen flex-col lg:flex-row">
-        <aside className="flex w-full flex-col bg-[#153b36] text-white lg:fixed lg:inset-y-0 lg:h-screen lg:w-[320px]">
-          <div className="shrink-0 border-b border-white/10 px-5 py-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white text-[#153b36]">
+        <aside
+          className={cn(
+            "flex w-full flex-col bg-[#153B36] text-[#F5F3EF] transition-[width] duration-200 lg:fixed lg:inset-y-0 lg:h-screen",
+            isLeftSidebarOpen ? "lg:w-[320px]" : "lg:w-[72px]",
+          )}
+        >
+          <div className={cn("shrink-0 border-b border-[#F5F3EF]/10 py-5", isLeftSidebarOpen ? "px-5" : "px-2")}>
+            <div className={cn("flex items-center gap-3", !isLeftSidebarOpen && "justify-center")}>
+              <div className={cn("flex h-10 w-10 items-center justify-center rounded-md bg-[#F4A623] text-[#153B36] shadow-sm", !isLeftSidebarOpen && "hidden")}>
                 <HeartPulse className="h-5 w-5" aria-hidden="true" />
               </div>
-              <div>
-                <h1 className="text-lg font-semibold tracking-normal">
+              <div className={cn("min-w-0 flex-1", !isLeftSidebarOpen && "hidden")}>
+                <h1 className="text-lg font-semibold tracking-normal text-[#F5F3EF]">
                   {t.appTitle}
                 </h1>
-                <p className="text-xs text-white/70">{t.appSubtitle}</p>
+                <p className="text-xs font-medium text-[#F5F3EF]/70">
+                  {t.appSubtitle}
+                </p>
               </div>
+              <Button
+                title={isLeftSidebarOpen ? "Collapse navigation" : "Open navigation"}
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0 text-[#F5F3EF] hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]"
+                onClick={() => setIsLeftSidebarOpen((current) => !current)}
+              >
+                {isLeftSidebarOpen ? (
+                  <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
+                )}
+              </Button>
             </div>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="px-4 py-4">
+            <div className={cn("py-4", isLeftSidebarOpen ? "px-4" : "px-2")}>
               <div className="space-y-1">
                 <button
                   className={cn(
                     "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold transition-colors",
+                    !isLeftSidebarOpen && "justify-center px-0",
                     selectedProjectId === null
-                      ? "bg-white text-[#153b36]"
-                      : "text-white/80 hover:bg-white/10 hover:text-white",
+                      ? "bg-[#F5F3EF] text-[#153B36]"
+                      : "text-[#F5F3EF]/80 hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
                   )}
                   onClick={() => {
                     setSelectedProjectId(null);
@@ -349,7 +449,9 @@ export default function Home() {
                   }}
                 >
                   <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
-                  <span className="min-w-0 flex-1 truncate">{t.overview}</span>
+                  <span className={cn("min-w-0 flex-1 truncate", !isLeftSidebarOpen && "hidden")}>
+                    {t.overview}
+                  </span>
                 </button>
 
                 {projectList.map((project, index) => {
@@ -362,9 +464,10 @@ export default function Home() {
                       <button
                         className={cn(
                           "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left transition-colors",
+                          !isLeftSidebarOpen && "justify-center px-0",
                           active
-                            ? "bg-white text-[#153b36]"
-                            : "text-white/80 hover:bg-white/10 hover:text-white",
+                            ? "bg-[#F5F3EF] text-[#153B36]"
+                            : "text-[#F5F3EF]/80 hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
                         )}
                         onClick={() => {
                           if (active) {
@@ -379,20 +482,21 @@ export default function Home() {
                         }}
                       >
                         <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                        <span className={cn("min-w-0 flex-1 truncate text-sm font-semibold", !isLeftSidebarOpen && "hidden")}>
                           {project.name}
                         </span>
                         <ChevronRight
                           className={cn(
                             "h-4 w-4 shrink-0 transition-transform",
                             expanded && "rotate-90",
+                            !isLeftSidebarOpen && "hidden",
                           )}
                           aria-hidden="true"
                         />
                       </button>
 
-                      {expanded && project.sections.length > 0 && (
-                        <div className="mb-2 mt-1 border-l border-white/10 pl-3">
+                      {isLeftSidebarOpen && expanded && project.sections.length > 0 && (
+                        <div className="mb-2 mt-1 border-l border-[#F4A623]/40 pl-3">
                           <div className="space-y-1">
                             {project.sections.map((section) => (
                               <ProjectSectionNav
@@ -415,15 +519,20 @@ export default function Home() {
                 })}
 
                 <button
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold text-[#F5F3EF]/70 transition-colors hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
+                    !isLeftSidebarOpen && "justify-center px-0",
+                  )}
                   onClick={() => setIsAdding((current) => !current)}
                 >
                   <FolderPlus className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="min-w-0 flex-1 truncate">{t.addProject}</span>
+                  <span className={cn("min-w-0 flex-1 truncate", !isLeftSidebarOpen && "hidden")}>
+                    {t.addProject}
+                  </span>
                 </button>
 
-                {isAdding && (
-                  <div className="flex gap-2 rounded-md bg-white/10 p-2">
+                {isLeftSidebarOpen && isAdding && (
+                  <div className="flex gap-2 rounded-md bg-[#F5F3EF]/10 p-2">
                     <Input
                       value={newProjectName}
                       onChange={(event) => setNewProjectName(event.target.value)}
@@ -431,7 +540,7 @@ export default function Home() {
                         if (event.key === "Enter") addProject();
                       }}
                       placeholder={t.newProjectPlaceholder}
-                      className="border-white/10 bg-white text-stone-950"
+                      className="border-[#F5F3EF]/10 bg-[#F5F3EF] text-stone-950"
                     />
                     <Button
                       title={t.addProject}
@@ -445,19 +554,15 @@ export default function Home() {
                 )}
               </div>
             </div>
-
-            {selectedProject && (
-              <SidebarFilters
-                language={language}
-                selectedProjectId={selectedProject.id}
-                labels={t}
-              />
-            )}
           </div>
 
-          <div className="shrink-0 border-t border-white/10 p-4">
-            <div className="grid grid-cols-3 gap-2">
-              <SidebarTool icon={FileText} label={t.reportMode} />
+          <div className={cn("shrink-0 border-t border-[#F5F3EF]/10 p-4", !isLeftSidebarOpen && "px-2")}>
+            <div className={cn("grid gap-2", isLeftSidebarOpen ? "grid-cols-3" : "grid-cols-1")}>
+              <SidebarTool
+                icon={Upload}
+                label={t.uploadData}
+                onClick={() => setIsUploadModalOpen(true)}
+              />
               <SidebarTool
                 icon={Languages}
                 label={language === "fr" ? "English" : "Francais"}
@@ -465,12 +570,22 @@ export default function Home() {
                   setLanguage((current) => (current === "fr" ? "en" : "fr"))
                 }
               />
-              <SidebarTool icon={Settings} label={t.settings} />
+              <SidebarTool
+                icon={SlidersHorizontal}
+                label={t.filters}
+                onClick={() => setIsFilterModalOpen(true)}
+              />
             </div>
           </div>
         </aside>
 
-        <section className="flex min-h-screen flex-1 flex-col lg:ml-[320px]">
+        <section
+          className={cn(
+            "flex min-h-screen flex-1 flex-col transition-[margin] duration-200",
+            isLeftSidebarOpen ? "lg:ml-[320px]" : "lg:ml-[72px]",
+            isAssistantOpen ? "lg:mr-[380px]" : "lg:mr-14",
+          )}
+        >
           <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/95 px-5 py-4 backdrop-blur lg:px-8">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div>
@@ -495,19 +610,6 @@ export default function Home() {
                       : selectedProject.focus[language]
                     : t.overviewLead}
                 </p>
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="relative min-w-0 sm:w-[360px]">
-                  <MessageSquareText
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
-                    aria-hidden="true"
-                  />
-                  <Input placeholder={t.askPlaceholder} className="pl-9" />
-                </div>
-                <Button>
-                  <Bot className="h-4 w-4" aria-hidden="true" />
-                  {t.ask}
-                </Button>
               </div>
             </div>
           </header>
@@ -826,6 +928,34 @@ export default function Home() {
             </div>
           </div>
         </section>
+        <AssistantPanel
+          isOpen={isAssistantOpen}
+          language={language}
+          selectedProject={selectedProject}
+          selectedSection={selectedSection}
+          onToggle={() => setIsAssistantOpen((current) => !current)}
+        />
+        {isUploadModalOpen && (
+          <UploadModal
+            labels={t}
+            projects={projectList}
+            selectedProjectId={selectedProject?.id ?? null}
+            onClose={() => setIsUploadModalOpen(false)}
+          />
+        )}
+        <FilterModal
+          isOpen={isFilterModalOpen}
+          labels={t}
+          selectedProjectId={selectedProject?.id ?? null}
+          selectedProjectName={
+            selectedProject
+              ? selectedSection
+                ? `${selectedProject.name} / ${selectedSection.label[language]}`
+                : selectedProject.name
+              : t.overview
+          }
+          onClose={() => setIsFilterModalOpen(false)}
+        />
       </div>
     </main>
   );
@@ -846,10 +976,672 @@ function SidebarTool({
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="flex h-10 items-center justify-center rounded-md bg-white/10 text-white/80 hover:bg-white/15 hover:text-white"
+      className="flex h-10 items-center justify-center rounded-md bg-[#F5F3EF]/10 text-[#F5F3EF]/80 hover:bg-[#F4A623]/20 hover:text-[#F5F3EF]"
     >
       <Icon className="h-4 w-4" aria-hidden={true} />
     </button>
+  );
+}
+
+type UploadFilePreview = {
+  file: File;
+  name: string;
+  size: string;
+  kind: string;
+};
+
+type UploadStageKey =
+  | "received"
+  | "folder"
+  | "convert"
+  | "extract"
+  | "quality"
+  | "approval";
+
+type UploadStageState = "done" | "active" | "waiting" | "error";
+
+type UploadStageView = {
+  key: UploadStageKey;
+  state: UploadStageState;
+};
+
+type UploadResponse = {
+  batchId: string;
+  stages: Array<{
+    key: UploadStageKey;
+    status: UploadStageState;
+  }>;
+};
+
+type UploadBatchStatusResponse = {
+  batch: {
+    id: string;
+    status: string;
+    errorMessage: string | null;
+  };
+  stages: Array<{
+    key: UploadStageKey;
+    status: UploadStageState;
+  }>;
+};
+
+function UploadModal({
+  labels,
+  projects,
+  selectedProjectId,
+  onClose,
+}: {
+  labels: (typeof copy)["fr"];
+  projects: Project[];
+  selectedProjectId: string | null;
+  onClose: () => void;
+}) {
+  const [targetProjectId, setTargetProjectId] = useState(
+    selectedProjectId ?? "auto",
+  );
+  const [uploadedFiles, setUploadedFiles] = useState<UploadFilePreview[]>([]);
+  const [submittedStages, setSubmittedStages] = useState<UploadStageView[] | null>(
+    null,
+  );
+  const [submittedBatchId, setSubmittedBatchId] = useState<string | null>(null);
+  const [submittedBatchStatus, setSubmittedBatchStatus] = useState<string | null>(
+    null,
+  );
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!submittedBatchId) return;
+
+    let cancelled = false;
+
+    async function refreshBatchStatus() {
+      try {
+        const response = await fetch(`/api/upload-batches/${submittedBatchId}`, {
+          cache: "no-store",
+        });
+        const payload = (await response.json()) as
+          | UploadBatchStatusResponse
+          | { error?: string };
+
+        if (!response.ok) {
+          throw new Error(
+            "error" in payload ? payload.error : "Could not refresh workflow.",
+          );
+        }
+
+        if (!("batch" in payload) || cancelled) return;
+
+        setSubmittedBatchStatus(payload.batch.status);
+        setSubmittedStages(
+          payload.stages.map((stage) => ({
+            key: stage.key,
+            state: stage.status,
+          })),
+        );
+
+        if (payload.batch.status === "failed" && payload.batch.errorMessage) {
+          setUploadError(payload.batch.errorMessage);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setUploadError(
+            error instanceof Error ? error.message : "Could not refresh workflow.",
+          );
+        }
+      }
+    }
+
+    refreshBatchStatus();
+    const intervalId = window.setInterval(refreshBatchStatus, 3000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [submittedBatchId]);
+
+  function handleFiles(files: FileList | File[]) {
+    const selectedFiles = Array.from(files).map((file) => ({
+      file,
+      name: file.name,
+      size: formatFileSize(file.size),
+      kind: file.name.split(".").pop()?.toUpperCase() ?? "DATA",
+    }));
+
+    setUploadedFiles(selectedFiles);
+    setSubmittedStages(null);
+    setSubmittedBatchId(null);
+    setSubmittedBatchStatus(null);
+    setUploadError(null);
+  }
+
+  const hasFiles = uploadedFiles.length > 0;
+  const showWorkflow =
+    isSubmitting || submittedStages !== null || uploadError !== null;
+  const workflowStages = getUploadWorkflowStages(hasFiles, isSubmitting, submittedStages);
+  const workflowProgress = getUploadWorkflowProgress(workflowStages);
+
+  async function submitUpload() {
+    if (!hasFiles || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setUploadError(null);
+
+    const formData = new FormData();
+    formData.append("projectId", targetProjectId);
+    uploadedFiles.forEach((uploadFile) => {
+      formData.append("files", uploadFile.file);
+    });
+
+    try {
+      const response = await fetch("/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+      const payload = (await response.json()) as UploadResponse | { error?: string };
+
+      if (!response.ok) {
+        throw new Error("error" in payload ? payload.error : "Upload failed.");
+      }
+
+      if (!("batchId" in payload)) {
+        throw new Error("Upload response was missing workflow metadata.");
+      }
+
+      setSubmittedBatchId(payload.batchId);
+      setSubmittedBatchStatus("received");
+      setSubmittedStages(
+        payload.stages.map((stage) => ({
+          key: stage.key,
+          state: stage.status,
+        })),
+      );
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Upload failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/45 px-4 py-6 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="upload-title"
+    >
+      <div className="flex h-[min(760px,calc(100vh-3rem))] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-stone-200 bg-[#F5F3EF] shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-stone-200 bg-white px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#2FA66A]">
+              {labels.uploadData}
+            </p>
+            <h2
+              id="upload-title"
+              className="mt-1 text-lg font-semibold tracking-normal text-[#153B36]"
+            >
+              {labels.uploadTitle}
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-stone-600">
+              {labels.uploadLead}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            title={labels.close}
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col gap-4 p-5">
+          <div className="flex flex-col gap-2 rounded-lg border border-stone-200 bg-white p-3 sm:flex-row sm:items-center">
+            <span className="text-sm font-semibold text-stone-700">
+              {labels.targetProject}
+            </span>
+            <select
+              value={targetProjectId}
+              onChange={(event) => setTargetProjectId(event.target.value)}
+              className="h-10 min-w-0 flex-1 rounded-md border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-800 outline-none ring-[#2FA66A]/30 transition focus:ring-4"
+            >
+              <option value="auto">{labels.autoAssign}</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+              <option value="new">{labels.createNewProject}</option>
+            </select>
+          </div>
+
+          <div
+            className={cn(
+              "flex min-h-0 flex-1 flex-col rounded-lg border-2 bg-white",
+              hasFiles
+                ? "border-[#2FA66A]/30"
+                : "items-center justify-center border-dashed border-[#2FA66A]/40 px-6 py-10 text-center",
+            )}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              handleFiles(event.dataTransfer.files);
+            }}
+          >
+            {!hasFiles ? (
+              <>
+                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-md bg-[#153B36] text-[#F5F3EF]">
+                  <Upload className="h-7 w-7" aria-hidden="true" />
+                </div>
+                <p className="text-xl font-semibold tracking-normal text-stone-950">
+                  {labels.uploadDropTitle}
+                </p>
+                <p className="mt-2 max-w-sm text-sm leading-6 text-stone-500">
+                  {labels.uploadDropHelp}
+                </p>
+                <label className="mt-6 inline-flex h-10 cursor-pointer items-center justify-center rounded-md bg-[#F4A623] px-4 text-sm font-semibold text-[#153B36] hover:bg-[#F4A623]/90">
+                  {labels.chooseFiles}
+                  <input
+                    type="file"
+                    multiple
+                    accept=".xlsx,.xls,.csv,.tsv,.json,.zip"
+                    className="sr-only"
+                    onChange={(event) => {
+                      if (event.target.files) handleFiles(event.target.files);
+                    }}
+                  />
+                </label>
+              </>
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-5">
+                <div className="flex flex-col gap-3 border-b border-stone-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-stone-950">
+                      {showWorkflow ? labels.workflowPreview : labels.selectedFiles}
+                    </p>
+                    <p className="mt-1 text-sm text-stone-500">
+                      {submittedBatchId
+                        ? `Batch ${submittedBatchId.slice(0, 8)}`
+                        : `${uploadedFiles.length} ${labels.selectedFiles.toLowerCase()}`}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {showWorkflow && (
+                      <Badge
+                        variant={
+                          uploadError || submittedBatchStatus === "failed"
+                            ? "danger"
+                            : submittedBatchId
+                              ? "default"
+                              : "info"
+                        }
+                      >
+                        {uploadError || submittedBatchStatus === "failed"
+                          ? labels.workflowFailed
+                          : isSubmitting
+                            ? labels.workflowActive
+                            : submittedBatchId
+                              ? labels.workflowSaved
+                              : labels.workflowInProgress}
+                      </Badge>
+                    )}
+                    <label className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-700 hover:bg-stone-50">
+                      {labels.chooseFiles}
+                      <input
+                        type="file"
+                        multiple
+                        accept=".xlsx,.xls,.csv,.tsv,.json,.zip"
+                        className="sr-only"
+                        onChange={(event) => {
+                          if (event.target.files) handleFiles(event.target.files);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {!showWorkflow ? (
+                  <div className="flex flex-1 items-center justify-center py-8">
+                    <div className="w-full max-w-xl space-y-2">
+                      {uploadedFiles.map((file) => (
+                        <div
+                          key={`${file.name}-${file.size}`}
+                          className="flex items-center gap-3 rounded-md border border-stone-200 bg-stone-50 px-3 py-3"
+                        >
+                          <FileSpreadsheet
+                            className="h-4 w-4 shrink-0 text-[#2FA66A]"
+                            aria-hidden="true"
+                          />
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-stone-800">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-stone-500">
+                              {file.kind} - {file.size}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 py-4 lg:grid-cols-[0.85fr_1fr]">
+                    <div className="space-y-2">
+                    {uploadedFiles.map((file) => (
+                      <div
+                        key={`${file.name}-${file.size}`}
+                        className="flex items-center gap-3 rounded-md border border-stone-200 bg-stone-50 px-3 py-2"
+                      >
+                        <FileSpreadsheet
+                          className="h-4 w-4 shrink-0 text-[#2FA66A]"
+                          aria-hidden="true"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-stone-800">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-stone-500">
+                            {file.kind} - {file.size}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    </div>
+
+                    <div>
+                    {uploadError && (
+                      <div className="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">
+                        {uploadError}
+                      </div>
+                    )}
+                    <Progress value={workflowProgress} />
+                    <div className="mt-4 space-y-2">
+                      {workflowStages.map((stage) => (
+                        <div
+                          key={stage.key}
+                          className="flex items-center gap-3 rounded-md bg-stone-50 px-3 py-2"
+                        >
+                          <div
+                            className={cn(
+                              "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+                              stage.state === "done"
+                                ? "bg-[#2FA66A] text-white"
+                                : stage.state === "active"
+                                  ? "bg-[#F4A623] text-[#153B36]"
+                                  : "bg-stone-200 text-stone-500",
+                            )}
+                          >
+                            {stage.state === "done" ? (
+                              <CheckCircle2
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
+                            ) : stage.state === "active" ? (
+                              <RefreshCw
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <ClipboardList
+                                className="h-4 w-4"
+                                aria-hidden="true"
+                              />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-stone-800">
+                              {getUploadStageLabel(labels, stage.key)}
+                            </p>
+                            <p className="text-xs text-stone-500">
+                              {stage.state === "done"
+                                ? labels.workflowDone
+                                : stage.state === "active"
+                                  ? labels.workflowActive
+                                  : labels.workflowWaiting}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-stone-200 bg-white px-5 py-4">
+          <Button variant="outline" onClick={onClose}>
+            {labels.close}
+          </Button>
+          <Button
+            className="bg-[#153B36] text-[#F5F3EF] hover:bg-[#153B36]/90"
+            disabled={!hasFiles || isSubmitting || Boolean(submittedBatchId)}
+            onClick={submitUpload}
+          >
+            {isSubmitting ? labels.workflowActive : labels.startWorkflow}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AssistantPanel({
+  isOpen,
+  language,
+  selectedProject,
+  selectedSection,
+  onToggle,
+}: {
+  isOpen: boolean;
+  language: Language;
+  selectedProject?: Project;
+  selectedSection?: ProjectSection;
+  onToggle: () => void;
+}) {
+  const [draft, setDraft] = useState("");
+  const isFrench = language === "fr";
+  const contextLabel = selectedProject
+    ? selectedSection
+      ? `${selectedProject.name} / ${selectedSection.label[language]}`
+      : selectedProject.name
+    : isFrench
+      ? "Tous les projets"
+      : "All projects";
+  const suggestions = isFrench
+    ? [
+        "Quels changements demandent une attention cette semaine ?",
+        "Quels controles qualite faut-il lancer en priorite ?",
+        "Prepare une synthese courte pour une reunion projet.",
+      ]
+    : [
+        "Which changes need attention this week?",
+        "Which quality checks should run first?",
+        "Prepare a short summary for a project meeting.",
+      ];
+
+  if (!isOpen) {
+    return (
+      <aside className="fixed inset-y-0 right-0 z-20 hidden w-14 flex-col border-l border-stone-200 bg-white shadow-sm lg:flex">
+        <button
+          type="button"
+          aria-label={isFrench ? "Ouvrir l'assistant" : "Open assistant"}
+          title={isFrench ? "Ouvrir l'assistant" : "Open assistant"}
+          className="flex h-14 items-center justify-center border-b border-stone-200 text-stone-600 hover:bg-stone-100 hover:text-stone-950"
+          onClick={onToggle}
+        >
+          <PanelRightOpen className="h-5 w-5" aria-hidden="true" />
+        </button>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="-rotate-90 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-stone-400">
+            {isFrench ? "Assistant" : "Assistant"}
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="fixed inset-y-0 right-0 z-20 hidden w-[380px] flex-col border-l border-stone-200 bg-white shadow-sm lg:flex">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-stone-200 px-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#153B36] text-[#F5F3EF] ring-2 ring-[#F4A623]/25">
+            <Bot className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-semibold text-stone-950">
+              {isFrench ? "Assistant M&E" : "M&E Assistant"}
+            </h2>
+            <p className="truncate text-xs text-stone-500">{contextLabel}</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          title={isFrench ? "Fermer l'assistant" : "Close assistant"}
+          onClick={onToggle}
+        >
+          <PanelRightClose className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      </div>
+
+      <div className="shrink-0 border-b border-stone-100 p-4">
+        <div className="mb-3 flex flex-wrap gap-2">
+          <Badge variant="default">{isFrench ? "Francais" : "English"}</Badge>
+          <Badge variant="info">{isFrench ? "Contexte actif" : "Active context"}</Badge>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <AssistantAction
+            icon={MessageSquareText}
+            label={isFrench ? "Question" : "Question"}
+          />
+          <AssistantAction
+            icon={SlidersHorizontal}
+            label={isFrench ? "Mode" : "Mode"}
+          />
+          <AssistantAction
+            icon={RefreshCw}
+            label={isFrench ? "Reset" : "Reset"}
+          />
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-stone-50 p-4">
+        <ChatBubble
+          role="assistant"
+          text={
+            isFrench
+              ? "Bonjour. Je peux aider a verifier la qualite des donnees, expliquer les tendances, comparer les sites et preparer une synthese pour l'equipe ou les partenaires."
+              : "Hello. I can help check data quality, explain trends, compare facilities, and prepare a summary for teams or partners."
+          }
+        />
+        <ChatBubble
+          role="user"
+          text={
+            isFrench
+              ? "Analyse le contexte selectionne et propose les points d'attention."
+              : "Analyze the selected context and suggest attention points."
+          }
+        />
+        <ChatBubble
+          role="assistant"
+          text={
+            isFrench
+              ? "Pret. Dans la version connectee, je lirai les exports du projet actif, citerai les indicateurs utilises et separerai les faits des hypotheses."
+              : "Ready. In the connected version, I will read the active project's exports, cite the indicators used, and separate facts from hypotheses."
+          }
+        />
+
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+            {isFrench ? "Suggestions" : "Suggestions"}
+          </p>
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-left text-sm leading-5 text-stone-700 hover:border-[#2FA66A]/50 hover:bg-[#2FA66A]/10"
+              onClick={() => setDraft(suggestion)}
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="shrink-0 border-t border-stone-200 bg-white p-4">
+        <div className="mb-3 flex gap-2">
+          <Button variant="outline" size="sm" className="flex-1">
+            <Paperclip className="h-4 w-4" aria-hidden="true" />
+            {isFrench ? "Joindre" : "Attach"}
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1">
+            <FileText className="h-4 w-4" aria-hidden="true" />
+            {isFrench ? "Rapport" : "Report"}
+          </Button>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder={
+              isFrench
+                ? "Posez une question sur les donnees..."
+                : "Ask a question about the data..."
+            }
+          />
+          <Button size="icon" title={isFrench ? "Envoyer" : "Send"}>
+            <Send className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        </div>
+        <p className="mt-2 text-xs leading-5 text-stone-500">
+          {isFrench
+            ? "Prototype UI: la connexion aux donnees et au modele sera branchee ensuite."
+            : "Prototype UI: data and model connections will be wired next."}
+        </p>
+      </div>
+    </aside>
+  );
+}
+
+function AssistantAction({
+  icon: Icon,
+  label,
+}: {
+  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      className="flex h-10 items-center justify-center gap-2 rounded-md border border-stone-200 bg-white text-xs font-semibold text-stone-700 hover:bg-stone-100"
+    >
+      <Icon className="h-4 w-4" aria-hidden={true} />
+      {label}
+    </button>
+  );
+}
+
+function ChatBubble({ role, text }: { role: "assistant" | "user"; text: string }) {
+  const isAssistant = role === "assistant";
+
+  return (
+    <div className={cn("flex", isAssistant ? "justify-start" : "justify-end")}>
+      <div
+        className={cn(
+          "max-w-[88%] rounded-lg px-3 py-2 text-sm leading-6 shadow-sm",
+          isAssistant
+            ? "border border-stone-200 bg-white text-stone-700"
+            : "bg-[#153B36] text-[#F5F3EF]",
+        )}
+      >
+        {text}
+      </div>
+    </div>
   );
 }
 
@@ -877,10 +1669,10 @@ function ProjectSectionNav({
         className={cn(
           "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors",
           active
-            ? "bg-white/15 text-white"
+            ? "bg-[#F4A623]/20 text-[#F5F3EF]"
             : hasActiveChild
-              ? "text-white"
-              : "text-white/65 hover:bg-white/10 hover:text-white",
+              ? "text-[#F5F3EF]"
+              : "text-[#F5F3EF]/65 hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
           depth > 0 && "pl-8",
         )}
         onClick={() => onSelect(section.id)}
@@ -890,7 +1682,7 @@ function ProjectSectionNav({
           {section.label[language]}
         </span>
         {section.files.length > 0 && (
-          <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-white/60">
+          <span className="rounded bg-[#F5F3EF]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#F5F3EF]/60">
             {section.files.length}
           </span>
         )}
@@ -914,68 +1706,122 @@ function ProjectSectionNav({
   );
 }
 
-function SidebarFilters({
+function FilterModal({
+  isOpen,
   selectedProjectId,
+  selectedProjectName,
   labels,
+  onClose,
 }: {
-  selectedProjectId: string;
-  language: Language;
+  isOpen: boolean;
+  selectedProjectId: string | null;
+  selectedProjectName: string;
   labels: (typeof copy)["fr"];
+  onClose: () => void;
 }) {
-  const filterOptions = getSidebarFilterOptions(selectedProjectId);
+  const filterOptions = selectedProjectId
+    ? getSidebarFilterOptions(selectedProjectId)
+    : [];
+
+  if (!isOpen) return null;
 
   return (
-    <div className="border-t border-white/10 px-4 py-5">
-      <p className="mb-3 px-1 text-base font-bold text-white">
-        {labels.reportPeriod}
-      </p>
-      <div className="grid grid-cols-[1fr_auto_1fr] overflow-hidden rounded-md border border-white/25 bg-white text-sm font-semibold text-stone-700">
-        <div className="px-3 py-3 text-center">2025-12-27</div>
-        <div className="border-x border-stone-300 px-4 py-3 text-center text-stone-500">
-          to
-        </div>
-        <div className="px-3 py-3 text-center">2026-06-27</div>
-      </div>
-
-      {filterOptions.length > 0 && (
-        <div className="mt-5 space-y-3">
-          {filterOptions.map((option) => (
-            <label
-              key={option}
-              className="flex items-center gap-3 text-sm font-semibold text-white"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/45 px-4 py-6 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="filters-title"
+    >
+      <div className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-lg border border-stone-200 bg-[#F5F3EF] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-stone-200 bg-white px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#2FA66A]">
+              {labels.filterContext}: {selectedProjectName}
+            </p>
+            <h2
+              id="filters-title"
+              className="mt-1 text-lg font-semibold tracking-normal text-[#153B36]"
             >
-              <input
-                type="checkbox"
-                defaultChecked
-                className="h-4 w-4 accent-sky-500"
-              />
-              {option}
-            </label>
-          ))}
+              {labels.reportPeriod}
+            </h2>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            title={labels.close}
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </Button>
         </div>
-      )}
 
-      <div className="mt-6">
-        <p className="mb-3 px-1 text-sm font-bold text-white">
-          {labels.periodType}
-        </p>
-        <div className="space-y-3">
-          {[labels.monthly, labels.quarterly, labels.semester, labels.annual].map(
-            (period, index) => (
-              <label
-                key={period}
-                className="flex items-center gap-3 text-sm font-semibold text-white"
-              >
-                <input
-                  type="radio"
-                  name="period-type"
-                  defaultChecked={index === 0}
-                  className="h-4 w-4 accent-sky-500"
-                />
-                {period}
-              </label>
-            ),
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="space-y-2 text-sm font-semibold text-stone-700">
+              <span>{labels.startDate}</span>
+              <Input type="date" defaultValue="2025-12-27" />
+            </label>
+            <label className="space-y-2 text-sm font-semibold text-stone-700">
+              <span>{labels.endDate}</span>
+              <Input type="date" defaultValue="2026-06-27" />
+            </label>
+          </div>
+
+          <div>
+            <p className="mb-3 text-sm font-semibold text-stone-900">
+              {labels.periodType}
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {[labels.monthly, labels.quarterly, labels.semester, labels.annual].map(
+                (period, index) => (
+                  <label
+                    key={period}
+                    className="flex items-center gap-3 rounded-md border border-stone-200 bg-white px-3 py-3 text-sm font-semibold text-stone-700"
+                  >
+                    <input
+                      type="radio"
+                      name="period-type"
+                      defaultChecked={index === 0}
+                      className="h-4 w-4 accent-[#2FA66A]"
+                    />
+                    {period}
+                  </label>
+                ),
+              )}
+            </div>
+          </div>
+
+          {filterOptions.length > 0 && (
+            <div>
+              <p className="mb-3 text-sm font-semibold text-stone-900">
+                {selectedProjectName}
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {filterOptions.map((option) => (
+                  <label
+                    key={option}
+                    className="flex items-center gap-3 rounded-md border border-stone-200 bg-white px-3 py-3 text-sm font-semibold text-stone-700"
+                  >
+                    <input
+                      type="checkbox"
+                      defaultChecked
+                      className="h-4 w-4 accent-[#2FA66A]"
+                    />
+                    {option}
+                  </label>
+                ))}
+              </div>
+            </div>
           )}
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-stone-200 bg-white px-5 py-4">
+          <Button variant="outline" onClick={onClose}>
+            {labels.close}
+          </Button>
+          <Button className="bg-[#153B36] text-[#F5F3EF] hover:bg-[#153B36]/90" onClick={onClose}>
+            {labels.applyFilters}
+          </Button>
         </div>
       </div>
     </div>
@@ -1050,6 +1896,76 @@ function getSidebarFilterOptions(projectId: string) {
   };
 
   return optionsByProject[projectId] ?? [];
+}
+
+function getUploadWorkflowStages(
+  hasFiles: boolean,
+  isSubmitting: boolean,
+  submittedStages: UploadStageView[] | null,
+): UploadStageView[] {
+  if (submittedStages) return submittedStages;
+
+  const initialStages: UploadStageKey[] = [
+    "received",
+    "folder",
+    "convert",
+    "extract",
+    "quality",
+    "approval",
+  ];
+
+  return initialStages.map((key, index) => ({
+    key,
+    state: !hasFiles
+      ? "waiting"
+      : isSubmitting
+        ? index === 0
+          ? "active"
+          : "waiting"
+        : index === 0
+          ? "done"
+          : index === 1
+            ? "active"
+            : "waiting",
+  }));
+}
+
+function getUploadWorkflowProgress(stages: UploadStageView[]) {
+  const completed = stages.filter((stage) => stage.state === "done").length;
+  const active = stages.some((stage) => stage.state === "active") ? 0.5 : 0;
+
+  return ((completed + active) / stages.length) * 100;
+}
+
+function getUploadStageLabel(
+  labels: (typeof copy)["fr"],
+  key: UploadStageKey,
+) {
+  const labelsByKey: Record<UploadStageKey, string> = {
+    received: labels.uploadStageReceived,
+    folder: labels.uploadStageFolder,
+    convert: labels.uploadStageConvert,
+    extract: labels.uploadStageExtract,
+    quality: labels.uploadStageQuality,
+    approval: labels.uploadStageApproval,
+  };
+
+  return labelsByKey[key];
+}
+
+function formatFileSize(size: number) {
+  if (size < 1024) return `${size} B`;
+
+  const units = ["KB", "MB", "GB"];
+  let value = size / 1024;
+  let unitIndex = 0;
+
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
 function SeverityBadge({

@@ -22,6 +22,9 @@ uploads), `chat` (the conversational assistant, French-first).
 - Python 3.12, FastAPI + Uvicorn, Pydantic v2 (+ pydantic-settings)
 - LLM: Anthropic Claude by default (provider-configurable), wired in
   `app/core/llm.py` — see `TODO(DfM)`
+- Supabase: source-file storage and upload workflow metadata. The current
+  prototype upload route lives in the Next.js app at `frontend/src/app/api/uploads`
+  so the browser never sees the service-role key.
 - Ruff (lint/format) + pytest
 
 ## Setup & run
@@ -33,6 +36,9 @@ pip install -e .                                     # or: uv sync
 cp .env.example .env                                 # add an LLM key when wiring the assistant
 uvicorn app.main:app --reload --port 8000
 ```
+
+For upload persistence, also run `../supabase/schema.sql` in Supabase and fill
+the Supabase env values in `backend/.env` / `frontend/.env.local`.
 
 Health check: `curl localhost:8000/health` → `{"status":"ok",...}`
 OpenAPI docs: <http://localhost:8000/docs>
