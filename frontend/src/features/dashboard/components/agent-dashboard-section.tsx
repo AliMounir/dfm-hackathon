@@ -19,26 +19,25 @@ export function AgentDashboardSection({
   projectId: string;
   language?: Language;
 }) {
-  const [plan, setPlan] = useState<DashboardPlan | null>(null);
-  const [state, setState] = useState<"loading" | "ok" | "error">("loading");
+  const [load, setLoad] = useState<{
+    projectId: string;
+    plan: DashboardPlan | null;
+    state: "loading" | "ok" | "error";
+  }>({ projectId, plan: null, state: "loading" });
 
   useEffect(() => {
     let alive = true;
-    setState("loading");
-    setPlan(null);
     getDashboardPlan(projectId).then((p) => {
       if (!alive) return;
-      if (p) {
-        setPlan(p);
-        setState("ok");
-      } else {
-        setState("error");
-      }
+      setLoad({ projectId, plan: p, state: p ? "ok" : "error" });
     });
     return () => {
       alive = false;
     };
   }, [projectId]);
+
+  const state = load.projectId === projectId ? load.state : "loading";
+  const plan = load.projectId === projectId ? load.plan : null;
 
   return (
     <Card className="border-emerald-300 bg-emerald-50/40">
