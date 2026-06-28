@@ -36,7 +36,18 @@ BACKEND_API_URL=https://your-railway-service.up.railway.app
 
 Keep `NEXT_PUBLIC_API_URL` empty. The browser calls Vercel `/api/...`; Vercel
 server routes proxy dashboard/chat requests to Railway and fall back to local
-prototype data only when `BACKEND_API_URL` is not configured or unreachable.
+prototype data only when `BACKEND_API_URL` is not configured. If the variable is
+set but Railway is unreachable, the app returns a visible backend error instead
+of silently showing prototype chat.
+
+Check the Vercel-to-Railway connection at:
+
+```txt
+https://your-vercel-app.vercel.app/api/backend/health
+```
+
+It should return `"configured": true` and `"ok": true`. If it returns
+`BACKEND_API_URL is not set`, add the variable in Vercel and redeploy.
 
 Also keep the existing Supabase variables in Vercel for uploads:
 

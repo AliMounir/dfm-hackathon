@@ -1,5 +1,10 @@
 import { createChatResponse, findProject } from "@/lib/dashboard-api";
-import { backendResponse, fetchBackendApi } from "@/lib/backend-proxy";
+import {
+  backendResponse,
+  backendUnavailableResponse,
+  fetchBackendApi,
+  isBackendApiConfigured,
+} from "@/lib/backend-proxy";
 
 export const runtime = "nodejs";
 
@@ -20,6 +25,9 @@ export async function POST(request: Request, context: RouteContext) {
 
   if (backend) {
     return backendResponse(backend);
+  }
+  if (isBackendApiConfigured()) {
+    return backendUnavailableResponse("Railway backend streaming chat route is not reachable.");
   }
 
   const project = findProject(projectId);

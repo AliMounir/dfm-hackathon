@@ -7,6 +7,10 @@ export function getBackendApiBase(): string | null {
   return raw.replace(/\/api\/?$/, "").replace(/\/$/, "");
 }
 
+export function isBackendApiConfigured(): boolean {
+  return getBackendApiBase() !== null;
+}
+
 export async function fetchBackendApi(
   path: string,
   init: RequestInit = {},
@@ -26,6 +30,21 @@ export async function fetchBackendApi(
     console.error("Backend API proxy failed", error);
     return null;
   }
+}
+
+export function backendUnavailableResponse(message = "Railway backend is not reachable."): Response {
+  return Response.json(
+    {
+      error: message,
+      hint: "Check BACKEND_API_URL in Vercel, confirm the Railway /health URL works, then redeploy Vercel.",
+    },
+    {
+      status: 502,
+      headers: {
+        "x-hazava-backend": "unreachable",
+      },
+    },
+  );
 }
 
 export function backendResponse(response: Response): Response {

@@ -5,7 +5,12 @@ import {
   createOverviewDashboardPlan,
   findProject,
 } from "@/lib/dashboard-api";
-import { backendResponse, fetchBackendApi } from "@/lib/backend-proxy";
+import {
+  backendResponse,
+  backendUnavailableResponse,
+  fetchBackendApi,
+  isBackendApiConfigured,
+} from "@/lib/backend-proxy";
 
 export const runtime = "nodejs";
 
@@ -25,6 +30,9 @@ export async function GET(_request: Request, context: RouteContext) {
   const backend = await fetchBackendApi(`/projects/${projectId}/dashboard`);
   if (backend) {
     return backendResponse(backend);
+  }
+  if (isBackendApiConfigured()) {
+    return backendUnavailableResponse("Railway backend dashboard route is not reachable.");
   }
 
   const project = findProject(projectId);
