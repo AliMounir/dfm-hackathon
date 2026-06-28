@@ -29,16 +29,20 @@ export function ChatPanel({
   // Load THIS project's history when the selected project changes.
   useEffect(() => {
     activeProjectRef.current = projectId;
-    if (!projectId || typeof window === "undefined") {
-      setMessages([]);
-      return;
-    }
+    let nextMessages: Msg[] = [];
+
     try {
-      const raw = window.localStorage.getItem(`dfm-chat-${projectId}`);
-      setMessages(raw ? (JSON.parse(raw) as Msg[]) : []);
+      if (projectId && typeof window !== "undefined") {
+        const raw = window.localStorage.getItem(`dfm-chat-${projectId}`);
+        nextMessages = raw ? (JSON.parse(raw) as Msg[]) : [];
+      }
     } catch {
-      setMessages([]);
+      nextMessages = [];
     }
+
+    const timeoutId = window.setTimeout(() => setMessages(nextMessages), 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [projectId]);
 
   // Persist to the project the current messages belong to. Deps are [messages]
@@ -51,7 +55,6 @@ export function ChatPanel({
     } catch {
       /* ignore quota errors */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   useEffect(() => {

@@ -17,9 +17,14 @@ export async function GET() {
       return NextResponse.json({ error: result.error.message }, { status: 500 });
     }
 
+    const seededProjectIds = new Set(projects.map((project) => project.id));
+    const visibleProjects = result.data.filter(
+      (project) => project.description || seededProjectIds.has(project.id),
+    );
+
     return NextResponse.json({
       source: "supabase",
-      projects: result.data.map((project) => ({
+      projects: visibleProjects.map((project) => ({
         id: project.id,
         name: project.name,
         slug: project.slug,
@@ -62,6 +67,9 @@ export async function POST(request: Request) {
     const supabase = createSupabaseServerClient();
     const id = payload.id?.trim() || slugify(name);
     const folder = payload.folder?.trim() || `data/projects/${id}`;
+    const description =
+      payload.description?.trim() ||
+      "DFM project workspace created from Hazava AI.";
     const result = await supabase
       .from("projects")
       .upsert(
@@ -70,7 +78,7 @@ export async function POST(request: Request) {
           name,
           slug: id,
           folder_path: folder,
-          description: payload.description?.trim() || null,
+          description,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "id" },

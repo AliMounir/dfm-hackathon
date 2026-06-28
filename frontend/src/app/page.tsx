@@ -94,6 +94,8 @@ const copy = {
     addProject: "Ajouter un projet",
     addProjectShort: "Ajouter",
     newProjectPlaceholder: "Nom du nouveau projet",
+    addProjectSaving: "Enregistrement...",
+    addProjectError: "Impossible d'enregistrer le projet dans Supabase.",
     searchPlaceholder: "Rechercher un projet",
     activePeriod: "Periode active",
     periodValue: "27 Dec 2025 - 27 Jun 2026",
@@ -193,6 +195,8 @@ const copy = {
     addProject: "Add project",
     addProjectShort: "Add",
     newProjectPlaceholder: "New project name",
+    addProjectSaving: "Saving...",
+    addProjectError: "Could not save the project in Supabase.",
     searchPlaceholder: "Search projects",
     activePeriod: "Active period",
     periodValue: "Dec 27 2025 - Jun 27 2026",
@@ -314,6 +318,21 @@ const sectionIconMap: Record<
   users: Users,
 };
 
+type ProjectApiRecord = {
+  id: string;
+  name: string;
+  slug?: string;
+  folder?: string;
+  description?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+
+type ProjectsApiResponse = {
+  source: "supabase" | "local";
+  projects: ProjectApiRecord[];
+};
+
 export default function Home() {
   const [language, setLanguage] = useState<Language>("fr");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -324,15 +343,45 @@ export default function Home() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isSavingProject, setIsSavingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
-  const [customProjects, setCustomProjects] = useState<Project[]>([]);
+  const [syncedProjects, setSyncedProjects] = useState<Project[]>([]);
+  const [projectError, setProjectError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("summary");
+  const [dashboardRefreshKey, setDashboardRefreshKey] = useState(0);
 
   const t = copy[language];
   const projectList = useMemo(
-    () => [...projects, ...customProjects],
-    [customProjects],
+    () => mergeProjects(projects, syncedProjects),
+    [syncedProjects],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProjects() {
+      try {
+        const response = await fetch("/api/projects", { cache: "no-store" });
+        if (!response.ok) throw new Error("Could not load projects.");
+
+        const payload = (await response.json()) as ProjectsApiResponse;
+        if (cancelled) return;
+
+        setSyncedProjects(
+          payload.projects.map((project) => createSyncedProject(project)),
+        );
+        setProjectError(null);
+      } catch {
+        if (!cancelled) setProjectError(t.addProjectError);
+      }
+    }
+
+    void loadProjects();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [t.addProjectError]);
 
   const selectedProject = projectList.find(
     (project) => project.id === selectedProjectId,
@@ -354,7 +403,7 @@ export default function Home() {
   const selectedMetrics = selectedProject?.metrics ?? overviewMetrics;
   const selectedMonthly = selectedProject?.monthly ?? overviewMonthly;
 
-  function addProject() {
+  async function addProject() {
     const trimmedName = newProjectName.trim();
 
     if (!trimmedName) {
@@ -362,65 +411,43 @@ export default function Home() {
       return;
     }
 
-    const id = trimmedName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+    const id = getUniqueProjectId(slugifyProjectName(trimmedName), projectList);
+    setIsSavingProject(true);
+    setProjectError(null);
 
-    const project: Project = {
-      id: `${id || "project"}-${Date.now()}`,
-      name: trimmedName,
-      folder: `data/projects/${id || "new-project"}`,
-      accent: "emerald",
-      focus: {
-        fr: "Nouvel espace projet pret a recevoir des exports et indicateurs.",
-        en: "New project workspace ready for exports and indicators.",
-      },
-      dataSources: ["Excel", "REDCap", "DHIS2"],
-      status: { fr: "Cree localement", en: "Created locally" },
-      metrics: [
-        {
-          id: "empty",
-          label: { fr: "Donnees importees", en: "Imported datasets" },
-          value: "0",
-          helper: { fr: "a connecter", en: "to connect" },
-          tone: "emerald",
-        },
-        {
-          id: "checks",
-          label: { fr: "Controles actifs", en: "Active checks" },
-          value: "0",
-          helper: { fr: "a configurer", en: "to configure" },
-          tone: "amber",
-        },
-      ],
-      monthly: overviewMonthly.map((point) => ({
-        ...point,
-        services: 0,
-        risks: 0,
-      })),
-      sites: [],
-      qualityIssues: [],
-      insights: [],
-      suggestedQuestions: [
-        {
-          fr: "Quels controles qualite faut-il activer pour ce projet ?",
-          en: "Which quality checks should be enabled for this project?",
-        },
-      ],
-      story: {
-        fr: "Ajoutez les exports du projet pour generer une synthese.",
-        en: "Add project exports to generate a summary.",
-      },
-      sections: [],
-    };
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          name: trimmedName,
+          folder: `data/projects/${id}`,
+          description: "DFM project workspace created from Hazava AI.",
+        }),
+      });
 
-    setCustomProjects((current) => [...current, project]);
-    setSelectedProjectId(project.id);
-    setExpandedProjectId(project.id);
-    setSelectedSectionId(null);
-    setNewProjectName("");
-    setIsAdding(false);
+      const payload = (await response.json()) as {
+        project?: ProjectApiRecord;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.project) {
+        throw new Error(payload.error ?? "Could not save project.");
+      }
+
+      const project = createSyncedProject(payload.project);
+      setSyncedProjects((current) => mergeProjects(current, [project]));
+      setSelectedProjectId(project.id);
+      setExpandedProjectId(project.id);
+      setSelectedSectionId(null);
+      setNewProjectName("");
+      setIsAdding(false);
+    } catch {
+      setProjectError(t.addProjectError);
+    } finally {
+      setIsSavingProject(false);
+    }
   }
 
   return (
@@ -572,22 +599,36 @@ export default function Home() {
                   <div className="flex gap-2 rounded-md bg-[#F5F3EF]/10 p-2">
                     <Input
                       value={newProjectName}
+                      disabled={isSavingProject}
                       onChange={(event) => setNewProjectName(event.target.value)}
                       onKeyDown={(event) => {
-                        if (event.key === "Enter") addProject();
+                        if (event.key === "Enter") void addProject();
                       }}
                       placeholder={t.newProjectPlaceholder}
                       className="border-[#F5F3EF]/10 bg-[#F5F3EF] text-stone-950"
                     />
                     <Button
-                      title={t.addProject}
+                      title={isSavingProject ? t.addProjectSaving : t.addProject}
                       size="icon"
                       className="shrink-0"
-                      onClick={addProject}
+                      disabled={isSavingProject}
+                      onClick={() => void addProject()}
                     >
-                      <FolderPlus className="h-4 w-4" aria-hidden="true" />
+                      {isSavingProject ? (
+                        <RefreshCw
+                          className="h-4 w-4 animate-spin"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <FolderPlus className="h-4 w-4" aria-hidden="true" />
+                      )}
                     </Button>
                   </div>
+                )}
+                {isLeftSidebarOpen && projectError && (
+                  <p className="rounded-md bg-rose-500/15 px-3 py-2 text-xs font-semibold text-rose-100">
+                    {projectError}
+                  </p>
                 )}
               </div>
             </div>
@@ -616,7 +657,11 @@ export default function Home() {
           </div>
         </aside>
 
-        <DashboardProvider projectId={selectedProject?.id ?? null} language={language}>
+        <DashboardProvider
+          projectId={selectedProject?.id ?? null}
+          language={language}
+          refreshKey={dashboardRefreshKey}
+        >
         <section
           className={cn(
             "flex min-h-screen flex-1 flex-col transition-[margin] duration-200",
@@ -671,6 +716,12 @@ export default function Home() {
             labels={t}
             projects={projectList}
             selectedProjectId={selectedProject?.id ?? null}
+            onUploadComplete={(projectId) => {
+              setSelectedProjectId(projectId);
+              setExpandedProjectId(projectId);
+              setSelectedSectionId(null);
+              setDashboardRefreshKey((current) => current + 1);
+            }}
             onClose={() => setIsUploadModalOpen(false)}
           />
         )}
@@ -766,6 +817,11 @@ type ReviewIssue = {
 
 type UploadResponse = {
   batchId: string;
+  project: {
+    id: string;
+    name: string;
+    folder: string;
+  };
   files: StoredUploadFile[];
   reviewIssues?: ReviewIssue[];
   summary?: {
@@ -797,11 +853,13 @@ function UploadModal({
   labels,
   projects,
   selectedProjectId,
+  onUploadComplete,
   onClose,
 }: {
   labels: (typeof copy)["fr"];
   projects: Project[];
   selectedProjectId: string | null;
+  onUploadComplete: (projectId: string) => void;
   onClose: () => void;
 }) {
   const [targetProjectId, setTargetProjectId] = useState(
@@ -812,6 +870,7 @@ function UploadModal({
     null,
   );
   const [submittedBatchId, setSubmittedBatchId] = useState<string | null>(null);
+  const [submittedProjectId, setSubmittedProjectId] = useState<string | null>(null);
   const [submittedBatchStatus, setSubmittedBatchStatus] = useState<string | null>(
     null,
   );
@@ -894,6 +953,7 @@ function UploadModal({
     setUploadedFiles(selectedFiles);
     setSubmittedStages(null);
     setSubmittedBatchId(null);
+    setSubmittedProjectId(null);
     setSubmittedBatchStatus(null);
     setReviewIssues([]);
     setUploadError(null);
@@ -925,6 +985,7 @@ function UploadModal({
     setReviewError(null);
     setReviewIssues([]);
     setSubmittedBatchId(null);
+    setSubmittedProjectId(null);
     setSubmittedBatchStatus("processing");
     setSubmittedStages(createAnimatedUploadStages("received"));
 
@@ -962,10 +1023,12 @@ function UploadModal({
       if (uploadRunIdRef.current !== runId) return;
 
       setSubmittedBatchId(payload.batchId);
+      setSubmittedProjectId(payload.project.id);
       setSubmittedBatchStatus(getUploadBatchStatus(payload));
       setReviewIssues(payload.reviewIssues ?? []);
       setReviewError(null);
       setSubmittedStages(finalStages);
+      onUploadComplete(payload.project.id);
     } catch (error) {
       if (uploadRunIdRef.current === runId) {
         setUploadError(error instanceof Error ? error.message : "Upload failed.");
@@ -1024,6 +1087,7 @@ function UploadModal({
 
       setReviewIssues(reviewedIssues);
       setSubmittedBatchStatus("completed");
+      if (submittedProjectId) onUploadComplete(submittedProjectId);
       setSubmittedStages((current) =>
         (current ?? workflowStages).map((stage) =>
           stage.key === "approval"
@@ -1093,7 +1157,6 @@ function UploadModal({
                   {project.name}
                 </option>
               ))}
-              <option value="new">{labels.createNewProject}</option>
             </select>
           </div>
 
@@ -1897,6 +1960,100 @@ function getSidebarFilterOptions(projectId: string) {
   };
 
   return optionsByProject[projectId] ?? [];
+}
+
+function mergeProjects(baseProjects: Project[], incomingProjects: Project[]) {
+  const projectMap = new globalThis.Map<string, Project>(
+    baseProjects.map((project) => [project.id, project]),
+  );
+
+  for (const project of incomingProjects) {
+    if (!projectMap.has(project.id)) {
+      projectMap.set(project.id, project);
+    }
+  }
+
+  return Array.from(projectMap.values());
+}
+
+function createSyncedProject(record: ProjectApiRecord): Project {
+  return {
+    id: record.id,
+    name: record.name,
+    folder: record.folder ?? `data/projects/${record.id}`,
+    accent: "emerald",
+    focus: {
+      fr:
+        record.description ??
+        "Nouvel espace projet pret a recevoir des exports et indicateurs.",
+      en:
+        record.description ??
+        "New project workspace ready for exports and indicators.",
+    },
+    dataSources: ["Excel", "REDCap", "DHIS2"],
+    status: { fr: "Synchronise", en: "Synced" },
+    metrics: [
+      {
+        id: "empty",
+        label: { fr: "Donnees importees", en: "Imported datasets" },
+        value: "0",
+        helper: { fr: "a connecter", en: "to connect" },
+        tone: "emerald",
+      },
+      {
+        id: "checks",
+        label: { fr: "Controles actifs", en: "Active checks" },
+        value: "0",
+        helper: { fr: "a configurer", en: "to configure" },
+        tone: "amber",
+      },
+    ],
+    monthly: overviewMonthly.map((point) => ({
+      ...point,
+      services: 0,
+      risks: 0,
+    })),
+    sites: [],
+    qualityIssues: [],
+    insights: [],
+    suggestedQuestions: [
+      {
+        fr: "Quels controles qualite faut-il activer pour ce projet ?",
+        en: "Which quality checks should be enabled for this project?",
+      },
+    ],
+    story: {
+      fr: "Ajoutez les exports du projet pour generer une synthese.",
+      en: "Add project exports to generate a summary.",
+    },
+    sections: [],
+  };
+}
+
+function slugifyProjectName(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") || "project"
+  );
+}
+
+function getUniqueProjectId(baseId: string, currentProjects: Project[]) {
+  const currentIds = new Set(currentProjects.map((project) => project.id));
+  if (!currentIds.has(baseId)) return baseId;
+
+  let suffix = 2;
+  let candidate = `${baseId}-${suffix}`;
+
+  while (currentIds.has(candidate)) {
+    suffix += 1;
+    candidate = `${baseId}-${suffix}`;
+  }
+
+  return candidate;
 }
 
 function getUploadWorkflowStages(
