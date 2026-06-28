@@ -11,6 +11,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { DashboardPlan, Section } from "@/features/dashboard/lib/types";
 
 export const runtime = "nodejs";
+// The dashboard agent (LLM call on Railway) can take 20-30s. Without this,
+// Vercel's default function timeout (~10-15s) kills the proxy and the UI falls
+// back to the stale plan. 60s is the Hobby ceiling and ample on Pro.
+export const maxDuration = 60;
 
 type RouteContext = {
   params: Promise<{

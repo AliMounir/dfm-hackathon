@@ -7,6 +7,9 @@ import {
 } from "@/lib/backend-proxy";
 
 export const runtime = "nodejs";
+// Streamed chat holds the connection open while the agent works; raise the
+// Vercel function timeout so it isn't cut off mid-stream.
+export const maxDuration = 60;
 
 type RouteContext = {
   params: Promise<{

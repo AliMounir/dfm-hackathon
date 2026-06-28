@@ -9,6 +9,9 @@ import {
 } from "@/lib/backend-proxy";
 
 export const runtime = "nodejs";
+// The chat agent (LLM on Railway) can take 20-30s; raise the function timeout
+// so Vercel doesn't kill the proxy before the agent replies.
+export const maxDuration = 60;
 
 type RouteContext = {
   params: Promise<{
