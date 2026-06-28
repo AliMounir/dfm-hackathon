@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { createChatResponse, findProject } from "@/lib/dashboard-api";
-import { backendResponse, fetchBackendApi } from "@/lib/backend-proxy";
+import {
+  backendResponse,
+  backendUnavailableResponse,
+  fetchBackendApi,
+  getBackendApiBase,
+} from "@/lib/backend-proxy";
 
 export const runtime = "nodejs";
 
@@ -14,7 +19,9 @@ type RouteContext = {
 export async function POST(request: Request, context: RouteContext) {
   const { projectId } = await context.params;
   const bodyText = await request.text();
-  const backend = await fetchBackendApi(`/projects/${projectId}/chat`, {
+  const backendPath = `/projects/${projectId}/chat`;
+  const backendConfigured = Boolean(getBackendApiBase());
+  const backend = await fetchBackendApi(backendPath, {
     method: "POST",
     headers: { "Content-Type": request.headers.get("Content-Type") ?? "application/json" },
     body: bodyText,
@@ -24,10 +31,14 @@ export async function POST(request: Request, context: RouteContext) {
     return backendResponse(backend);
   }
 
+  if (backendConfigured) {
+    if (backend) return backendResponse(backend);
+    return backendUnavailableResponse(backendPath);
+  }
+
   const project = findProject(projectId);
 
   if (!project) {
-    if (backend) return backendResponse(backend);
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 

@@ -1,29 +1,31 @@
-import { getBackendApiBase } from "@/lib/backend-proxy";
+import { getBackendApiConfig } from "@/lib/backend-proxy";
 
 export const runtime = "nodejs";
 
 export async function GET() {
-  const base = getBackendApiBase();
+  const config = getBackendApiConfig();
 
-  if (!base) {
+  if (!config) {
     return Response.json(
       {
         configured: false,
         ok: false,
-        error: "BACKEND_API_URL is not set for this Vercel deployment.",
+        error: "BACKEND_API_URL is not set for this deployment.",
+        legacyFallback: "NEXT_PUBLIC_API_URL is also accepted for this prototype.",
       },
       { status: 503 },
     );
   }
 
   try {
-    const response = await fetch(`${base}/health`, { cache: "no-store" });
+    const response = await fetch(`${config.base}/health`, { cache: "no-store" });
     const text = await response.text();
 
     return Response.json(
       {
         configured: true,
-        backendUrl: base,
+        backendUrl: config.base,
+        source: config.source,
         ok: response.ok,
         status: response.status,
         response: parseBody(text),
@@ -34,7 +36,8 @@ export async function GET() {
     return Response.json(
       {
         configured: true,
-        backendUrl: base,
+        backendUrl: config.base,
+        source: config.source,
         ok: false,
         error: error instanceof Error ? error.message : "Could not reach Railway backend.",
       },
