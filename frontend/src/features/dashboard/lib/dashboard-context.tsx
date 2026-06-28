@@ -6,6 +6,11 @@ import { getDashboardPlan } from "@/features/dashboard/api/dashboard";
 import type { DashboardOp } from "@/features/dashboard/api/chat";
 import type { DashboardPlan } from "@/features/dashboard/lib/types";
 import type { Language } from "@/features/shared/lib/i18n";
+import {
+  createDashboardPlan,
+  createOverviewDashboardPlan,
+  findProject,
+} from "@/lib/dashboard-api";
 
 type State = "idle" | "loading" | "ok" | "error";
 
@@ -18,6 +23,13 @@ type Ctx = {
 };
 
 const DashboardCtx = createContext<Ctx | null>(null);
+
+function getLocalDashboardPlan(projectId: string): DashboardPlan | null {
+  if (projectId === "overview") return createOverviewDashboardPlan();
+
+  const project = findProject(projectId);
+  return project ? createDashboardPlan(project) : null;
+}
 
 export function useDashboard(): Ctx {
   const c = useContext(DashboardCtx);
@@ -46,10 +58,19 @@ export function DashboardProvider({
     if (!projectId) return;
 
     let alive = true;
-    getDashboardPlan(projectId).then((p) => {
-      if (!alive) return;
-      setLoad({ projectId, plan: p, state: p ? "ok" : "error" });
-    });
+    const localPlan = getLocalDashboardPlan(projectId);
+    setLoad({ projectId, plan: localPlan, state: localPlan ? "ok" : "loading" });
+
+    getDashboardPlan(projectId)
+      .then((p) => {
+        if (!alive) return;
+        const plan = p ?? localPlan;
+        setLoad({ projectId, plan, state: plan ? "ok" : "error" });
+      })
+      .catch(() => {
+        if (!alive) return;
+        setLoad({ projectId, plan: localPlan, state: localPlan ? "ok" : "error" });
+      });
     return () => {
       alive = false;
     };
