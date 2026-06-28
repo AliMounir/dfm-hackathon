@@ -63,7 +63,8 @@ def run_chat(project_id: str, req: ChatRequest) -> ChatAgentOutput:
         f"Current dashboard widgets:\n{widgets}\n\n"
         f"Conversation so far:\n{history}\n\n"
         f"User: {req.message}\n\n"
-        "Reply, and modify the dashboard only if the user asked for it."
+        f"Reply primarily in {'French' if req.language == 'fr' else 'English'}, and "
+        "modify the dashboard only if the user asked for it."
     )
 
     out: ChatAgentOutput | None = None

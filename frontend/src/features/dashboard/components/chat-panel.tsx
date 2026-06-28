@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Bot, PanelRightClose, PanelRightOpen, SendHorizontal, Trash2 } from "lucide-react";
 
-import { postChat, streamChat, type DashboardOp, type WidgetRef } from "@/features/dashboard/api/chat";
+import { postChat, type DashboardOp, type WidgetRef } from "@/features/dashboard/api/chat";
 import { useDashboard } from "@/features/dashboard/lib/dashboard-context";
 import { t } from "@/features/shared/lib/i18n";
 
@@ -19,55 +19,40 @@ export function ChatPanel({
   projectName?: string | null;
 }) {
   const { projectId, language, plan, applyOp } = useDashboard();
-  const [messageLoad, setMessageLoad] = useState<{
-    projectId: string | null;
-    messages: Msg[];
-  }>({ projectId: null, messages: [] });
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const activeProjectRef = useRef<string | null>(projectId);
   const fr = language === "fr";
-  const messages = messageLoad.projectId === projectId ? messageLoad.messages : [];
 
-  // Load persisted history when the project changes.
+  // Load THIS project's history when the selected project changes.
   useEffect(() => {
-    if (!projectId || typeof window === "undefined") return;
-
-    let alive = true;
-    Promise.resolve().then(() => {
-      try {
-        const raw = window.localStorage.getItem(`dfm-chat-${projectId}`);
-        if (alive) {
-          setMessageLoad({ projectId, messages: raw ? (JSON.parse(raw) as Msg[]) : [] });
-        }
-      } catch {
-        if (alive) setMessageLoad({ projectId, messages: [] });
-      }
-    });
-    return () => {
-      alive = false;
-    };
+    activeProjectRef.current = projectId;
+    if (!projectId || typeof window === "undefined") {
+      setMessages([]);
+      return;
+    }
+    try {
+      const raw = window.localStorage.getItem(`dfm-chat-${projectId}`);
+      setMessages(raw ? (JSON.parse(raw) as Msg[]) : []);
+    } catch {
+      setMessages([]);
+    }
   }, [projectId]);
 
-  function setMessages(updater: Msg[] | ((messages: Msg[]) => Msg[])) {
-    setMessageLoad((current) => {
-      const currentMessages = current.projectId === projectId ? current.messages : [];
-      const nextMessages =
-        typeof updater === "function" ? updater(currentMessages) : updater;
-
-      return { projectId, messages: nextMessages };
-    });
-  }
-
-  // Persist history.
+  // Persist to the project the current messages belong to. Deps are [messages]
+  // only — so switching projects never writes the old messages under the new key.
   useEffect(() => {
-    if (!projectId || typeof window === "undefined") return;
+    const pid = activeProjectRef.current;
+    if (!pid || typeof window === "undefined") return;
     try {
-      window.localStorage.setItem(`dfm-chat-${projectId}`, JSON.stringify(messages));
+      window.localStorage.setItem(`dfm-chat-${pid}`, JSON.stringify(messages));
     } catch {
       /* ignore quota errors */
     }
-  }, [messages, projectId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -104,33 +89,20 @@ export function ChatPanel({
         ]
       : [];
     const changes: string[] = [];
-    let received = false;
 
+    // Non-streaming: one request → reply + dashboard operations (reliable).
     try {
-      await streamChat(projectId, msg, history, widgets, language, (e) => {
-        received = true;
-        if (e.type === "token") patchLast((p) => ({ ...p, content: p.content + e.text }));
-        else if (e.type === "op") applyOpWithNote(e.op, changes);
-      });
+      const res = await postChat(projectId, msg, history, widgets, language);
+      patchLast((p) => ({ ...p, content: t(res.reply, language) || p.content }));
+      if (res.clear) applyOpWithNote({ kind: "clear" }, changes);
+      (res.add_charts ?? []).forEach((s) => applyOpWithNote({ kind: "add_chart", section: s }, changes));
+      (res.add_kpis ?? []).forEach((k) => applyOpWithNote({ kind: "add_kpi", kpi: k }, changes));
+      (res.remove_ids ?? []).forEach((id) => applyOpWithNote({ kind: "remove", id }, changes));
     } catch {
-      received = false; // stream failed → fall back below
-    }
-
-    if (!received) {
-      // Fallback: non-streaming endpoint guarantees a visible response.
-      try {
-        const res = await postChat(projectId, msg, history, widgets, language);
-        patchLast((p) => ({ ...p, content: t(res.reply, language) || p.content }));
-        if (res.clear) applyOpWithNote({ kind: "clear" }, changes);
-        (res.add_charts ?? []).forEach((s) => applyOpWithNote({ kind: "add_chart", section: s }, changes));
-        (res.add_kpis ?? []).forEach((k) => applyOpWithNote({ kind: "add_kpi", kpi: k }, changes));
-        (res.remove_ids ?? []).forEach((id) => applyOpWithNote({ kind: "remove", id }, changes));
-      } catch {
-        patchLast((p) => ({
-          ...p,
-          content: p.content || (fr ? "Assistant injoignable (backend démarré ?)." : "Assistant unreachable."),
-        }));
-      }
+      patchLast((p) => ({
+        ...p,
+        content: p.content || (fr ? "Assistant injoignable (backend démarré ?)." : "Assistant unreachable."),
+      }));
     }
 
     // Make sure something shows even if only the dashboard changed.

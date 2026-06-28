@@ -66,7 +66,10 @@ class ChatService:
                     id=f"k-{uuid.uuid4().hex[:8]}", tone=k.tone, icon=k.icon,
                     title=k.label, value=_fmt(r["value"], k.unit), helper=k.helper))
 
+        # Only honour "clear" if we actually have new widgets to show — never wipe
+        # the dashboard to nothing because a focus request resolved no data.
+        do_clear = out.clear and bool(charts or kpis)
         return ChatResponse(
-            reply=out.reply, clear=out.clear, add_charts=charts, add_kpis=kpis,
+            reply=out.reply, clear=do_clear, add_charts=charts, add_kpis=kpis,
             remove_ids=out.remove_ids, generated_by=f"openai:{settings.llm_model}",
         )

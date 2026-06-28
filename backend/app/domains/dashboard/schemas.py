@@ -94,6 +94,7 @@ class ChatRequest(AppBaseModel):
     message: str
     history: list[ChatTurn] = []
     widgets: list[WidgetRef] = []  # what's currently on the dashboard
+    language: str = "fr"  # UI language for the reply ("fr" | "en")
 
 
 class ChartSpec(AppBaseModel):
