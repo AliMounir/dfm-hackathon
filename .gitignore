@@ -30,3 +30,6 @@ __pycache__/
 data/projects/**/*.md
 data/**/_parsed.json
 data/DATA_OVERVIEW.md
+
+# Python build metadata
+*.egg-info/
