@@ -11,11 +11,11 @@ export function Progress({ value, className, ...props }: ProgressProps) {
 
   return (
     <div
-      className={cn("h-2 w-full overflow-hidden rounded-full bg-stone-200", className)}
+      className={cn("h-2 w-full overflow-hidden rounded-none bg-line", className)}
       {...props}
     >
       <div
-        className="h-full rounded-full bg-emerald-600 transition-all"
+        className="h-full rounded-none bg-azure transition-all"
         style={{ width: `${safeValue}%` }}
       />
     </div>

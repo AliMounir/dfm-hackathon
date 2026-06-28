@@ -65,6 +65,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Duotone } from "@/components/ui/duotone";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -285,11 +286,11 @@ const copy = {
 };
 
 const metricToneClasses: Record<MetricTone, string> = {
-  emerald: "border-emerald-200 bg-emerald-50 text-emerald-900",
-  cyan: "border-cyan-200 bg-cyan-50 text-cyan-900",
-  amber: "border-amber-200 bg-amber-50 text-amber-900",
-  rose: "border-rose-200 bg-rose-50 text-rose-900",
-  violet: "border-violet-200 bg-violet-50 text-violet-900",
+  emerald: "border-line bg-azure-wash text-ink",
+  cyan: "border-line bg-azure-wash text-ink",
+  amber: "border-line bg-caution-wash text-ink",
+  rose: "border-line bg-critical-wash text-ink",
+  violet: "border-line bg-indigo-wash text-ink",
 };
 
 const projectIcons = [HeartPulse, Stethoscope, Microscope, Activity];
@@ -423,24 +424,24 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-100 text-stone-950">
+    <main className="min-h-screen bg-canvas text-ink">
       <div className="flex min-h-screen flex-col lg:flex-row">
         <aside
           className={cn(
-            "flex w-full flex-col bg-[#153B36] text-[#F5F3EF] transition-[width] duration-200 lg:fixed lg:inset-y-0 lg:h-screen",
+            "flex w-full flex-col border-r border-line bg-paper text-ink transition-[width] duration-200 lg:fixed lg:inset-y-0 lg:h-screen",
             isLeftSidebarOpen ? "lg:w-[320px]" : "lg:w-[72px]",
           )}
         >
-          <div className={cn("shrink-0 border-b border-[#F5F3EF]/10 py-5", isLeftSidebarOpen ? "px-5" : "px-2")}>
+          <div className={cn("shrink-0 border-b border-line py-5", isLeftSidebarOpen ? "px-5" : "px-2")}>
             <div className={cn("flex items-center gap-3", !isLeftSidebarOpen && "justify-center")}>
-              <div className={cn("flex h-10 w-10 items-center justify-center rounded-md bg-[#F4A623] text-[#153B36] shadow-sm", !isLeftSidebarOpen && "hidden")}>
+              <div className={cn("flex h-10 w-10 items-center justify-center bg-azure text-white", !isLeftSidebarOpen && "hidden")}>
                 <HeartPulse className="h-5 w-5" aria-hidden="true" />
               </div>
               <div className={cn("min-w-0 flex-1", !isLeftSidebarOpen && "hidden")}>
-                <h1 className="text-lg font-semibold tracking-normal text-[#F5F3EF]">
+                <h1 className="text-lg font-normal tracking-tight text-ink">
                   {t.appTitle}
                 </h1>
-                <p className="text-xs font-medium text-[#F5F3EF]/70">
+                <p className="text-xs font-medium text-muted">
                   {t.appSubtitle}
                 </p>
               </div>
@@ -448,7 +449,7 @@ export default function Home() {
                 title={isLeftSidebarOpen ? "Collapse navigation" : "Open navigation"}
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 shrink-0 text-[#F5F3EF] hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]"
+                className="h-9 w-9 shrink-0"
                 onClick={() => setIsLeftSidebarOpen((current) => !current)}
               >
                 {isLeftSidebarOpen ? (
@@ -465,11 +466,11 @@ export default function Home() {
               <div className="space-y-1">
                 <button
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold transition-colors",
+                    "flex w-full items-center gap-3 border-l-[3px] px-3 py-3 text-left text-sm transition-colors",
                     !isLeftSidebarOpen && "justify-center px-0",
                     selectedProjectId === null
-                      ? "bg-[#F5F3EF] text-[#153B36]"
-                      : "text-[#F5F3EF]/80 hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
+                      ? "border-azure bg-azure-wash font-medium text-azure-deep"
+                      : "border-transparent text-slate hover:bg-mist hover:text-ink",
                   )}
                   onClick={() => {
                     setSelectedProjectId(null);
@@ -492,11 +493,11 @@ export default function Home() {
                     <div key={project.id}>
                       <button
                         className={cn(
-                          "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left transition-colors",
+                          "flex w-full items-center gap-3 border-l-[3px] px-3 py-3 text-left text-sm transition-colors",
                           !isLeftSidebarOpen && "justify-center px-0",
                           active
-                            ? "bg-[#F5F3EF] text-[#153B36]"
-                            : "text-[#F5F3EF]/80 hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
+                            ? "border-azure bg-azure-wash font-medium text-azure-deep"
+                            : "border-transparent text-slate hover:bg-mist hover:text-ink",
                         )}
                         onClick={() => {
                           if (active) {
@@ -511,7 +512,7 @@ export default function Home() {
                         }}
                       >
                         <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                        <span className={cn("min-w-0 flex-1 truncate text-sm font-semibold", !isLeftSidebarOpen && "hidden")}>
+                        <span className={cn("min-w-0 flex-1 truncate", !isLeftSidebarOpen && "hidden")}>
                           {project.name}
                         </span>
                         <ChevronRight
@@ -525,7 +526,7 @@ export default function Home() {
                       </button>
 
                       {isLeftSidebarOpen && expanded && project.sections.length > 0 && (
-                        <div className="mb-2 mt-1 border-l border-[#F4A623]/40 pl-3">
+                        <div className="mb-2 mt-1 border-l border-line pl-3">
                           <div className="space-y-1">
                             {project.sections.map((section) => (
                               <ProjectSectionNav
@@ -549,7 +550,7 @@ export default function Home() {
 
                 <button
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold text-[#F5F3EF]/70 transition-colors hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
+                    "flex w-full items-center gap-3 border-l-[3px] border-transparent px-3 py-3 text-left text-sm text-muted transition-colors hover:bg-mist hover:text-ink",
                     !isLeftSidebarOpen && "justify-center px-0",
                   )}
                   onClick={() => setIsAdding((current) => !current)}
@@ -561,7 +562,7 @@ export default function Home() {
                 </button>
 
                 {isLeftSidebarOpen && isAdding && (
-                  <div className="flex gap-2 rounded-md bg-[#F5F3EF]/10 p-2">
+                  <div className="flex gap-2 bg-mist p-2">
                     <Input
                       value={newProjectName}
                       onChange={(event) => setNewProjectName(event.target.value)}
@@ -569,7 +570,6 @@ export default function Home() {
                         if (event.key === "Enter") addProject();
                       }}
                       placeholder={t.newProjectPlaceholder}
-                      className="border-[#F5F3EF]/10 bg-[#F5F3EF] text-stone-950"
                     />
                     <Button
                       title={t.addProject}
@@ -585,25 +585,40 @@ export default function Home() {
             </div>
           </div>
 
-          <div className={cn("shrink-0 border-t border-[#F5F3EF]/10 p-4", !isLeftSidebarOpen && "px-2")}>
-            <div className={cn("grid gap-2", isLeftSidebarOpen ? "grid-cols-3" : "grid-cols-1")}>
-              <SidebarTool
-                icon={Upload}
-                label={t.uploadData}
-                onClick={() => setIsUploadModalOpen(true)}
+          <div className={cn("shrink-0 border-t border-line", !isLeftSidebarOpen && "px-2")}>
+            {isLeftSidebarOpen && (
+              <Duotone
+                src="/photos/field-clinic.jpg"
+                alt="DFM health team at work in Madagascar"
+                className="h-28 w-full"
+                overlay
               />
-              <SidebarTool
-                icon={Languages}
-                label={language === "fr" ? "English" : "Francais"}
-                onClick={() =>
-                  setLanguage((current) => (current === "fr" ? "en" : "fr"))
-                }
-              />
-              <SidebarTool
-                icon={SlidersHorizontal}
-                label={t.filters}
-                onClick={() => setIsFilterModalOpen(true)}
-              />
+            )}
+            <div className={cn("p-4", !isLeftSidebarOpen && "px-0")}>
+              <div className={cn("grid gap-2", isLeftSidebarOpen ? "grid-cols-3" : "grid-cols-1")}>
+                <SidebarTool
+                  icon={Upload}
+                  label={t.uploadData}
+                  onClick={() => setIsUploadModalOpen(true)}
+                />
+                <SidebarTool
+                  icon={Languages}
+                  label={language === "fr" ? "English" : "Francais"}
+                  onClick={() =>
+                    setLanguage((current) => (current === "fr" ? "en" : "fr"))
+                  }
+                />
+                <SidebarTool
+                  icon={SlidersHorizontal}
+                  label={t.filters}
+                  onClick={() => setIsFilterModalOpen(true)}
+                />
+              </div>
+              {isLeftSidebarOpen && (
+                <p className="mt-3 text-[10px] uppercase tracking-[0.12em] text-muted">
+                  Doctors for Madagascar
+                </p>
+              )}
             </div>
           </div>
         </aside>
@@ -616,30 +631,37 @@ export default function Home() {
             isAssistantOpen ? "lg:mr-[380px]" : "lg:mr-14",
           )}
         >
-          <header className="sticky top-0 z-10 border-b border-stone-200 bg-white/95 px-5 py-4 backdrop-blur lg:px-8">
+          <header className="sticky top-0 z-10 border-b border-line bg-paper/95 px-5 py-5 backdrop-blur lg:px-8">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <Badge variant="neutral">{t.demoBadge}</Badge>
-                  <Badge variant="info">{t.activePeriod}: {t.periodValue}</Badge>
-                  <Badge variant="default">
-                    {t.activeDataset}: {activeDatasetLabel}
-                  </Badge>
-                </div>
-                <h2 className="text-2xl font-semibold tracking-normal text-stone-950">
+                <span className="eyebrow mb-3">
+                  {selectedProject
+                    ? `${language === "fr" ? "Projet" : "Project"} · ${activeDatasetLabel}`
+                    : language === "fr"
+                      ? "Suivi & évaluation"
+                      : "Monitoring & evaluation"}
+                </span>
+                <h2 className="text-3xl font-light tracking-tight text-ink">
                   {selectedProject
                     ? selectedSection
                       ? `${selectedProject.name} / ${selectedSection.label[language]}`
                       : selectedProject.name
                     : t.overviewTitle}
                 </h2>
-                <p className="mt-1 max-w-4xl text-sm leading-6 text-stone-600">
+                <p className="mt-2 max-w-4xl text-sm leading-6 text-slate">
                   {selectedProject
                     ? selectedSectionFiles.length > 0
                       ? `${selectedProject.focus[language]} ${t.attachedFiles}: ${selectedSectionFiles.join(", ")}.`
                       : selectedProject.focus[language]
                     : t.overviewLead}
                 </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Badge variant="neutral">{t.demoBadge}</Badge>
+                  <Badge variant="info">{t.activePeriod}: {t.periodValue}</Badge>
+                  <Badge variant="default">
+                    {t.activeDataset}: {activeDatasetLabel}
+                  </Badge>
+                </div>
               </div>
             </div>
           </header>
@@ -648,7 +670,29 @@ export default function Home() {
             {selectedProject ? (
               <AgentDashboardSection />
             ) : (
-              <StaticOverview onSelect={setSelectedProjectId} language={language} />
+              <>
+                <div className="relative overflow-hidden border border-line">
+                  <Duotone
+                    src="/photos/hero.jpg"
+                    alt="Children in a community served by Doctors for Madagascar"
+                    className="absolute inset-0 h-full w-full"
+                    overlay
+                    priority
+                  />
+                  <div className="relative px-6 py-16 lg:px-10 lg:py-24">
+                    <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-white/85">
+                      <span className="h-0.5 w-6 bg-azure" aria-hidden="true" />
+                      Doctors for Madagascar
+                    </span>
+                    <h2 className="mt-4 max-w-2xl text-4xl font-light leading-tight tracking-tight text-white lg:text-5xl">
+                      {language === "fr"
+                        ? "Des données claires pour de meilleurs soins."
+                        : "Clear data for better care."}
+                    </h2>
+                  </div>
+                </div>
+                <StaticOverview onSelect={setSelectedProjectId} language={language} />
+              </>
             )}
           </div>
         </section>
@@ -699,7 +743,7 @@ function SidebarTool({
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="flex h-10 items-center justify-center rounded-md bg-[#F5F3EF]/10 text-[#F5F3EF]/80 hover:bg-[#F4A623]/20 hover:text-[#F5F3EF]"
+      className="flex h-10 items-center justify-center border border-line bg-mist text-slate hover:border-azure hover:bg-azure-wash hover:text-azure-deep"
     >
       <Icon className="h-4 w-4" aria-hidden={true} />
     </button>
@@ -1038,24 +1082,24 @@ function UploadModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/45 px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 px-4 py-6 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="upload-title"
     >
-      <div className="flex h-[min(760px,calc(100vh-3rem))] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-stone-200 bg-[#F5F3EF] shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-stone-200 bg-white px-5 py-4">
+      <div className="flex h-[min(760px,calc(100vh-3rem))] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-line bg-mist shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-line bg-white px-5 py-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#2FA66A]">
+            <p className="text-xs font-semibold uppercase tracking-wide text-azure-deep">
               {labels.uploadData}
             </p>
             <h2
               id="upload-title"
-              className="mt-1 text-lg font-semibold tracking-normal text-[#153B36]"
+              className="mt-1 text-lg font-normal tracking-tight text-ink"
             >
               {labels.uploadTitle}
             </h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-stone-600">
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
               {labels.uploadLead}
             </p>
           </div>
@@ -1070,14 +1114,14 @@ function UploadModal({
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 p-5">
-          <div className="flex flex-col gap-2 rounded-lg border border-stone-200 bg-white p-3 sm:flex-row sm:items-center">
-            <span className="text-sm font-semibold text-stone-700">
+          <div className="flex flex-col gap-2 rounded-lg border border-line bg-white p-3 sm:flex-row sm:items-center">
+            <span className="text-sm font-semibold text-slate">
               {labels.targetProject}
             </span>
             <select
               value={targetProjectId}
               onChange={(event) => setTargetProjectId(event.target.value)}
-              className="h-10 min-w-0 flex-1 rounded-md border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-800 outline-none ring-[#2FA66A]/30 transition focus:ring-4"
+              className="h-10 min-w-0 flex-1 rounded-md border border-line bg-white px-3 text-sm font-semibold text-slate outline-none ring-azure/30 transition focus:ring-4"
             >
               <option value="auto">{labels.autoAssign}</option>
               {projects.map((project) => (
@@ -1093,8 +1137,8 @@ function UploadModal({
             className={cn(
               "flex min-h-0 flex-1 flex-col rounded-lg border-2 bg-white",
               hasFiles
-                ? "border-[#2FA66A]/30"
-                : "items-center justify-center border-dashed border-[#2FA66A]/40 px-6 py-10 text-center",
+                ? "border-azure/30"
+                : "items-center justify-center border-dashed border-azure/40 px-6 py-10 text-center",
             )}
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => {
@@ -1104,16 +1148,16 @@ function UploadModal({
           >
             {!hasFiles ? (
               <>
-                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-md bg-[#153B36] text-[#F5F3EF]">
+                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-md bg-azure text-white">
                   <Upload className="h-7 w-7" aria-hidden="true" />
                 </div>
-                <p className="text-xl font-semibold tracking-normal text-stone-950">
+                <p className="text-xl font-semibold tracking-normal text-ink">
                   {labels.uploadDropTitle}
                 </p>
-                <p className="mt-2 max-w-sm text-sm leading-6 text-stone-500">
+                <p className="mt-2 max-w-sm text-sm leading-6 text-muted">
                   {labels.uploadDropHelp}
                 </p>
-                <label className="mt-6 inline-flex h-10 cursor-pointer items-center justify-center rounded-md bg-[#F4A623] px-4 text-sm font-semibold text-[#153B36] hover:bg-[#F4A623]/90">
+                <label className="mt-6 inline-flex h-10 cursor-pointer items-center justify-center rounded-md bg-azure px-4 text-sm font-semibold text-white hover:bg-azure/90">
                   {labels.chooseFiles}
                   <input
                     type="file"
@@ -1128,12 +1172,12 @@ function UploadModal({
               </>
             ) : (
               <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-5">
-                <div className="flex flex-col gap-3 border-b border-stone-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-stone-950">
+                    <p className="text-sm font-semibold text-ink">
                       {showWorkflow ? labels.workflowPreview : labels.selectedFiles}
                     </p>
-                    <p className="mt-1 text-sm text-stone-500">
+                    <p className="mt-1 text-sm text-muted">
                       {submittedBatchId
                         ? `Batch ${submittedBatchId.slice(0, 8)}`
                         : `${uploadedFiles.length} ${labels.selectedFiles.toLowerCase()}`}
@@ -1159,7 +1203,7 @@ function UploadModal({
                               : labels.workflowInProgress}
                       </Badge>
                     )}
-                    <label className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-700 hover:bg-stone-50">
+                    <label className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-line bg-white px-3 text-sm font-semibold text-slate hover:bg-mist">
                       {labels.chooseFiles}
                       <input
                         type="file"
@@ -1180,17 +1224,17 @@ function UploadModal({
                       {uploadedFiles.map((file) => (
                         <div
                           key={`${file.name}-${file.size}`}
-                          className="flex items-center gap-3 rounded-md border border-stone-200 bg-stone-50 px-3 py-3"
+                          className="flex items-center gap-3 rounded-md border border-line bg-mist px-3 py-3"
                         >
                           <FileSpreadsheet
-                            className="h-4 w-4 shrink-0 text-[#2FA66A]"
+                            className="h-4 w-4 shrink-0 text-azure-deep"
                             aria-hidden="true"
                           />
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-stone-800">
+                            <p className="truncate text-sm font-semibold text-slate">
                               {file.name}
                             </p>
-                            <p className="text-xs text-stone-500">
+                            <p className="text-xs text-muted">
                               {file.kind} - {file.size}
                             </p>
                           </div>
@@ -1204,17 +1248,17 @@ function UploadModal({
                     {uploadedFiles.map((file) => (
                       <div
                         key={`${file.name}-${file.size}`}
-                        className="flex items-center gap-3 rounded-md border border-stone-200 bg-stone-50 px-3 py-2"
+                        className="flex items-center gap-3 rounded-md border border-line bg-mist px-3 py-2"
                       >
                         <FileSpreadsheet
-                          className="h-4 w-4 shrink-0 text-[#2FA66A]"
+                          className="h-4 w-4 shrink-0 text-azure-deep"
                           aria-hidden="true"
                         />
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-stone-800">
+                          <p className="truncate text-sm font-semibold text-slate">
                             {file.name}
                           </p>
-                          <p className="text-xs text-stone-500">
+                          <p className="text-xs text-muted">
                             {file.kind} - {file.size}
                           </p>
                         </div>
@@ -1224,7 +1268,7 @@ function UploadModal({
 
                     <div>
                     {uploadError && (
-                      <div className="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">
+                      <div className="mb-3 rounded-md border border-critical bg-critical-wash px-3 py-2 text-sm font-medium text-critical">
                         {uploadError}
                       </div>
                     )}
@@ -1233,18 +1277,18 @@ function UploadModal({
                       {workflowStages.map((stage) => (
                         <div
                           key={stage.key}
-                          className="flex items-center gap-3 rounded-md bg-stone-50 px-3 py-2"
+                          className="flex items-center gap-3 rounded-md bg-mist px-3 py-2"
                         >
                           <div
                             className={cn(
                               "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
                               stage.state === "done"
-                                ? "bg-[#2FA66A] text-white"
+                                ? "bg-azure text-white"
                                 : stage.state === "active"
-                                  ? "bg-[#F4A623] text-[#153B36]"
+                                  ? "bg-azure text-white"
                                   : stage.state === "error"
-                                    ? "bg-rose-600 text-white"
-                                  : "bg-stone-200 text-stone-500",
+                                    ? "bg-critical text-white"
+                                  : "bg-line text-muted",
                             )}
                           >
                             {stage.state === "done" ? (
@@ -1270,10 +1314,10 @@ function UploadModal({
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-stone-800">
+                            <p className="text-sm font-semibold text-slate">
                               {getUploadStageLabel(labels, stage.key)}
                             </p>
-                            <p className="text-xs text-stone-500">
+                            <p className="text-xs text-muted">
                               {stage.message ??
                                 (stage.state === "done"
                                   ? labels.workflowDone
@@ -1288,13 +1332,13 @@ function UploadModal({
                       ))}
                     </div>
                     {isReviewReady ? (
-                      <div className="mt-4 rounded-md border border-amber-200 bg-white p-3">
+                      <div className="mt-4 rounded-md border border-caution bg-paper p-3">
                         <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div>
-                            <p className="text-sm font-semibold text-stone-900">
+                            <p className="text-sm font-semibold text-ink">
                               {labels.reviewIssues}
                             </p>
-                            <p className="mt-1 text-xs leading-5 text-stone-500">
+                            <p className="mt-1 text-xs leading-5 text-muted">
                               {reviewIssues.length > 0
                                 ? labels.reviewIssuesHelp
                                 : labels.noReviewIssues}
@@ -1308,7 +1352,7 @@ function UploadModal({
                         </div>
 
                         {reviewError && (
-                          <div className="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
+                          <div className="mb-3 rounded-md border border-critical bg-critical-wash px-3 py-2 text-xs font-medium text-critical">
                             {reviewError}
                           </div>
                         )}
@@ -1320,8 +1364,8 @@ function UploadModal({
                               className={cn(
                                 "rounded-md border px-3 py-2",
                                 issue.status === "accepted"
-                                  ? "border-emerald-200 bg-emerald-50"
-                                  : "border-stone-200 bg-stone-50",
+                                  ? "border-positive bg-positive-wash"
+                                  : "border-line bg-mist",
                               )}
                             >
                               <div className="flex flex-wrap items-center gap-2">
@@ -1329,22 +1373,22 @@ function UploadModal({
                                 <Badge variant="neutral">
                                   {issue.issueType.replace(/_/g, " ")}
                                 </Badge>
-                                <span className="text-xs font-semibold text-stone-700">
+                                <span className="text-xs font-semibold text-slate">
                                   {labels.rowLabel} {issue.rowNumber}
                                 </span>
                                 {issue.column && (
-                                  <span className="text-xs text-stone-500">
+                                  <span className="text-xs text-muted">
                                     {labels.columnLabel}: {issue.column}
                                   </span>
                                 )}
                               </div>
-                              <p className="mt-1 text-xs font-semibold leading-5 text-stone-800">
+                              <p className="mt-1 text-xs font-semibold leading-5 text-slate">
                                 {issue.agentMessageFr || issue.message}
                               </p>
-                              <p className="mt-0.5 text-xs leading-5 text-stone-500">
+                              <p className="mt-0.5 text-xs leading-5 text-muted">
                                 EN: {issue.agentSubtextEn || issue.suggestedReviewStep}
                               </p>
-                              <p className="mt-1 truncate text-xs text-stone-500">
+                              <p className="mt-1 truncate text-xs text-muted">
                                 {labels.fileLabel}: {issue.fileName} / {labels.sheetLabel}:{" "}
                                 {issue.sheetName}
                               </p>
@@ -1375,8 +1419,8 @@ function UploadModal({
                           ))}
                         </div>
 
-                        <div className="mt-3 flex items-center justify-between gap-3 border-t border-stone-100 pt-3">
-                          <p className="text-xs font-semibold text-stone-500">
+                        <div className="mt-3 flex items-center justify-between gap-3 border-t border-line pt-3">
+                          <p className="text-xs font-semibold text-muted">
                             {submittedBatchStatus === "completed"
                               ? labels.reviewComplete
                               : `${acceptedIssueCount}/${reviewIssues.length} ${labels.workflowDone.toLowerCase()}`}
@@ -1406,12 +1450,12 @@ function UploadModal({
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-stone-200 bg-white px-5 py-4">
+        <div className="flex justify-end gap-2 border-t border-line bg-white px-5 py-4">
           <Button variant="outline" onClick={onClose}>
             {labels.close}
           </Button>
           <Button
-            className="bg-[#153B36] text-[#F5F3EF] hover:bg-[#153B36]/90"
+            className="bg-azure text-white hover:bg-azure-deep"
             disabled={!hasFiles || isSubmitting || Boolean(submittedBatchId)}
             onClick={submitUpload}
           >
@@ -1459,18 +1503,18 @@ function AssistantPanel({
 
   if (!isOpen) {
     return (
-      <aside className="fixed inset-y-0 right-0 z-20 hidden w-14 flex-col border-l border-stone-200 bg-white shadow-sm lg:flex">
+      <aside className="fixed inset-y-0 right-0 z-20 hidden w-14 flex-col border-l border-line bg-white shadow-sm lg:flex">
         <button
           type="button"
           aria-label={isFrench ? "Ouvrir l'assistant" : "Open assistant"}
           title={isFrench ? "Ouvrir l'assistant" : "Open assistant"}
-          className="flex h-14 items-center justify-center border-b border-stone-200 text-stone-600 hover:bg-stone-100 hover:text-stone-950"
+          className="flex h-14 items-center justify-center border-b border-line text-muted hover:bg-mist hover:text-ink"
           onClick={onToggle}
         >
           <PanelRightOpen className="h-5 w-5" aria-hidden="true" />
         </button>
         <div className="flex flex-1 items-center justify-center">
-          <div className="-rotate-90 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-stone-400">
+          <div className="-rotate-90 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted">
             {isFrench ? "Assistant" : "Assistant"}
           </div>
         </div>
@@ -1479,17 +1523,17 @@ function AssistantPanel({
   }
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-20 hidden w-[380px] flex-col border-l border-stone-200 bg-white shadow-sm lg:flex">
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-stone-200 px-4">
+    <aside className="fixed inset-y-0 right-0 z-20 hidden w-[380px] flex-col border-l border-line bg-white shadow-sm lg:flex">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#153B36] text-[#F5F3EF] ring-2 ring-[#F4A623]/25">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-azure text-white">
             <Bot className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-stone-950">
+            <h2 className="truncate text-sm font-semibold text-ink">
               {isFrench ? "Assistant M&E" : "M&E Assistant"}
             </h2>
-            <p className="truncate text-xs text-stone-500">{contextLabel}</p>
+            <p className="truncate text-xs text-muted">{contextLabel}</p>
           </div>
         </div>
         <Button
@@ -1502,7 +1546,7 @@ function AssistantPanel({
         </Button>
       </div>
 
-      <div className="shrink-0 border-b border-stone-100 p-4">
+      <div className="shrink-0 border-b border-line p-4">
         <div className="mb-3 flex flex-wrap gap-2">
           <Badge variant="default">{isFrench ? "Francais" : "English"}</Badge>
           <Badge variant="info">{isFrench ? "Contexte actif" : "Active context"}</Badge>
@@ -1523,7 +1567,7 @@ function AssistantPanel({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-stone-50 p-4">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-mist p-4">
         <ChatBubble
           role="assistant"
           text={
@@ -1550,14 +1594,14 @@ function AssistantPanel({
         />
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">
             {isFrench ? "Suggestions" : "Suggestions"}
           </p>
           {suggestions.map((suggestion) => (
             <button
               key={suggestion}
               type="button"
-              className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-left text-sm leading-5 text-stone-700 hover:border-[#2FA66A]/50 hover:bg-[#2FA66A]/10"
+              className="w-full rounded-md border border-line bg-white px-3 py-2 text-left text-sm leading-5 text-slate hover:border-azure/50 hover:bg-azure/10"
               onClick={() => setDraft(suggestion)}
             >
               {suggestion}
@@ -1566,7 +1610,7 @@ function AssistantPanel({
         </div>
       </div>
 
-      <div className="shrink-0 border-t border-stone-200 bg-white p-4">
+      <div className="shrink-0 border-t border-line bg-white p-4">
         <div className="mb-3 flex gap-2">
           <Button variant="outline" size="sm" className="flex-1">
             <Paperclip className="h-4 w-4" aria-hidden="true" />
@@ -1591,7 +1635,7 @@ function AssistantPanel({
             <Send className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
-        <p className="mt-2 text-xs leading-5 text-stone-500">
+        <p className="mt-2 text-xs leading-5 text-muted">
           {isFrench
             ? "Prototype UI: la connexion aux donnees et au modele sera branchee ensuite."
             : "Prototype UI: data and model connections will be wired next."}
@@ -1611,7 +1655,7 @@ function AssistantAction({
   return (
     <button
       type="button"
-      className="flex h-10 items-center justify-center gap-2 rounded-md border border-stone-200 bg-white text-xs font-semibold text-stone-700 hover:bg-stone-100"
+      className="flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white text-xs font-semibold text-slate hover:bg-mist"
     >
       <Icon className="h-4 w-4" aria-hidden={true} />
       {label}
@@ -1626,10 +1670,10 @@ function ChatBubble({ role, text }: { role: "assistant" | "user"; text: string }
     <div className={cn("flex", isAssistant ? "justify-start" : "justify-end")}>
       <div
         className={cn(
-          "max-w-[88%] rounded-lg px-3 py-2 text-sm leading-6 shadow-sm",
+          "max-w-[88%] px-3 py-2 text-sm leading-6",
           isAssistant
-            ? "border border-stone-200 bg-white text-stone-700"
-            : "bg-[#153B36] text-[#F5F3EF]",
+            ? "border border-line bg-paper text-slate"
+            : "bg-azure text-white",
         )}
       >
         {text}
@@ -1660,22 +1704,22 @@ function ProjectSectionNav({
     <div>
       <button
         className={cn(
-          "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors",
+          "flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors",
           active
-            ? "bg-[#F4A623]/20 text-[#F5F3EF]"
+            ? "bg-azure-wash font-medium text-azure-deep"
             : hasActiveChild
-              ? "text-[#F5F3EF]"
-              : "text-[#F5F3EF]/65 hover:bg-[#F5F3EF]/10 hover:text-[#F5F3EF]",
+              ? "text-ink"
+              : "text-muted hover:bg-mist hover:text-ink",
           depth > 0 && "pl-8",
         )}
         onClick={() => onSelect(section.id)}
       >
         <Icon className="h-4 w-4 shrink-0" aria-hidden={true} />
-        <span className="min-w-0 flex-1 truncate font-semibold">
+        <span className="min-w-0 flex-1 truncate">
           {section.label[language]}
         </span>
         {section.files.length > 0 && (
-          <span className="rounded bg-[#F5F3EF]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#F5F3EF]/60">
+          <span className="bg-mist px-1.5 py-0.5 text-[10px] font-medium text-muted">
             {section.files.length}
           </span>
         )}
@@ -1720,20 +1764,20 @@ function FilterModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/45 px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 px-4 py-6 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="filters-title"
     >
-      <div className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-lg border border-stone-200 bg-[#F5F3EF] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-stone-200 bg-white px-5 py-4">
+      <div className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-lg border border-line bg-mist shadow-2xl">
+        <div className="flex items-center justify-between border-b border-line bg-white px-5 py-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#2FA66A]">
+            <p className="text-xs font-semibold uppercase tracking-wide text-azure-deep">
               {labels.filterContext}: {selectedProjectName}
             </p>
             <h2
               id="filters-title"
-              className="mt-1 text-lg font-semibold tracking-normal text-[#153B36]"
+              className="mt-1 text-lg font-normal tracking-tight text-ink"
             >
               {labels.reportPeriod}
             </h2>
@@ -1750,18 +1794,18 @@ function FilterModal({
 
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5">
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-semibold text-stone-700">
+            <label className="space-y-2 text-sm font-semibold text-slate">
               <span>{labels.startDate}</span>
               <Input type="date" defaultValue="2025-12-27" />
             </label>
-            <label className="space-y-2 text-sm font-semibold text-stone-700">
+            <label className="space-y-2 text-sm font-semibold text-slate">
               <span>{labels.endDate}</span>
               <Input type="date" defaultValue="2026-06-27" />
             </label>
           </div>
 
           <div>
-            <p className="mb-3 text-sm font-semibold text-stone-900">
+            <p className="mb-3 text-sm font-semibold text-ink">
               {labels.periodType}
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -1769,13 +1813,13 @@ function FilterModal({
                 (period, index) => (
                   <label
                     key={period}
-                    className="flex items-center gap-3 rounded-md border border-stone-200 bg-white px-3 py-3 text-sm font-semibold text-stone-700"
+                    className="flex items-center gap-3 rounded-md border border-line bg-white px-3 py-3 text-sm font-semibold text-slate"
                   >
                     <input
                       type="radio"
                       name="period-type"
                       defaultChecked={index === 0}
-                      className="h-4 w-4 accent-[#2FA66A]"
+                      className="h-4 w-4 accent-azure"
                     />
                     {period}
                   </label>
@@ -1786,19 +1830,19 @@ function FilterModal({
 
           {filterOptions.length > 0 && (
             <div>
-              <p className="mb-3 text-sm font-semibold text-stone-900">
+              <p className="mb-3 text-sm font-semibold text-ink">
                 {selectedProjectName}
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {filterOptions.map((option) => (
                   <label
                     key={option}
-                    className="flex items-center gap-3 rounded-md border border-stone-200 bg-white px-3 py-3 text-sm font-semibold text-stone-700"
+                    className="flex items-center gap-3 rounded-md border border-line bg-white px-3 py-3 text-sm font-semibold text-slate"
                   >
                     <input
                       type="checkbox"
                       defaultChecked
-                      className="h-4 w-4 accent-[#2FA66A]"
+                      className="h-4 w-4 accent-azure"
                     />
                     {option}
                   </label>
@@ -1808,11 +1852,11 @@ function FilterModal({
           )}
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-stone-200 bg-white px-5 py-4">
+        <div className="flex justify-end gap-2 border-t border-line bg-white px-5 py-4">
           <Button variant="outline" onClick={onClose}>
             {labels.close}
           </Button>
-          <Button className="bg-[#153B36] text-[#F5F3EF] hover:bg-[#153B36]/90" onClick={onClose}>
+          <Button className="bg-azure text-white hover:bg-azure-deep" onClick={onClose}>
             {labels.applyFilters}
           </Button>
         </div>
@@ -2064,12 +2108,12 @@ function StoryStep({
   body: string;
 }) {
   return (
-    <div className="rounded-md border border-stone-200 bg-stone-50 p-4">
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-md bg-white text-emerald-700">
+    <div className="rounded-md border border-line bg-mist p-4">
+      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-md bg-paper text-azure-deep">
         <Icon className="h-4 w-4" aria-hidden={true} />
       </div>
-      <p className="font-semibold text-stone-950">{title}</p>
-      <p className="mt-1 text-sm leading-6 text-stone-600">{body}</p>
+      <p className="font-semibold text-ink">{title}</p>
+      <p className="mt-1 text-sm leading-6 text-muted">{body}</p>
     </div>
   );
 }

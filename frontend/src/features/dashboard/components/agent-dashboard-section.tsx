@@ -10,13 +10,13 @@ export function AgentDashboardSection() {
 
   if (state === "loading")
     return (
-      <p className="text-sm text-stone-500">
+      <p className="text-sm text-muted">
         {language === "fr" ? "L'agent compose le tableau de bord…" : "The agent is composing the dashboard…"}
       </p>
     );
   if (state === "error" || !plan)
     return (
-      <p className="text-sm text-stone-500">
+      <p className="text-sm text-muted">
         {language === "fr" ? "Backend non disponible — démarrez-le sur :8000." : "Backend not reachable — start it on :8000."}
       </p>
     );

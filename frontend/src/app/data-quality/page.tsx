@@ -12,7 +12,7 @@ export default async function DataQualityPage({
   const project = projects.find((p) => p.id === pid) ?? projects[0];
   return (
     <main className="mx-auto w-full max-w-5xl space-y-4 p-6">
-      <Link href="/" className="text-sm text-neutral-500 hover:underline">
+      <Link href="/" className="text-sm text-muted hover:underline">
         ← Accueil
       </Link>
       <DataQualityPanel project={project} />

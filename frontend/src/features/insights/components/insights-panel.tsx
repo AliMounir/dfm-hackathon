@@ -21,14 +21,15 @@ export function InsightsPanel({ project, lang: initial = "fr" }: { project: Proj
   const [lang, setLang] = useState<Language>(initial);
   return (
     <section className="space-y-4">
-      <header className="flex items-center justify-between">
+      <header className="flex items-end justify-between">
         <div>
-          <h2 className="text-lg font-semibold">{HEADING[lang]}</h2>
-          <p className="text-sm text-neutral-500">{project.name}</p>
+          <span className="eyebrow mb-2">{lang === "fr" ? "Analyses" : "Insights"}</span>
+          <h2 className="text-2xl font-light tracking-tight text-ink">{HEADING[lang]}</h2>
+          <p className="text-sm text-muted">{project.name}</p>
         </div>
         <button
           onClick={() => setLang(lang === "fr" ? "en" : "fr")}
-          className="rounded-md border px-2 py-1 text-xs uppercase"
+          className="border border-line px-2 py-1 text-xs uppercase text-slate hover:bg-mist"
         >
           {lang === "fr" ? "EN" : "FR"}
         </button>
@@ -36,26 +37,25 @@ export function InsightsPanel({ project, lang: initial = "fr" }: { project: Proj
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {project.metrics.map((m) => (
-          <Card key={m.id}>
-            <CardHeader className="pb-2">
-              <CardDescription>{t(m.label, lang)}</CardDescription>
-              <CardTitle className="text-2xl">{m.value}</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs text-neutral-500">{t(m.helper, lang)}</CardContent>
-          </Card>
+          <div key={m.id} className="elevate relative overflow-hidden border border-line bg-paper p-5">
+            <div className="absolute inset-x-0 top-0 h-1 bg-azure" aria-hidden="true" />
+            <div className="text-xs font-medium uppercase tracking-[0.09em] text-muted">{t(m.label, lang)}</div>
+            <div className="mt-3 font-mono text-3xl font-light tabular-nums tracking-tight text-ink">{m.value}</div>
+            <div className="mt-1 text-xs text-muted">{t(m.helper, lang)}</div>
+          </div>
         ))}
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
         {project.insights.map((i) => (
-          <Card key={i.id}>
+          <Card key={i.id} className="border-t-2 border-t-indigo">
             <CardHeader>
               <CardTitle className="text-base">{t(i.title, lang)}</CardTitle>
               <CardDescription>
-                <Badge className="bg-violet-100 text-violet-700">{t(i.tag, lang)}</Badge>
+                <Badge className="bg-indigo-wash text-indigo">{t(i.tag, lang)}</Badge>
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-sm text-neutral-700">{t(i.body, lang)}</CardContent>
+            <CardContent className="text-sm text-slate">{t(i.body, lang)}</CardContent>
           </Card>
         ))}
       </div>
@@ -64,7 +64,7 @@ export function InsightsPanel({ project, lang: initial = "fr" }: { project: Proj
         <CardHeader>
           <CardTitle className="text-base">{lang === "fr" ? "Récit d'impact" : "Impact story"}</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm leading-relaxed text-neutral-700">
+        <CardContent className="text-sm leading-relaxed text-slate">
           {t(project.story, lang)}
         </CardContent>
       </Card>

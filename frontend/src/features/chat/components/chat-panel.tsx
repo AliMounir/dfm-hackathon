@@ -42,7 +42,7 @@ export function ChatPanel({ project, lang = "fr" }: { project: Project; lang?: L
             <button
               key={idx}
               onClick={() => send(t(qq, lang))}
-              className="rounded-full border px-3 py-1 text-xs text-neutral-600 hover:bg-neutral-100"
+              className="rounded-full border border-line px-3 py-1 text-xs text-slate hover:border-azure hover:bg-azure-wash"
             >
               {t(qq, lang)}
             </button>
@@ -55,8 +55,8 @@ export function ChatPanel({ project, lang = "fr" }: { project: Project; lang?: L
               key={i}
               className={
                 m.role === "user"
-                  ? "ml-auto max-w-[80%] rounded-lg bg-neutral-900 px-3 py-2 text-sm text-white"
-                  : "mr-auto max-w-[80%] rounded-lg bg-neutral-100 px-3 py-2 text-sm"
+                  ? "ml-auto max-w-[80%] rounded-lg bg-azure px-3 py-2 text-sm text-white"
+                  : "mr-auto max-w-[80%] rounded-lg bg-mist px-3 py-2 text-sm text-slate"
               }
             >
               {m.content}

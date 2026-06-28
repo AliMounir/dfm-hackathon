@@ -6,20 +6,22 @@ import { Database, FileText, LayoutDashboard, type LucideIcon } from "lucide-rea
 import { getOverview, type Overview } from "@/features/dashboard/api/overview";
 import type { Language } from "@/features/shared/lib/i18n";
 
-const TONE: Record<string, string> = {
-  emerald: "border-emerald-200 bg-emerald-50 text-emerald-900",
-  cyan: "border-cyan-200 bg-cyan-50 text-cyan-900",
-  violet: "border-violet-200 bg-violet-50 text-violet-900",
+const TONE: Record<string, { bar: string; icon: string }> = {
+  emerald: { bar: "bg-azure", icon: "text-azure-deep" },
+  cyan: { bar: "bg-azure", icon: "text-azure-deep" },
+  violet: { bar: "bg-indigo", icon: "text-indigo" },
 };
 
 function OvCard({ tone, icon: Icon, label, value }: { tone: string; icon: LucideIcon; label: string; value: React.ReactNode }) {
+  const tc = TONE[tone] ?? TONE.emerald;
   return (
-    <div className={`relative overflow-hidden rounded-xl border p-5 ${TONE[tone]}`}>
-      <div className="absolute right-4 top-4 rounded-lg bg-white/90 p-2 shadow-sm">
-        <Icon className="h-5 w-5" aria-hidden="true" />
+    <div className="elevate relative overflow-hidden border border-line bg-paper p-5">
+      <div className={`absolute inset-x-0 top-0 h-1 ${tc.bar}`} aria-hidden="true" />
+      <div className="flex items-start justify-between gap-3">
+        <div className="text-xs font-medium uppercase tracking-[0.09em] text-muted">{label}</div>
+        <Icon className={`h-5 w-5 shrink-0 ${tc.icon}`} aria-hidden="true" />
       </div>
-      <div className="text-sm font-semibold">{label}</div>
-      <div className="mt-1 text-3xl font-bold tracking-tight">{value}</div>
+      <div className="mt-3 font-mono text-4xl font-light tabular-nums tracking-tight text-ink">{value}</div>
     </div>
   );
 }
@@ -48,10 +50,10 @@ export function StaticOverview({ onSelect, language = "fr" }: { onSelect: (id: s
 
   const tr = (fr: string, en: string) => (language === "fr" ? fr : en);
 
-  if (state === "loading") return <p className="text-sm text-stone-500">…</p>;
+  if (state === "loading") return <p className="text-sm text-muted">…</p>;
   if (state === "error" || !data)
     return (
-      <p className="text-sm text-stone-500">
+      <p className="text-sm text-muted">
         {tr("Backend non disponible — démarrez-le sur :8000.", "Backend not reachable — start it on :8000.")}
       </p>
     );
@@ -59,8 +61,9 @@ export function StaticOverview({ onSelect, language = "fr" }: { onSelect: (id: s
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold text-stone-950">{tr("Vue d'ensemble", "Overview")}</h2>
-        <p className="text-sm leading-6 text-stone-600">
+        <span className="eyebrow mb-2">{tr("Tous les projets", "All projects")}</span>
+        <h2 className="text-2xl font-light tracking-tight text-ink">{tr("Vue d'ensemble", "Overview")}</h2>
+        <p className="mt-1 text-sm leading-6 text-slate">
           {tr("Aperçu statique de toutes les données disponibles.", "Static overview of all available data.")}
         </p>
       </div>
@@ -76,15 +79,15 @@ export function StaticOverview({ onSelect, language = "fr" }: { onSelect: (id: s
           <button
             key={p.id}
             onClick={() => onSelect(p.id)}
-            className="rounded-xl border border-stone-200 bg-white p-4 text-left transition hover:border-emerald-300 hover:shadow-sm"
+            className="elevate elevate-hover group border-l-2 border-l-azure border-y border-r border-line bg-paper p-4 text-left hover:border-l-azure-deep"
           >
-            <div className="text-sm font-semibold text-stone-900">{p.name}</div>
-            <div className="mt-2 flex items-center gap-2 text-xs text-stone-500">
+            <div className="text-sm font-medium text-ink">{p.name}</div>
+            <div className="mt-2 flex items-center gap-2 text-xs text-muted">
               <span>{p.files} {tr("fichiers", "files")}</span>
               <span>·</span>
               <span>{p.records.toLocaleString()} {tr("enreg.", "records")}</span>
             </div>
-            <div className="mt-2 text-xs font-medium text-emerald-700">
+            <div className="mt-2 text-xs font-medium text-azure-deep">
               {tr("Ouvrir le tableau de bord →", "Open dashboard →")}
             </div>
           </button>

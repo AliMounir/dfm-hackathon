@@ -21,14 +21,15 @@ export function HealthGapsPanel({ project, lang: initial = "fr" }: { project: Pr
   const [lang, setLang] = useState<Language>(initial);
   return (
     <section className="space-y-4">
-      <header className="flex items-center justify-between">
+      <header className="flex items-end justify-between">
         <div>
-          <h2 className="text-lg font-semibold">{HEADING[lang]}</h2>
-          <p className="text-sm text-neutral-500">{project.name}</p>
+          <span className="eyebrow mb-2">{lang === "fr" ? "Lacunes & risques" : "Gaps & risks"}</span>
+          <h2 className="text-2xl font-light tracking-tight text-ink">{HEADING[lang]}</h2>
+          <p className="text-sm text-muted">{project.name}</p>
         </div>
         <button
           onClick={() => setLang(lang === "fr" ? "en" : "fr")}
-          className="rounded-md border px-2 py-1 text-xs uppercase"
+          className="border border-line px-2 py-1 text-xs uppercase text-slate hover:bg-mist"
         >
           {lang === "fr" ? "EN" : "FR"}
         </button>
@@ -43,7 +44,7 @@ export function HealthGapsPanel({ project, lang: initial = "fr" }: { project: Pr
           </CardHeader>
           <CardContent>
             <table className="w-full text-sm">
-              <thead className="text-left text-neutral-500">
+              <thead className="text-left text-muted">
                 <tr>
                   <th className="py-1">{lang === "fr" ? "Mois" : "Month"}</th>
                   <th>{lang === "fr" ? "Services" : "Services"}</th>
@@ -55,11 +56,11 @@ export function HealthGapsPanel({ project, lang: initial = "fr" }: { project: Pr
                 {project.monthly.map((m) => (
                   <tr key={m.month} className="border-t">
                     <td className="py-1">{m.month}</td>
-                    <td className={m.services < m.target ? "text-rose-600" : "text-emerald-600"}>
+                    <td className={m.services < m.target ? "text-critical" : "text-positive"}>
                       {m.services}
                     </td>
                     <td>{m.risks}</td>
-                    <td className="text-neutral-500">{m.target}</td>
+                    <td className="text-muted">{m.target}</td>
                   </tr>
                 ))}
               </tbody>
@@ -77,7 +78,7 @@ export function HealthGapsPanel({ project, lang: initial = "fr" }: { project: Pr
                 <span>{s.site}</span>
                 <span className="flex items-center gap-2">
                   <span className="font-medium">{s.value}</span>
-                  <Badge className={s.change < 0 ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}>
+                  <Badge className={s.change < 0 ? "bg-critical-wash text-critical" : "bg-positive-wash text-positive"}>
                     {s.change > 0 ? "+" : ""}
                     {s.change}%
                   </Badge>
@@ -94,10 +95,10 @@ export function HealthGapsPanel({ project, lang: initial = "fr" }: { project: Pr
             <CardHeader>
               <CardTitle className="text-base">{t(i.title, lang)}</CardTitle>
               <CardDescription>
-                <Badge className="bg-cyan-100 text-cyan-700">{t(i.tag, lang)}</Badge>
+                <Badge className="bg-azure-wash text-azure-deep">{t(i.tag, lang)}</Badge>
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-sm text-neutral-700">{t(i.body, lang)}</CardContent>
+            <CardContent className="text-sm text-slate">{t(i.body, lang)}</CardContent>
           </Card>
         ))}
       </div>
