@@ -10,17 +10,26 @@ DataFrames are cached per project in-process (first request loads, then reused).
 
 from __future__ import annotations
 
+import io
 import json
 import logging
+import time
 from pathlib import Path
 
 import pandas as pd
 
 from app.core.config import get_settings
+from app.shared import supabase_client as sb
 
 logger = logging.getLogger(__name__)
 
-_CACHE: dict[str, list[tuple[str, str, pd.DataFrame]]] = {}
+# Cache the combined (local + Supabase) frames per project, keyed by a signature
+# of the project's uploaded files so newly-uploaded data is picked up. A short
+# TTL cache on the file listing avoids re-querying Supabase on every load() call
+# within a single request.
+_CACHE: dict[str, tuple[str, list[tuple[str, str, pd.DataFrame]]]] = {}
+_SIG_CACHE: dict[str, tuple[float, str, list[dict]]] = {}
+_SIG_TTL = 8.0
 
 _MONTHS = {1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
            7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"}
@@ -55,19 +64,12 @@ def _flatten(cols) -> list[str]:
     return out
 
 
-def _read_file(path: Path) -> list[tuple[str, pd.DataFrame]]:
-    suf = path.suffix.lower()
+def _frames_from(name: str, reader) -> list[tuple[str, pd.DataFrame]]:
+    """Run a pandas reader, flatten headers, return [(sheet, df)]."""
     try:
-        if suf == ".xlsx":
-            frames = pd.read_excel(path, sheet_name=None, engine="openpyxl")
-        elif suf == ".html":
-            frames = {f"table_{i + 1}": d for i, d in enumerate(pd.read_html(str(path)))}
-        elif suf == ".csv":
-            frames = {"csv": pd.read_csv(path)}
-        else:
-            return []
+        frames = reader()
     except Exception:  # noqa: BLE001
-        logger.exception("failed reading %s", path.name)
+        logger.exception("failed reading %s", name)
         return []
     out = []
     for sn, df in frames.items():
@@ -77,9 +79,28 @@ def _read_file(path: Path) -> list[tuple[str, pd.DataFrame]]:
     return out
 
 
-def load(project_id: str) -> list[tuple[str, str, pd.DataFrame]]:
-    if project_id in _CACHE:
-        return _CACHE[project_id]
+def _read_file(path: Path) -> list[tuple[str, pd.DataFrame]]:
+    suf = path.suffix.lower()
+    if suf == ".xlsx":
+        return _frames_from(path.name, lambda: pd.read_excel(path, sheet_name=None, engine="openpyxl"))
+    if suf == ".html":
+        return _frames_from(path.name, lambda: {f"table_{i + 1}": d for i, d in enumerate(pd.read_html(str(path)))})
+    if suf == ".csv":
+        return _frames_from(path.name, lambda: {"csv": pd.read_csv(path)})
+    return []
+
+
+def _read_bytes(name: str, content: bytes) -> list[tuple[str, pd.DataFrame]]:
+    """Parse an in-memory uploaded file (xlsx/csv) into [(sheet, df)]."""
+    low = name.lower()
+    if low.endswith(".xlsx"):
+        return _frames_from(name, lambda: pd.read_excel(io.BytesIO(content), sheet_name=None, engine="openpyxl"))
+    if low.endswith(".csv"):
+        return _frames_from(name, lambda: {"csv": pd.read_csv(io.BytesIO(content))})
+    return []
+
+
+def _local_frames(project_id: str) -> list[tuple[str, str, pd.DataFrame]]:
     pdir = get_settings().data_dir / "projects" / project_id
     frames: list[tuple[str, str, pd.DataFrame]] = []
     if pdir.exists():
@@ -87,7 +108,70 @@ def load(project_id: str) -> list[tuple[str, str, pd.DataFrame]]:
             if f.suffix.lower() in (".xlsx", ".html", ".csv"):
                 for sn, df in _read_file(f):
                     frames.append((f.name, sn, df))
-    _CACHE[project_id] = frames
+    return frames
+
+
+def _uploaded_source_rows(project_id: str) -> tuple[str, list[dict]]:
+    """The project's uploaded tabular source files from Supabase (newest first),
+    with a signature for cache invalidation. Cached briefly to avoid re-querying
+    on every load() call in a request. ('', []) when Supabase isn't configured."""
+    now = time.monotonic()
+    cached = _SIG_CACHE.get(project_id)
+    if cached and cached[0] > now:
+        return cached[1], cached[2]
+
+    rows: list[dict] = []
+    if sb.configured():
+        try:
+            rows = sb.rest_select(
+                "project_files",
+                {
+                    "project_id": f"eq.{project_id}",
+                    "select": "id,original_filename,storage_bucket,storage_path,kind,status,created_at",
+                    "order": "created_at.desc",
+                },
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("could not list uploaded files for %s: %s", project_id, exc)
+            rows = []
+
+    source = [r for r in rows if str(r.get("kind") or "").lower() in ("excel", "csv")]
+    sig = ",".join(sorted(str(r.get("id")) for r in source))
+    _SIG_CACHE[project_id] = (now + _SIG_TTL, sig, source)
+    return sig, source
+
+
+def load(project_id: str) -> list[tuple[str, str, pd.DataFrame]]:
+    """Project data = locally-bundled exports + files uploaded to Supabase.
+
+    Cached per project, keyed by the Supabase upload signature so newly-uploaded
+    data is analysed as soon as it lands (no restart needed)."""
+    sig, rows = _uploaded_source_rows(project_id)
+    cached = _CACHE.get(project_id)
+    if cached and cached[0] == sig:
+        return cached[1]
+
+    frames = _local_frames(project_id)
+    local_names = {f.lower() for f, _s, _df in frames}
+    bucket = get_settings().supabase_upload_bucket
+    seen: set[str] = set()
+    for r in rows:
+        name = r.get("original_filename") or ""
+        key = name.lower()
+        path = r.get("storage_path")
+        # Skip files already bundled locally (avoid double-counting) and dupes.
+        if not name or not path or key in local_names or key in seen:
+            continue
+        seen.add(key)
+        try:
+            content = sb.storage_download(r.get("storage_bucket") or bucket, path)
+        except Exception:  # noqa: BLE001
+            logger.exception("supabase download failed for %s", name)
+            continue
+        for sn, df in _read_bytes(name, content):
+            frames.append((name, sn, df))
+
+    _CACHE[project_id] = (sig, frames)
     return frames
 
 
