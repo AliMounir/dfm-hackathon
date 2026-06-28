@@ -10,6 +10,7 @@ DataFrames are cached per project in-process (first request loads, then reused).
 
 from __future__ import annotations
 
+import json
 import logging
 from pathlib import Path
 
@@ -355,6 +356,120 @@ def site_breakdown(project_id: str) -> list[dict]:
                 change[site] = round((c - o) / o * 100, 1) if o else 0.0
     return [{"site": str(s), "value": int(v), "change": change.get(str(s), 0.0)}
             for s, v in counts.items()]
+
+
+def _find_col(df: pd.DataFrame, name: str) -> str | None:
+    """Resolve an agent-provided column name to an actual column (fuzzy)."""
+    n = str(name).lower().strip()
+    if not n:
+        return None
+    for c in df.columns:
+        if _short(c).lower() == n:
+            return c
+    for c in df.columns:
+        if n in _short(c).lower() or n in str(c).lower():
+            return c
+    return None
+
+
+def aggregate(project_id: str, dimension: str, measure: str | None = None,
+              agg: str = "sum", top: int = 8, dataset: str | None = None) -> list[dict]:
+    """Ad-hoc series for a chat-requested chart: group by `dimension`, aggregate
+    `measure` (or count rows when no measure). When `dataset` is given, restrict to
+    the file/sheet whose name matches it (e.g. 'ACCOUCHEMENT'). [] if not found."""
+    frames = load(project_id)
+    if dataset:
+        d = dataset.lower()
+        scoped = [t for t in frames if d in t[1].lower() or d in t[0].lower()]
+        frames = scoped or frames
+    for _fname, _sname, df in sorted(frames, key=lambda t: len(t[2]), reverse=True):
+        dcol = _find_col(df, dimension)
+        if not dcol:
+            continue
+        try:
+            if measure:
+                mcol = _find_col(df, measure)
+                if not mcol or not pd.api.types.is_numeric_dtype(df[mcol]):
+                    continue
+                grouped = df.groupby(df[dcol].astype(str))[mcol]
+                s = grouped.mean() if agg == "mean" else grouped.sum()
+            else:
+                s = df[dcol].astype(str).value_counts()
+            s = s.sort_values(ascending=False).head(top)
+            return [{"label": str(k), "value": round(float(v), 2)}
+                    for k, v in s.items() if pd.notna(v)]
+        except Exception:  # noqa: BLE001
+            logger.exception("aggregate failed (%s by %s)", measure, dimension)
+            continue
+    return []
+
+
+def data_summary(project_id: str) -> dict:
+    """Compact summary for the chat agent: which dimensions/measures it can chart."""
+    frames = load(project_id)
+    dims: set[str] = set()
+    meas: set[str] = set()
+    for _f, _s, df in frames:
+        for c in df.columns:
+            if pd.api.types.is_numeric_dtype(df[c]):
+                if not _is_id_like(c, df[c]) and float(df[c].fillna(0).sum()) > 0:
+                    meas.add(_short(c))
+            else:
+                nun = df[c].nunique(dropna=True)
+                if 2 <= nun <= 40:
+                    dims.add(_short(c))
+    datasets = []
+    for f, s, df in sorted(frames, key=lambda t: len(t[2]), reverse=True)[:20]:
+        d_dims = [_short(c) for c in df.columns
+                  if not pd.api.types.is_numeric_dtype(df[c]) and 2 <= df[c].nunique(dropna=True) <= 40][:8]
+        d_meas = [_short(c) for c in df.columns
+                  if pd.api.types.is_numeric_dtype(df[c]) and not _is_id_like(c, df[c])
+                  and float(df[c].fillna(0).sum()) > 0][:8]
+        datasets.append({"name": s, "file": f, "rows": int(len(df)),
+                         "dimensions": d_dims, "measures": d_meas})
+
+    return {
+        "n_records": sum(len(df) for _f, _s, df in frames),
+        "dimensions": sorted(dims)[:25],
+        "measures": sorted(meas)[:30],
+        "datasets": datasets,
+    }
+
+
+def overview() -> dict:
+    """Static, deterministic overview across all projects (no LLM). Fast: counts
+    files from disk and reads record totals from each project's _parsed.json when
+    present (run scripts/parse_data.py to populate)."""
+    root = get_settings().data_dir / "projects"
+    projects = []
+    total_files = 0
+    total_records = 0
+    if root.exists():
+        for pdir in sorted(d for d in root.iterdir() if d.is_dir()):
+            files = [f for f in pdir.iterdir()
+                     if f.suffix.lower() in (".xlsx", ".html", ".csv")]
+            records = 0
+            pj = pdir / "_parsed.json"
+            if pj.exists():
+                try:
+                    agg = json.loads(pj.read_text(encoding="utf-8"))
+                    records = sum(r.get("rows", 0) for r in agg.get("record_counts", []))
+                except (json.JSONDecodeError, OSError):
+                    pass
+            total_files += len(files)
+            total_records += records
+            projects.append({
+                "id": pdir.name,
+                "name": pdir.name.replace("-", " ").upper(),
+                "files": len(files),
+                "records": records,
+            })
+    return {
+        "n_projects": len(projects),
+        "n_files": total_files,
+        "n_records": total_records,
+        "projects": projects,
+    }
 
 
 def dashboard_menu(project_id: str) -> dict:

@@ -5,7 +5,7 @@ Imported lazily by ``agent.py`` so the app/fallback run without LangChain.
 
 from langchain_core.tools import tool
 
-from app.domains.dashboard import analytics
+from app.domains.dashboard import analytics, artifacts
 
 
 @tool
@@ -35,4 +35,21 @@ def compute(project_id: str, expression: str) -> dict:
     return analytics.compute(project_id, expression)
 
 
+@tool
+def list_artifacts(project_id: str) -> list:
+    """List the data files (artifacts) uploaded to the database for this project
+    — REDCap/DHIS2/Excel/CSV exports. Returns each file's id, filename, kind,
+    size and status. Use read_artifact(artifact_id) to inspect one."""
+    return artifacts.list_artifacts(project_id)
+
+
+@tool
+def read_artifact(artifact_id: str) -> dict:
+    """Read one uploaded artifact by its id: returns its columns and a preview of
+    the actual rows (for Excel/CSV) so you can ground answers in the real file."""
+    return artifacts.read_artifact(artifact_id)
+
+
 AGENT_TOOLS = [get_project_facts, compute]
+# Tools the conversational assistant gets (can also read the uploaded files DB).
+CHAT_TOOLS = [compute, list_artifacts, read_artifact]

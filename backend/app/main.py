@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.domains.chat.router import router as chat_router
+from app.domains.dashboard.router import overview_router
 from app.domains.dashboard.router import router as dashboard_router
 from app.domains.data_quality.router import router as data_quality_router
 from app.domains.files.router import router as files_router
@@ -42,6 +43,7 @@ async def health() -> dict[str, str]:
 
 app.include_router(projects_router, prefix=API)
 app.include_router(dashboard_router, prefix=API)
+app.include_router(overview_router, prefix=API)
 app.include_router(data_quality_router, prefix=API)
 app.include_router(health_gaps_router, prefix=API)
 app.include_router(insights_router, prefix=API)

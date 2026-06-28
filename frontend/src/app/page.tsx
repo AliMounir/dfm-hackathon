@@ -80,6 +80,9 @@ import {
 } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 import { AgentDashboardSection } from "@/features/dashboard/components/agent-dashboard-section";
+import { ChatPanel } from "@/features/dashboard/components/chat-panel";
+import { StaticOverview } from "@/features/dashboard/components/static-overview";
+import { DashboardProvider } from "@/features/dashboard/lib/dashboard-context";
 
 const copy = {
   fr: {
@@ -579,6 +582,7 @@ export default function Home() {
           </div>
         </aside>
 
+        <DashboardProvider projectId={selectedProject?.id ?? null} language={language}>
         <section
           className={cn(
             "flex min-h-screen flex-1 flex-col transition-[margin] duration-200",
@@ -615,326 +619,19 @@ export default function Home() {
           </header>
 
           <div className="space-y-6 px-5 py-6 lg:px-8">
-            {selectedProject && (
-              <AgentDashboardSection projectId={selectedProject.id} language={language} />
+            {selectedProject ? (
+              <AgentDashboardSection />
+            ) : (
+              <StaticOverview onSelect={setSelectedProjectId} language={language} />
             )}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger
-                  active={activeTab === "summary"}
-                  onClick={() => setActiveTab("summary")}
-                >
-                  <BarChart3 className="mr-2 inline h-4 w-4" aria-hidden="true" />
-                  {t.overviewTab}
-                </TabsTrigger>
-                <TabsTrigger
-                  active={activeTab === "quality"}
-                  onClick={() => setActiveTab("quality")}
-                >
-                  <ShieldCheck className="mr-2 inline h-4 w-4" aria-hidden="true" />
-                  {t.qualityTab}
-                </TabsTrigger>
-                <TabsTrigger
-                  active={activeTab === "story"}
-                  onClick={() => setActiveTab("story")}
-                >
-                  <Sparkles className="mr-2 inline h-4 w-4" aria-hidden="true" />
-                  {t.storyTab}
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
-              {selectedMetrics.map((metric) => (
-                <MetricCard key={metric.id} metric={metric} language={language} />
-              ))}
-            </div>
-
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
-              <section className="rounded-lg border border-stone-200 bg-white">
-                <div className="flex flex-col gap-2 border-b border-stone-100 p-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h3 className="text-base font-semibold text-stone-950">
-                      {t.activityTrend}
-                    </h3>
-                    <p className="text-sm leading-6 text-stone-600">
-                      {selectedProject
-                        ? `${t.selectedLead} ${t.activeDataset}: ${activeDatasetLabel}.`
-                        : t.readyForGithub}
-                    </p>
-                  </div>
-                  <Badge variant="default">
-                    <LineChart className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
-                    M&E
-                  </Badge>
-                </div>
-                <div className="h-[320px] p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={selectedMonthly}>
-                      <CartesianGrid stroke="#e7e5e4" vertical={false} />
-                      <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                      <YAxis tickLine={false} axisLine={false} width={42} />
-                      <Tooltip
-                        cursor={{ fill: "#f5f5f4" }}
-                        contentStyle={{
-                          borderRadius: "8px",
-                          borderColor: "#e7e5e4",
-                          boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                        }}
-                      />
-                      <Bar
-                        dataKey="services"
-                        name={t.serviceLabel}
-                        fill="#059669"
-                        radius={[6, 6, 0, 0]}
-                      />
-                      <Line
-                        dataKey="target"
-                        name={t.targetLabel}
-                        stroke="#0891b2"
-                        strokeWidth={3}
-                        dot={false}
-                      />
-                      <Line
-                        dataKey="risks"
-                        name={t.riskLabel}
-                        stroke="#e11d48"
-                        strokeWidth={2}
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-              </section>
-
-              <section className="rounded-lg border border-stone-200 bg-white">
-                <div className="border-b border-stone-100 p-5">
-                  <h3 className="text-base font-semibold text-stone-950">
-                    {t.facilityFocus}
-                  </h3>
-                  <p className="text-sm leading-6 text-stone-600">
-                    {selectedProject
-                      ? selectedSectionFiles.length > 0
-                        ? `${selectedProject.folder} / ${selectedSectionFiles.join(", ")}`
-                        : selectedProject.folder
-                      : "data/projects/*"}
-                  </p>
-                </div>
-                <div className="space-y-4 p-5">
-                  {(selectedProject?.sites.length
-                    ? selectedProject.sites
-                    : projects.slice(0, 5).map((project, index) => ({
-                        site: project.name,
-                        value: 88 - index * 8,
-                        change: index % 2 === 0 ? 6 : -4,
-                      }))
-                  ).map((site) => (
-                    <div key={site.site} className="space-y-2">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <MapPin className="h-4 w-4 shrink-0 text-stone-400" />
-                          <span className="truncate text-sm font-semibold text-stone-800">
-                            {site.site}
-                          </span>
-                        </div>
-                        <span
-                          className={cn(
-                            "flex items-center gap-1 text-xs font-semibold",
-                            site.change >= 0 ? "text-emerald-700" : "text-rose-700",
-                          )}
-                        >
-                          {site.change >= 0 ? (
-                            <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
-                          ) : (
-                            <TrendingDown className="h-3.5 w-3.5" aria-hidden="true" />
-                          )}
-                          {site.change > 0 ? "+" : ""}
-                          {site.change}%
-                        </span>
-                      </div>
-                      <Progress value={Math.min(100, site.value)} />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </div>
-
-            <div className="grid gap-6 xl:grid-cols-2">
-              <section>
-                <div className="mb-3 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base font-semibold text-stone-950">
-                      {t.qualityChecks}
-                    </h3>
-                    <p className="text-sm leading-6 text-stone-600">
-                      {selectedProject
-                        ? `${selectedProject.folder} - ${activeDatasetLabel}`
-                        : "data/projects"}
-                    </p>
-                  </div>
-                  <Badge variant="warning">
-                    <AlertTriangle className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
-                    {selectedProject
-                      ? selectedProject.qualityIssues.length
-                      : projects.length}{" "}
-                    checks
-                  </Badge>
-                </div>
-                <div className="grid gap-3">
-                  {(selectedProject?.qualityIssues.length
-                    ? selectedProject.qualityIssues
-                    : projects.slice(0, 3).flatMap((project) =>
-                        project.qualityIssues.slice(0, 1).map((issue) => ({
-                          ...issue,
-                          id: `${project.id}-${issue.id}`,
-                          title: {
-                            fr: `${project.name}: ${issue.title.fr}`,
-                            en: `${project.name}: ${issue.title.en}`,
-                          },
-                        })),
-                      )
-                  ).map((issue) => (
-                    <Card key={issue.id}>
-                      <CardContent className="space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <h4 className="font-semibold text-stone-950">
-                              {issue.title[language]}
-                            </h4>
-                            <p className="mt-1 text-sm leading-6 text-stone-600">
-                              {issue.whyItMatters[language]}
-                            </p>
-                          </div>
-                          <SeverityBadge severity={issue.severity} count={issue.count} />
-                        </div>
-                        <div className="rounded-md bg-stone-50 p-3 text-sm leading-6 text-stone-700">
-                          <span className="font-semibold text-stone-950">
-                            {t.suggestedAction}:{" "}
-                          </span>
-                          {issue.action[language]}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </section>
-
-              <section>
-                <div className="mb-3 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base font-semibold text-stone-950">
-                      {t.insightPanel}
-                    </h3>
-                    <p className="text-sm leading-6 text-stone-600">
-                      {selectedProject
-                        ? selectedSectionFiles.length > 0
-                          ? selectedSectionFiles.join(" / ")
-                          : selectedProject.dataSources.join(" / ")
-                        : "REDCap / DHIS2 / Excel"}
-                    </p>
-                  </div>
-                  <Badge variant="default">
-                    <Bot className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
-                    AI
-                  </Badge>
-                </div>
-                <div className="grid gap-3">
-                  {(selectedProject?.insights.length
-                    ? selectedProject.insights
-                    : projects.slice(0, 2).flatMap((project) =>
-                        project.insights.slice(0, 1).map((insight) => ({
-                          ...insight,
-                          id: `${project.id}-${insight.id}`,
-                        })),
-                      )
-                  ).map((insight) => (
-                    <Card key={insight.id}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <CardTitle>{insight.title[language]}</CardTitle>
-                            <CardDescription>{insight.body[language]}</CardDescription>
-                          </div>
-                          <Badge variant="info">{insight.tag[language]}</Badge>
-                        </div>
-                      </CardHeader>
-                    </Card>
-                  ))}
-                </div>
-              </section>
-            </div>
-
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,0.8fr)_minmax(320px,0.2fr)]">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t.storyTitle}</CardTitle>
-                  <CardDescription>
-                    {selectedProject
-                      ? selectedProject.story[language]
-                      : language === "fr"
-                        ? "Le prototype montre comment passer des exports bruts a une lecture actionnable: qualite des donnees, tendances, risques et message clair pour les equipes ou bailleurs."
-                        : "The prototype shows how raw exports become actionable reading: data quality, trends, risks, and clear messages for teams or donors."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    <StoryStep
-                      icon={Database}
-                      title={language === "fr" ? "Importer" : "Import"}
-                      body={
-                        language === "fr"
-                          ? "Deposer les exports dans le dossier projet."
-                          : "Drop exports into the project folder."
-                      }
-                    />
-                    <StoryStep
-                      icon={CheckCircle2}
-                      title={language === "fr" ? "Verifier" : "Check"}
-                      body={
-                        language === "fr"
-                          ? "Detecter les valeurs manquantes et incoherences."
-                          : "Detect missing values and inconsistencies."
-                      }
-                    />
-                    <StoryStep
-                      icon={Sparkles}
-                      title={language === "fr" ? "Expliquer" : "Explain"}
-                      body={
-                        language === "fr"
-                          ? "Produire une synthese claire et contextualisee."
-                          : "Produce a clear contextualized summary."
-                      }
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t.questionsTitle}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {(selectedProject?.suggestedQuestions ??
-                    projects[0].suggestedQuestions
-                  ).map((question) => (
-                    <button
-                      key={question[language]}
-                      className="w-full rounded-md border border-stone-200 bg-white px-3 py-3 text-left text-sm leading-5 text-stone-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50"
-                    >
-                      {question[language]}
-                    </button>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </section>
-        <AssistantPanel
+        <ChatPanel
           isOpen={isAssistantOpen}
-          language={language}
-          selectedProject={selectedProject}
-          selectedSection={selectedSection}
           onToggle={() => setIsAssistantOpen((current) => !current)}
+          projectName={selectedProject?.name ?? null}
         />
+        </DashboardProvider>
         {isUploadModalOpen && (
           <UploadModal
             labels={t}

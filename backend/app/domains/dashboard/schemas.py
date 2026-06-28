@@ -52,6 +52,7 @@ class DashboardDesign(AppBaseModel):
 # ── API response ────────────────────────────────────────────────────────────
 
 class KpiCard(AppBaseModel):
+    id: str = ""
     tone: str
     icon: str
     title: Bilingual
@@ -60,6 +61,7 @@ class KpiCard(AppBaseModel):
 
 
 class Section(AppBaseModel):
+    id: str = ""
     tone: str
     type: str  # bar | line
     title: Bilingual
@@ -72,4 +74,66 @@ class DashboardPlan(AppBaseModel):
     description: Bilingual
     kpis: list[KpiCard]
     sections: list[Section]
+    generated_by: str = ""
+
+
+# ── Chat (interactive dashboard editing) ────────────────────────────────────
+
+class ChatTurn(AppBaseModel):
+    role: str  # "user" | "assistant"
+    content: str
+
+
+class WidgetRef(AppBaseModel):
+    id: str
+    kind: str  # "kpi" | "chart"
+    title: str
+
+
+class ChatRequest(AppBaseModel):
+    message: str
+    history: list[ChatTurn] = []
+    widgets: list[WidgetRef] = []  # what's currently on the dashboard
+
+
+class ChartSpec(AppBaseModel):
+    """A chart the agent wants to add (resolved to real data by the service)."""
+
+    title: Bilingual
+    insight: Bilingual
+    tone: Tone = "cyan"
+    type: Literal["bar", "line"] = "bar"
+    dimension: str  # a dimension name from the data summary
+    measure: str = ""  # a measure name (empty = count rows)
+    agg: Literal["sum", "mean", "count"] = "sum"
+    top: int = 8
+
+
+class KpiSpec(AppBaseModel):
+    label: Bilingual
+    helper: Bilingual
+    tone: Tone = "emerald"
+    icon: Icon = "activity"
+    expression: str  # pandas expression → value
+    unit: str = ""
+
+
+class ChatAgentOutput(AppBaseModel):
+    """The chat agent's structured output."""
+
+    reply: Bilingual  # the conversational answer (French first)
+    clear: bool = False  # True to wipe the dashboard first (focus/replace requests)
+    add_charts: list[ChartSpec] = []
+    add_kpis: list[KpiSpec] = []
+    remove_ids: list[str] = []  # widget ids to remove from the dashboard
+
+
+class ChatResponse(AppBaseModel):
+    """API response: reply + resolved dashboard operations."""
+
+    reply: Bilingual
+    clear: bool = False
+    add_charts: list[Section] = []
+    add_kpis: list[KpiCard] = []
+    remove_ids: list[str] = []
     generated_by: str = ""

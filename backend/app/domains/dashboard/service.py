@@ -39,14 +39,14 @@ class DashboardService:
 
                 d = compose_design(project_id, menu)
                 kpis = [
-                    KpiCard(tone=c.tone, icon=c.icon, title=c.title,
+                    KpiCard(id=f"kpi-{i}", tone=c.tone, icon=c.icon, title=c.title,
                             value=kpi_by[c.id]["value"], helper=c.helper)
-                    for c in d.kpis if c.id in kpi_by
+                    for i, c in enumerate(x for x in d.kpis if x.id in kpi_by)
                 ]
                 sections = [
-                    Section(tone=c.tone, type=chart_by[c.id]["type"], title=c.title,
+                    Section(id=f"sec-{i}", tone=c.tone, type=chart_by[c.id]["type"], title=c.title,
                             insight=c.insight, data=chart_by[c.id]["data"])
-                    for c in d.sections if c.id in chart_by
+                    for i, c in enumerate(x for x in d.sections if x.id in chart_by)
                 ]
                 if kpis or sections:
                     return DashboardPlan(
@@ -62,12 +62,12 @@ class DashboardService:
     def _fallback(self, project_id: str, menu: dict) -> DashboardPlan:
         facts = analytics.project_facts(project_id)
         kpis = [
-            KpiCard(tone=_TONES[i % len(_TONES)], icon="activity",
+            KpiCard(id=f"kpi-{i}", tone=_TONES[i % len(_TONES)], icon="activity",
                     title=_t(k["hint"], k["hint"]), value=k["value"], helper=Bilingual())
             for i, k in enumerate(menu["kpis"][:5])
         ]
         sections = [
-            Section(tone=_TONES[i % len(_TONES)], type=c["type"],
+            Section(id=f"sec-{i}", tone=_TONES[i % len(_TONES)], type=c["type"],
                     title=_t(c["hint"], c["hint"]),
                     insight=_t("Calculé à partir des données.", "Computed from the data."),
                     data=c["data"])
